@@ -206,14 +206,16 @@ function prefixMaps(out){
  return ['-ffile-prefix-map='+out+'=/anyps5-fex','-fmacro-prefix-map='+path.join(out,'anyps5')+'/=','-fmacro-prefix-map='+out+'=/anyps5-fex'];
 }
 
-function link(out,objects,log){
+// stubs: link-stub objects only the proof links. The start host takes none, so a symbol no object defines fails its link.
+function link(out,objects,log,stubs=[]){
  const build=path.join(out,'build');
  run('cmake',['-S',path.join(out,'fex'),'-B',build,'-G','Ninja','-DCMAKE_BUILD_TYPE=Release','-DBUILD_TESTING=OFF','-DBUILD_FEXCONFIG=OFF',
   '-DENABLE_JEMALLOC_GLIBC_ALLOC=OFF','-DENABLE_OFFLINE_TELEMETRY=OFF','-DENABLE_CCACHE=OFF','-DENABLE_LTO=OFF','-DTUNE_CPU=none','-DTUNE_ARCH=generic',
   '-DCMAKE_PROJECT_FEX_INCLUDE='+path.join(out,'host',recipe.host.entry),'-DANYPS5_ARM64_OBJECTS='+objects.join(';'),'-DANYPS5_SOURCE_DIR='+path.join(out,'anyps5'),'-DANYPS5_GENERATED_THUNKS='+generatedFiles.join(';'),
   '-DANYPS5_ARM64_LINK='+[...cmake.archives,...cmake.link].join(';'),'-DANYPS5_ARM64_INCLUDES='+cmake.includes.join(';'),
-  '-DANYPS5_ARM64_DEFINES='+cmake.defines.join(';')],{stdio:['ignore','ignore','inherit']});
- const result=spawnSync('ninja',['-C',build,...recipe.host.targets],{encoding:'utf8',maxBuffer:Infinity});
+  '-DANYPS5_ARM64_DEFINES='+cmake.defines.join(';'),'-DANYPS5_PROOF_STUBS='+stubs.join(';')],{stdio:['ignore','ignore','inherit']});
+ // -k 0: every target's link errors, not only the first failing target's.
+ const result=spawnSync('ninja',['-C',build,'-k','0',...recipe.host.targets],{encoding:'utf8',maxBuffer:Infinity});
  fs.writeFileSync(log,result.stdout+result.stderr);
  return result.status===0;
 }
@@ -322,6 +324,9 @@ const objects=[...recipe.anyps5.objects.map(source=>compile(source)),...libraryO
 // per-source definition.
 const cmake=options.anyps5Arm64?cmakeLibraries(options.anyps5Arm64,recipe.anyps5.cmakeLibraries,new Set([...recipe.anyps5.objects,...libraryObjects.map(([source])=>source)]),path.join(options.out,'anyps5')):
  {libraries:[],objects:[],archives:[],link:[],sources:[],includes:[],defines:[]};
+// Static libraries of the arm64 CMake build that the per-source objects need (ZArchive for AppArchive.cpp), which no
+// CMake PRX library listed above links.
+if(options.anyps5Arm64)cmake.archives.push(...recipe.anyps5.archives.map(name=>path.join(options.anyps5Arm64,'build',name)));
 // The thunk units repeat their sources' includes, which the per-source compile resolves with these directories too.
 cmake.includes.unshift(path.join(options.out,'anyps5/3rdparty/ZArchive/include'));
 if(options.anyps5Arm64){
@@ -354,13 +359,18 @@ const generatedThunks=path.join(options.out,'generated-thunks.cpp');
 const generatedFiles=execFileSync('python3',['-I',path.join(import.meta.dirname,recipe.host.directory,recipe.host.generator.script),generatedThunks,
  [path.join(options.out,'anyps5/core/libs'),...cmake.includes].join(':'),...[...recipe.anyps5.objects,...cmake.sources.filter(source=>fs.existsSync(path.join(options.out,'anyps5',source)))].map(source=>path.join(options.out,'anyps5',source)),'--',...objects],{encoding:'utf8',stdio:['ignore','pipe','inherit']}).trim().split('\n');
 const firstLog=path.join(options.out,'link-exports.log');
+const assembly=path.join(options.out,'anyps5-unreached-exports.s'),stubs=path.join(options.out,'anyps5-unreached-exports.o');
+// Stubs of an earlier build never stand for this one.
+for(const file of [assembly,stubs])fs.rmSync(file,{force:true});
 if(!link(options.out,objects,firstLog)){
  if(!/Undefined symbols/.test(fs.readFileSync(firstLog,'utf8')))throw Error('The proof build failed; see '+firstLog);
- const assembly=path.join(options.out,'anyps5-unreached-exports.s'),stubs=path.join(options.out,'anyps5-unreached-exports.o');
  execFileSync('python3',['-I',path.join(import.meta.dirname,recipe.host.directory,'unreached-exports.py'),firstLog,assembly,...objects,...cmake.archives],{stdio:'inherit'});
  run('clang',['-c','-arch','arm64',assembly,'-o',stubs]);
  const secondLog=path.join(options.out,'link-proof.log');
- if(!link(options.out,[...objects,stubs],secondLog))throw Error('The proof build failed; see '+secondLog);
+ if(!link(options.out,objects,secondLog,[stubs])){
+  const missing=[...fs.readFileSync(secondLog,'utf8').matchAll(/^  "(.*)", referenced from:/gm)].map(match=>match[1]);
+  throw Error((missing.length?'anyps5-fex-start references '+missing.length+' symbols no object defines ('+missing.slice(0,40).join(', ')+(missing.length>40?', ...':'')+')':'The proof build failed')+'; see '+secondLog);
+ }
 }
 const [proof,abi,start,syscall]=recipe.host.targets.map(target=>path.join(options.out,'build/Bin',target));
 // The dynamic libraries the AnyPS5 libraries link (SDL) load from next to the executables (@executable_path).

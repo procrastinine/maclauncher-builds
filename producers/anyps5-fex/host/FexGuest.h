@@ -23,6 +23,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <dlfcn.h>
+#include <exception>
 #include <mach/mach.h>
 #include <mach/mach_vm.h>
 #include <mutex>
@@ -355,6 +356,9 @@ inline std::uint64_t SlotCalls[MaximumThunks] {};
 
 // Whether this OS thread is running a thunk, where its guest state is in memory and consistent.
 inline thread_local bool InHostCall = false;
+// Set by InstallGuestCpuHost (GuestCpuHost.h): whether an exception a thunk threw is AnyPS5's GuestContext::Transfer,
+// with which its guest context restore (longjmp, setcontext, swapcontext) ends after writing the guest registers.
+inline bool (*IsGuestTransfer)(std::exception_ptr) = nullptr;
 inline void FinishTranslatedException(CPUState& Guest);
 
 // Executes this OS thread's guest thread until its rip is StopAt or Breakpoint (0 for none), dispatching thunks on the
@@ -379,7 +383,18 @@ inline void Loop(std::uint64_t StopAt, std::uint64_t Breakpoint) {
     __atomic_fetch_add(ActiveThunkCalls, 1, __ATOMIC_RELAXED);
     __atomic_fetch_add(&SlotCalls[(Stop - ThunkStubOffset) / ThunkStubSize], 1, __ATOMIC_RELAXED);
     InHostCall = true;
-    const After Next = ActiveThunks[(Stop - ThunkStubOffset) / ThunkStubSize](Guest);
+    After Next;
+    try {
+      Next = ActiveThunks[(Stop - ThunkStubOffset) / ThunkStubSize](Guest);
+    } catch (...) {
+      // A guest context restore resumes the guest at the rip it set; any other exception goes on (ExitRequest of a
+      // thread's pthread_exit, say).
+      if (!IsGuestTransfer || !IsGuestTransfer(std::current_exception())) {
+        InHostCall = false;
+        throw;
+      }
+      Next = After::Continue;
+    }
     InHostCall = false;
     if (Next == After::Return) {
       auto& RSP = Guest.gregs[X86::REG_RSP];

@@ -12,7 +12,10 @@
 
 #include <FEXCore/Darwin/GuestState.h>
 
+#include "prx/libc/include/GuestContextArm64.hpp"
 #include "prx/libc/include/GuestCpuArm64.hpp"
+
+#include <cstring>
 
 namespace FexGuest {
 namespace HostCpu {
@@ -63,6 +66,82 @@ inline void SetX87Status(std::uint16_t Value) {
 }
 } // namespace HostCpu
 
+// AnyPS5's guest context accessors (prx/libc/include/GuestContextArm64.hpp): setjmp, getcontext and the others capture
+// the calling guest thread's registers, and longjmp, setcontext and swapcontext restore them and throw
+// GuestContext::Transfer, which FexGuest::Loop takes as "resume at the restored rip". The FXSAVE image carries the x87
+// control and status words, the abridged tag word, MXCSR, ST0-ST7 and XMM0-XMM15.
+namespace HostContext {
+using Frame = GuestContext::RegisterFrame;
+constexpr std::uint64_t Frame::* General[16] = {&Frame::rax, &Frame::rbx, &Frame::rcx, &Frame::rdx, &Frame::rsi, &Frame::rdi,
+                                                &Frame::rbp, &Frame::rsp, &Frame::r8,  &Frame::r9,  &Frame::r10, &Frame::r11,
+                                                &Frame::r12, &Frame::r13, &Frame::r14, &Frame::r15};
+constexpr unsigned Numbers[16] = {X86::REG_RAX, X86::REG_RBX, X86::REG_RCX, X86::REG_RDX, X86::REG_RSI, X86::REG_RDI,
+                                  X86::REG_RBP, X86::REG_RSP, X86::REG_R8,  X86::REG_R9,  X86::REG_R10, X86::REG_R11,
+                                  X86::REG_R12, X86::REG_R13, X86::REG_R14, X86::REG_R15};
+constexpr std::size_t ControlWord = 0, StatusWord = 2, TagWord = 4, MxcsrAt = 24, MxcsrMaskAt = 28, X87At = 32, XmmAt = 160;
+
+[[noreturn]] inline void Unbound(const char* What) {
+  std::printf("guest context %s on a thread with no guest thread\nFAIL\n", What);
+  std::fflush(stdout);
+  std::_Exit(1);
+}
+inline void Capture(Frame* Result) {
+  if (!HostCpu::Bound()) {
+    Unbound("capture");
+  }
+  auto& Thread = FEXCore::Darwin::GuestState::Thread();
+  auto& State = Thread.CurrentFrame->State;
+  *Result = {};
+  for (int i = 0; i < 16; ++i) {
+    Result->*General[i] = State.gregs[Numbers[i]];
+  }
+  Result->rip = State.rip;
+  Result->rflags = CTX->ReconstructCompactedEFLAGS(&Thread, false, nullptr, 0);
+  Result->cs = 0x43;
+  Result->ss = 0x3b;
+  const std::uint16_t Control = State.FCW, Status = FEXCore::Darwin::GuestState::X87Status();
+  const std::uint32_t Mxcsr = State.mxcsr, MxcsrMask = FEXCore::Darwin::GuestState::MxcsrMask();
+  std::memcpy(Result->fxsave + ControlWord, &Control, sizeof(Control));
+  std::memcpy(Result->fxsave + StatusWord, &Status, sizeof(Status));
+  Result->fxsave[TagWord] = State.AbridgedFTW;
+  std::memcpy(Result->fxsave + MxcsrAt, &Mxcsr, sizeof(Mxcsr));
+  std::memcpy(Result->fxsave + MxcsrMaskAt, &MxcsrMask, sizeof(MxcsrMask));
+  for (int i = 0; i < 8; ++i) {
+    std::memcpy(Result->fxsave + X87At + 16 * i, State.mm[i], 10);
+  }
+  for (int i = 0; i < 16; ++i) {
+    std::memcpy(Result->fxsave + XmmAt + 16 * i, State.xmm.sse.data[i], 16);
+  }
+}
+inline void Restore(const Frame* Source) {
+  if (!HostCpu::Bound()) {
+    Unbound("restore");
+  }
+  auto& Thread = FEXCore::Darwin::GuestState::Thread();
+  auto& State = Thread.CurrentFrame->State;
+  for (int i = 0; i < 16; ++i) {
+    State.gregs[Numbers[i]] = Source->*General[i];
+  }
+  State.rip = Source->rip;
+  CTX->SetFlagsFromCompactedEFLAGS(&Thread, static_cast<std::uint32_t>(Source->rflags));
+  std::uint16_t Control, Status;
+  std::uint32_t Mxcsr;
+  std::memcpy(&Control, Source->fxsave + ControlWord, sizeof(Control));
+  std::memcpy(&Status, Source->fxsave + StatusWord, sizeof(Status));
+  std::memcpy(&Mxcsr, Source->fxsave + MxcsrAt, sizeof(Mxcsr));
+  State.FCW = Control;
+  FEXCore::Darwin::GuestState::SetX87Status(Status);
+  State.AbridgedFTW = Source->fxsave[TagWord];
+  FEXCore::Darwin::GuestState::SetMxcsr(Mxcsr);
+  for (int i = 0; i < 8; ++i) {
+    std::memcpy(State.mm[i], Source->fxsave + X87At + 16 * i, 10);
+  }
+  for (int i = 0; i < 16; ++i) {
+    std::memcpy(State.xmm.sse.data[i], Source->fxsave + XmmAt + 16 * i, 16);
+  }
+}
+} // namespace HostContext
+
 inline void InstallGuestCpuHost() {
   static GuestCpu::HostAccessors Host {};
   FEXCore::Darwin::GuestState::InstallHostAccessors(Host);
@@ -76,5 +155,16 @@ inline void InstallGuestCpuHost() {
   Host.X87Status = HostCpu::X87Status;
   Host.SetX87Status = HostCpu::SetX87Status;
   GuestCpuInstallHost_nid_no_patch(&Host);
+  static const GuestContext::HostAccessors Context {HostContext::Capture, HostContext::Restore};
+  GuestContextInstallHost_nid_no_patch(&Context);
+  IsGuestTransfer = [](std::exception_ptr Thrown) {
+    try {
+      std::rethrow_exception(Thrown);
+    } catch (const GuestContext::Transfer&) {
+      return true;
+    } catch (...) {
+      return false;
+    }
+  };
 }
 } // namespace FexGuest

@@ -19,6 +19,7 @@
 
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <cerrno>
 #include <chrono>
 #include <condition_variable>
@@ -288,7 +289,24 @@ struct MutexAttributes {
 struct Mutex {
   pthread_mutex_t Host;
   int Type;
+  // The holding thread and its lock depth, which only the holder writes (pthread_mutex_isowned_np reads the owner).
+  std::atomic<pthread_t> Owner {nullptr};
+  int Depth = 0;
 };
+void Acquired(Mutex* M) {
+  if (M->Owner.load(std::memory_order_relaxed) == pthread_self()) {
+    ++M->Depth;
+  } else {
+    M->Owner.store(pthread_self(), std::memory_order_relaxed);
+    M->Depth = 1;
+  }
+}
+// Before the host unlock, so the next holder's Acquired comes after.
+void Releasing(Mutex* M) {
+  if (M->Owner.load(std::memory_order_relaxed) == pthread_self() && --M->Depth == 0) {
+    M->Owner.store(nullptr, std::memory_order_relaxed);
+  }
+}
 Mutex* NewMutex(int Type) {
   auto* M = new Mutex;
   M->Type = Type;
@@ -341,13 +359,45 @@ int MutexDestroy(std::uint64_t* Slot) {
   return 0;
 }
 int MutexLock(std::uint64_t* Slot) {
-  return Slot ? pthread_mutex_lock(&MutexOf(Slot)->Host) : EINVAL;
+  if (!Slot) {
+    return EINVAL;
+  }
+  auto* M = MutexOf(Slot);
+  const int Error = pthread_mutex_lock(&M->Host);
+  if (Error == 0) {
+    Acquired(M);
+  }
+  return Error;
 }
 int MutexTrylock(std::uint64_t* Slot) {
-  return Slot ? pthread_mutex_trylock(&MutexOf(Slot)->Host) : EINVAL;
+  if (!Slot) {
+    return EINVAL;
+  }
+  auto* M = MutexOf(Slot);
+  const int Error = pthread_mutex_trylock(&M->Host);
+  if (Error == 0) {
+    Acquired(M);
+  }
+  return Error;
 }
 int MutexUnlock(std::uint64_t* Slot) {
-  return Slot ? pthread_mutex_unlock(&MutexOf(Slot)->Host) : EINVAL;
+  if (!Slot) {
+    return EINVAL;
+  }
+  auto* M = MutexOf(Slot);
+  Releasing(M);
+  return pthread_mutex_unlock(&M->Host);
+}
+bool MutexIsOwned(std::uint64_t* Slot) {
+  return Slot && __atomic_load_n(Slot, __ATOMIC_ACQUIRE) > 1 &&
+         reinterpret_cast<Mutex*>(*Slot)->Owner.load(std::memory_order_relaxed) == pthread_self();
+}
+int PosixMutexIsowned(std::uint64_t* Slot) {
+  return MutexIsOwned(Slot) ? 1 : 0;
+}
+// libkernel_sys's form: SceKernelError(1) when the calling thread holds it, 0 when it does not.
+int SceMutexIsowned(std::uint64_t* Slot) {
+  return MutexIsOwned(Slot) ? static_cast<int>(0x80020001) : 0;
 }
 // Darwin has no pthread_mutex_timedlock: try until the deadline.
 int MutexLockFor(std::uint64_t* Slot, std::chrono::steady_clock::time_point Deadline) {
@@ -357,6 +407,9 @@ int MutexLockFor(std::uint64_t* Slot, std::chrono::steady_clock::time_point Dead
   auto* M = MutexOf(Slot);
   for (;;) {
     const int Error = pthread_mutex_trylock(&M->Host);
+    if (Error == 0) {
+      Acquired(M);
+    }
     if (Error != EBUSY) {
       return Error;
     }
@@ -471,8 +524,28 @@ int CondDestroy(std::uint64_t* Slot) {
   *Slot = 0;
   return 0;
 }
+// A wait releases the mutex and takes it again: the owner record follows.
+template<class Wait>
+int WaitHolding(Mutex* M, Wait Waiting) {
+  const int Depth = M->Owner.load(std::memory_order_relaxed) == pthread_self() ? M->Depth : 0;
+  if (Depth) {
+    M->Depth = 0;
+    M->Owner.store(nullptr, std::memory_order_relaxed);
+  }
+  const int Error = Waiting();
+  if (Depth) {
+    M->Owner.store(pthread_self(), std::memory_order_relaxed);
+    M->Depth = Depth;
+  }
+  return Error;
+}
 int CondWait(std::uint64_t* Slot, std::uint64_t* MutexSlot) {
-  return Slot && MutexSlot ? pthread_cond_wait(&CondOf(Slot)->Host, &MutexOf(MutexSlot)->Host) : EINVAL;
+  if (!Slot || !MutexSlot) {
+    return EINVAL;
+  }
+  auto* C = CondOf(Slot);
+  auto* M = MutexOf(MutexSlot);
+  return WaitHolding(M, [&] { return pthread_cond_wait(&C->Host, &M->Host); });
 }
 int CondWaitUntil(std::uint64_t* Slot, std::uint64_t* MutexSlot, std::chrono::steady_clock::time_point Deadline) {
   if (!Slot || !MutexSlot) {
@@ -481,7 +554,9 @@ int CondWaitUntil(std::uint64_t* Slot, std::uint64_t* MutexSlot, std::chrono::st
   const auto Remaining = std::chrono::duration_cast<std::chrono::nanoseconds>(Deadline - std::chrono::steady_clock::now()).count();
   const timespec Relative {static_cast<time_t>(std::max<std::int64_t>(Remaining, 0) / 1'000'000'000),
                            static_cast<long>(std::max<std::int64_t>(Remaining, 0) % 1'000'000'000)};
-  return pthread_cond_timedwait_relative_np(&CondOf(Slot)->Host, &MutexOf(MutexSlot)->Host, &Relative);
+  auto* C = CondOf(Slot);
+  auto* M = MutexOf(MutexSlot);
+  return WaitHolding(M, [&] { return pthread_cond_timedwait_relative_np(&C->Host, &M->Host, &Relative); });
 }
 int CondTimedwait(std::uint64_t* Slot, std::uint64_t* MutexSlot, const GuestTimespec* Time) {
   return Slot && Time ? CondWaitUntil(Slot, MutexSlot, DeadlineOf(Time, CondOf(Slot)->Clock)) : EINVAL;
@@ -1118,6 +1193,7 @@ const std::pair<const char*, FexGuest::Thunk> Functions[] = {
   {"pthread_mutex_lock", SysV::Thunk<&MutexLock>},
   {"pthread_mutex_trylock", SysV::Thunk<&MutexTrylock>},
   {"pthread_mutex_unlock", SysV::Thunk<&MutexUnlock>},
+  {"pthread_mutex_isowned_np", SysV::Thunk<&PosixMutexIsowned>},
   {"pthread_mutex_timedlock", SysV::Thunk<&MutexTimedlock>},
   {"pthread_mutexattr_init", SysV::Thunk<&MutexattrInit>},
   {"pthread_mutexattr_destroy", SysV::Thunk<&MutexattrDestroy>},
@@ -1182,6 +1258,7 @@ const std::pair<const char*, FexGuest::Thunk> Functions[] = {
   {"scePthreadMutexLock", SysV::Thunk<&SceOf<&MutexLock, std::uint64_t*>>},
   {"scePthreadMutexTrylock", SysV::Thunk<&SceOf<&MutexTrylock, std::uint64_t*>>},
   {"scePthreadMutexUnlock", SysV::Thunk<&SceOf<&MutexUnlock, std::uint64_t*>>},
+  {"scePthreadMutexIsowned", SysV::Thunk<&SceMutexIsowned>},
   {"scePthreadMutexTimedlock", SysV::Thunk<&SceMutexTimedlock>},
   {"scePthreadMutexattrInit", SysV::Thunk<&SceOf<&MutexattrInit, std::uint64_t*>>},
   {"scePthreadMutexattrDestroy", SysV::Thunk<&SceOf<&MutexattrDestroy, std::uint64_t*>>},
@@ -1442,20 +1519,12 @@ int scePthreadGetthreadid() {
 void pthread_set_name_np_nid_postfix(std::uint64_t Handle, const char* Name) {
   PosixSetnameNp(Handle, Name);
 }
-// The standard library's named mutex (std::_Mtx_init_with_name, which _Mtx_init_with_default_name_override calls):
-// _Mtx_recursive (0x100) makes it recursive, and any other type is the layer's default. The result is _Thrd_success (0)
-// or _Thrd_error (4).
-int _ZNSt8__sce_v219_Mtx_init_with_nameEPP13pthread_mutexiPKc_nid_postfix(std::uint64_t* Slot, int Type, const char* Name) {
-  std::uint64_t Attributes = 0;
-  if (MutexattrInit(&Attributes) != 0) {
-    return 4;
-  }
-  if ((Type & 0x100) != 0) {
-    MutexattrSettype(&Attributes, MutexRecursive);
-  }
-  const int Result = SceMutexInit(Slot, &Attributes, Name);
-  MutexattrDestroy(&Attributes);
-  return Result == 0 ? 0 : 4;
+int pthread_mutex_isowned_np_nid_postfix(std::uint64_t* Slot) {
+  return PosixMutexIsowned(Slot);
+}
+// libkernel_sys's scePthreadSetDefaultstacksize and pthread_attr_setdefaultstacksize_np.
+bool SetDefaultStackSize_nid_no_patch(std::size_t Size) {
+  return SetDefaultstacksize(Size) == 0;
 }
 }
 

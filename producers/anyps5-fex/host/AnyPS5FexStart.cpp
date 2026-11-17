@@ -24,6 +24,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <chrono>
 #include <cmath>
 #include <CoreFoundation/CoreFoundation.h>
 #include <cstddef>
@@ -34,6 +35,7 @@
 #include <exception>
 #include <filesystem>
 #include <functional>
+#include <limits>
 #include <mach/mach.h>
 #include <mach/mach_error.h>
 #include <mach/mach_vm.h>
@@ -144,9 +146,10 @@ void Sincosf(float X, float* Sine, float* Cosine) {
 
 // libkernel's module loader (Module/) is the Rosetta route's dlopen of relinked images; here the host loads the guest's
 // modules itself (RuntimeModules, after Resolve below). libkernel's Signals.cpp installs guest handlers as host signal
-// handlers, which x86-64 guest code cannot be; until the host delivers guest signals, signal() and the signal mask are
-// accepted and recorded nowhere.
+// handlers, which x86-64 guest code cannot be; until the host delivers guest signals, GuestSignals below records the
+// dispositions, masks and alarms without delivering them.
 namespace RuntimeModules {
+struct ModuleInfo;
 struct ModuleInfoEx;
 struct ModuleInfoForUnwind;
 struct SegmentInfo {
@@ -159,7 +162,203 @@ int GetModuleInfoFromAddr(std::uint64_t Address, int Flags, ModuleInfoEx* Info);
 int GetModuleInfoForUnwind(std::uint64_t Address, int Flags, ModuleInfoForUnwind* Info);
 int PhdrMatchAddr(const void* PhdrInfo, std::uint64_t Address);
 int GetModuleSegmentInfo(SegmentInfo* Result);
+int ThreadAtexitIncrement(std::uint64_t DsoSymbol);
+int ThreadAtexitDecrement(std::uint64_t DsoSymbol);
 } // namespace RuntimeModules
+extern "C" int sceKernelGetModuleInfo(int Handle, RuntimeModules::ModuleInfo* Info);
+extern "C" int sceKernelGetModuleList(int* Handles, std::size_t Count, std::size_t* Actual);
+
+// Guest signal state on this route: dispositions, each thread's mask, siginterrupt's set and alarm()'s deadline, which
+// libkernel's signal exports keep on the Rosetta route. No guest signal is delivered here: a handler is recorded and
+// reported once, and an alarm's deadline is kept for its remaining time.
+namespace GuestSignals {
+struct Set {
+  std::uint32_t Bits[4];
+};
+struct Action {
+  std::uint64_t Handler;
+  std::int32_t Flags;
+  Set Mask;
+};
+static_assert(sizeof(Set) == 16 && sizeof(Action) == 32);
+constexpr int Count = 128, Kill = 9, Stop = 17, Block = 1, Unblock = 2, SetMask = 3, Restart = 0x2;
+constexpr std::int64_t MaxAlarmSeconds = 0x7fffffff / 2;
+std::mutex Lock;
+Action Dispositions[Count] {};
+std::chrono::steady_clock::time_point AlarmDeadline {};
+bool AlarmArmed = false;
+thread_local Set ThreadMask {};
+bool Reported[Count] {};
+
+bool Valid(int Number) {
+  return Number > 0 && Number < Count;
+}
+bool Contains(const Set& S, int Number) {
+  return (S.Bits[(Number - 1) / 32] >> ((Number - 1) % 32)) & 1;
+}
+int Fail(int Error) {
+  errno = Error;
+  return -1;
+}
+void Report(int Number, std::uint64_t Handler) {
+  if (Handler > 1 && !Reported[Number]) {
+    Reported[Number] = true;
+    std::printf("guest handler 0x%llx for signal %d recorded; this route delivers no guest signals\n",
+                static_cast<unsigned long long>(Handler), Number);
+  }
+}
+int Exchange(int Number, const Action* Requested, Action* Previous) {
+  if (!Valid(Number) || (Requested && (Number == Kill || Number == Stop))) {
+    return Fail(EINVAL);
+  }
+  std::lock_guard Guard(Lock);
+  if (Previous) {
+    *Previous = Dispositions[Number];
+  }
+  if (Requested) {
+    Dispositions[Number] = *Requested;
+    Report(Number, Requested->Handler);
+  }
+  return 0;
+}
+int ChangeMask(int How, const Set* Requested, Set* Previous) {
+  const Set Old = ThreadMask;
+  if (Requested) {
+    for (int i = 0; i < 4; ++i) {
+      switch (How) {
+      case Block: ThreadMask.Bits[i] |= Requested->Bits[i]; break;
+      case Unblock: ThreadMask.Bits[i] &= ~Requested->Bits[i]; break;
+      case SetMask: ThreadMask.Bits[i] = Requested->Bits[i]; break;
+      default: return Fail(EINVAL);
+      }
+    }
+  }
+  if (Previous) {
+    *Previous = Old;
+  }
+  return 0;
+}
+} // namespace GuestSignals
+
+extern "C" {
+// siginterrupt's set: a handler installed with signal() for a signal in it has no SA_RESTART.
+GuestSignals::Set _sigintr_nid_postfix {};
+int _sigaction_nid_postfix(int Number, const GuestSignals::Action* Requested, GuestSignals::Action* Previous) {
+  return GuestSignals::Exchange(Number, Requested, Previous);
+}
+int sigprocmask_nid_postfix(int How, const void* Requested, void* Previous) {
+  return GuestSignals::ChangeMask(How, static_cast<const GuestSignals::Set*>(Requested), static_cast<GuestSignals::Set*>(Previous));
+}
+unsigned int GuestAlarm_nid_no_patch(unsigned int Seconds) {
+  if (Seconds > GuestSignals::MaxAlarmSeconds) {
+    errno = EINVAL;
+    return static_cast<unsigned int>(-1);
+  }
+  std::lock_guard Guard(GuestSignals::Lock);
+  const auto Now = std::chrono::steady_clock::now();
+  unsigned int Remaining = 0;
+  if (GuestSignals::AlarmArmed && GuestSignals::AlarmDeadline > Now) {
+    const auto Micros = std::chrono::duration_cast<std::chrono::microseconds>(GuestSignals::AlarmDeadline - Now).count();
+    Remaining = static_cast<unsigned int>((Micros + 999999) / 1000000);
+  }
+  GuestSignals::AlarmArmed = Seconds != 0;
+  GuestSignals::AlarmDeadline = Now + std::chrono::seconds(Seconds);
+  if (Seconds != 0) {
+    GuestSignals::Report(14, 2);
+  }
+  return Remaining;
+}
+}
+
+// Dinkumware's scaled decimal parsers (_Stodx, _Stofx, _Stoldx), which the wide-string conversions (_WStod and the
+// others) call. DinkumwareInternals.cpp needs an 80-bit long double, which arm64 does not have, so they are written here
+// the same way: parse, then parse again with the power-of-ten scale added to the exponent.
+extern "C" int* __error_nid_postfix();
+extern "C" const char* NanSubjectEnd_nid_no_patch(const char* Text);
+extern "C" double strtod_nid_postfix(const char* Text, char** End);
+extern "C" float strtof_nid_postfix(const char* Text, char** End);
+namespace Dinkumware {
+constexpr long long ExponentLimit = 1000000000;
+constexpr int RangeError = 34;
+bool Hexadecimal(const char* Text) {
+  while (std::isspace(static_cast<unsigned char>(*Text))) {
+    ++Text;
+  }
+  if (*Text == '+' || *Text == '-') {
+    ++Text;
+  }
+  return Text[0] == '0' && (Text[1] == 'x' || Text[1] == 'X');
+}
+template<typename T>
+T Scaled(const char* Text, char** End, std::int64_t Pten, int* Error, T (*Parse)(const char*, char**)) {
+  int& Errno = *__error_nid_postfix();
+  const int Saved = Errno;
+  if (Error) {
+    *Error = 0;
+  }
+  if (const char* Stop = NanSubjectEnd_nid_no_patch(Text)) {
+    if (End) {
+      *End = const_cast<char*>(Stop);
+    }
+    return std::numeric_limits<T>::quiet_NaN();
+  }
+  Errno = 0;
+  char* Stop = nullptr;
+  T Value = Parse(Text, &Stop);
+  if (End) {
+    *End = Stop;
+  }
+  const bool Hex = Hexadecimal(Text);
+  if (Pten == 0 && Hex) {
+    Errno = Saved;
+    return Value;
+  }
+  const bool Overflowed = std::isinf(Value) && Errno == RangeError;
+  if (Pten != 0 && Stop != Text && (std::isfinite(Value) || Overflowed)) {
+    const long long Scale = std::clamp<std::int64_t>(Pten, -ExponentLimit, ExponentLimit);
+    if (Hex) {
+      Errno = 0;
+      Value = static_cast<T>(Value * std::pow(10.0L, static_cast<long double>(Scale)));
+      if (std::isinf(Value) || Value == 0) {
+        Errno = RangeError;
+      }
+    } else {
+      std::string Number(Text, static_cast<const char*>(Stop));
+      long long Exponent = 0;
+      if (const auto Marker = Number.find_first_of("eE"); Marker != std::string::npos) {
+        Exponent = std::strtoll(Number.c_str() + Marker + 1, nullptr, 10);
+        Number.resize(Marker);
+      }
+      Exponent = std::clamp(Exponent, -ExponentLimit, ExponentLimit) + Scale;
+      Number += 'e';
+      Number += std::to_string(Exponent);
+      Errno = 0;
+      Value = Parse(Number.c_str(), nullptr);
+    }
+  }
+  if (Errno == RangeError && (Value == 0 || std::isinf(Value))) {
+    if (Error) {
+      *Error = 1;
+    }
+  } else if (Errno == 0 || Errno == RangeError) {
+    Errno = Saved;
+  }
+  return Value;
+}
+} // namespace Dinkumware
+
+extern "C" {
+double _Stodx_nid_postfix(const char* Text, char** End, std::int64_t Pten, int* Error) {
+  return Dinkumware::Scaled<double>(Text, End, Pten, Error, strtod_nid_postfix);
+}
+float _Stofx_nid_postfix(const char* Text, char** End, std::int64_t Pten, int* Error) {
+  return Dinkumware::Scaled<float>(Text, End, Pten, Error, strtof_nid_postfix);
+}
+// long double is double on arm64, as Api.hpp declares _Stoldx there.
+long double _Stoldx_nid_postfix(const char* Text, char** End, std::int64_t Pten, int* Error) {
+  return Dinkumware::Scaled<double>(Text, End, Pten, Error, strtod_nid_postfix);
+}
+}
 
 namespace Guest {
 [[noreturn]] void Ends(const char* What) {
@@ -187,15 +386,21 @@ int WriteCppExceptionInfo(const void*, std::uint64_t, const char* Type, const ch
   std::printf("guest C++ exception %s: %s\n", Type ? Type : "?", What ? What : "");
   return 0;
 }
-std::uint64_t Signal(int Number, std::uint64_t) {
-  std::printf("guest signal(%d) accepted; guest signal delivery is not implemented\n", Number);
-  return 0; // SIG_DFL
-}
-int Sigprocmask(int, const void*, std::uint64_t* Old) {
-  if (Old) {
-    Old[0] = Old[1] = 0; // FreeBSD sigset_t: 128 bits
+// signal(): the handler with SA_RESTART unless siginterrupt named the signal; SIG_ERR (-1) for an invalid one.
+std::uint64_t Signal(int Number, std::uint64_t Handler) {
+  if (!GuestSignals::Valid(Number)) {
+    errno = EINVAL;
+    return ~std::uint64_t {0};
   }
-  return 0;
+  const GuestSignals::Action Requested {Handler, GuestSignals::Contains(_sigintr_nid_postfix, Number) ? 0 : GuestSignals::Restart, {}};
+  GuestSignals::Action Previous {};
+  if (GuestSignals::Exchange(Number, &Requested, &Previous) != 0) {
+    return ~std::uint64_t {0};
+  }
+  return Previous.Handler;
+}
+int Sigprocmask(int How, const void* Requested, void* Previous) {
+  return sigprocmask_nid_postfix(How, Requested, Previous);
 }
 } // namespace Guest
 
@@ -242,6 +447,10 @@ const std::pair<const char*, FexGuest::Thunk> HostFunctions[] = {
   {"sceKernelStopUnloadModule", SysV::Thunk<&RuntimeModules::StopUnloadModule>},
   {"sceKernelDlsym", SysV::Thunk<&RuntimeModules::Dlsym>},
   {"sceKernelGetModuleInfoFromAddr", SysV::Thunk<&RuntimeModules::GetModuleInfoFromAddr>},
+  {"sceKernelGetModuleInfo", SysV::Thunk<&sceKernelGetModuleInfo>},
+  {"sceKernelGetModuleList", SysV::Thunk<&sceKernelGetModuleList>},
+  {"_sceKernelRtldThreadAtexitIncrement", SysV::Thunk<&RuntimeModules::ThreadAtexitIncrement>},
+  {"_sceKernelRtldThreadAtexitDecrement", SysV::Thunk<&RuntimeModules::ThreadAtexitDecrement>},
   {"sceKernelGetModuleInfoForUnwind", SysV::Thunk<&RuntimeModules::GetModuleInfoForUnwind>},
   {"__elf_phdr_match_addr", SysV::Thunk<&RuntimeModules::PhdrMatchAddr>},
   {"sceKernelInternalMemoryGetModuleSegmentInfo", SysV::Thunk<&RuntimeModules::GetModuleSegmentInfo>},
@@ -770,12 +979,144 @@ int GetModuleSegmentInfo(SegmentInfo* Result) {
   *Result = {FexGuest::StubBase, FexGuest::StubPageSize};
   return 0;
 }
+
+// A libc keeps the module of a thread_local destructor while a thread holds one (_sceKernelRtldThreadAtexitIncrement and
+// Decrement). Guest modules stay loaded here (StopUnloadModule), so no count is kept: an address in a guest module takes
+// its reference, and any other address fails (-1), as libkernel's Rtld.cpp answers for an address in no image.
+int ThreadAtexitIncrement(std::uint64_t DsoSymbol) {
+  return Containing(DsoSymbol) ? 0 : -1;
+}
+int ThreadAtexitDecrement(std::uint64_t) {
+  return 0;
+}
 } // namespace RuntimeModules
 
 // libSceLibcInternal's thread_local destructor pass (_sceLibcInternalForceTlsDestructor) asks which module holds a
 // destructor's DSO handle, through the same lookup as the guest's import of it.
 extern "C" int sceKernelGetModuleInfoFromAddr(std::uint64_t Address, int Flags, RuntimeModules::ModuleInfoEx* Info) {
   return RuntimeModules::GetModuleInfoFromAddr(Address, Flags, Info);
+}
+
+// libkernel's module queries and loads that AnyPS5's own libraries make (libkernel_sys's sceKernelIsModuleLoaded,
+// sceKernelGetModuleInfoInternal and sceKernelLoadStartModuleForSysmodule; libSceSysmodule's module handles), over the
+// same module records as the guest's imports of them. Like GetModuleInfoFromAddr they read the module list without the
+// load lock, which a module start function holds while it runs.
+namespace RuntimeModules {
+// SceTypes.hpp's ModuleInfo.
+struct ModuleInfo {
+  std::uint64_t Size;
+  char Name[256];
+  Segment Segments[4];
+  std::uint32_t SegmentCount;
+  std::uint8_t Fingerprint[20];
+};
+static_assert(offsetof(ModuleInfo, Segments) == 0x108 && offsetof(ModuleInfo, SegmentCount) == 0x148 && sizeof(ModuleInfo) == 0x160);
+constexpr int ErrorInvalidSize = ErrorInvalid;
+
+template<class Info>
+int InfoByHandle(int Handle, Info* Result, bool (*Write)(Ps5::Module&, Info&)) {
+  if (!Result) {
+    return ErrorFault;
+  }
+  if (Result->Size != sizeof(Info)) {
+    return ErrorInvalidSize;
+  }
+  auto* M = ModuleOf(Handle);
+  if (!M) {
+    return ErrorNoSuch;
+  }
+  Info Filled {};
+  if (!Write(*M, Filled)) {
+    return ErrorNoSuch;
+  }
+  *Result = Filled;
+  return 0;
+}
+bool FillShort(Ps5::Module& M, ModuleInfo& Info) {
+  ModuleInfoEx Full;
+  if (!Fill(M, Full)) {
+    return false;
+  }
+  Info = {};
+  Info.Size = sizeof(Info);
+  std::memcpy(Info.Name, Full.Name, sizeof(Info.Name));
+  std::memcpy(Info.Segments, Full.Segments, sizeof(Info.Segments));
+  Info.SegmentCount = Full.SegmentCount;
+  return true;
+}
+// The libraries linked into this host stand in for the PS5's system modules: dlopen of one (libSceSysmodule opens
+// "libs/<name>.prx") gives a handle of its own, past the guest module handles, that stays the same for that name.
+std::mutex HostLibrariesLock;
+std::vector<std::string> HostLibraries;
+constexpr std::intptr_t HostLibraryHandles = 0x10000;
+} // namespace RuntimeModules
+
+extern "C" {
+int GetModuleInfoExByHandle_nid_no_patch(int Handle, RuntimeModules::ModuleInfoEx* Info) {
+  return RuntimeModules::InfoByHandle<RuntimeModules::ModuleInfoEx>(Handle, Info, RuntimeModules::Fill);
+}
+int sceKernelGetModuleInfo(int Handle, RuntimeModules::ModuleInfo* Info) {
+  return RuntimeModules::InfoByHandle<RuntimeModules::ModuleInfo>(Handle, Info, RuntimeModules::FillShort);
+}
+int sceKernelGetModuleList(int* Handles, std::size_t Count, std::size_t* Actual) {
+  if (!Handles) {
+    return RuntimeModules::ErrorFault;
+  }
+  const std::size_t Loaded = Modules.size();
+  for (std::size_t i = 0; i < std::min(Loaded, Count); ++i) {
+    Handles[i] = static_cast<int>(i + 1);
+  }
+  if (Loaded > Count) {
+    return RuntimeModules::ErrorNoMemory;
+  }
+  if (!Actual) {
+    return RuntimeModules::ErrorFault;
+  }
+  *Actual = Loaded;
+  return 0;
+}
+int sceKernelLoadStartModule(const char* Path, std::size_t Arguments, const void* ArgumentPointer, std::uint32_t Flags, const void* Options,
+                             int* Result) {
+  return RuntimeModules::LoadStartModule(Path, Arguments, reinterpret_cast<std::uint64_t>(ArgumentPointer), Flags, Options, Result);
+}
+// dlopen(nullptr) is the executable; a guest module's name or /app0 path is that module, loaded and started if it is
+// not yet; any other name is a library linked into this host. RTLD_LAZY (1) or RTLD_NOW (2), optionally RTLD_GLOBAL.
+void* dlopen_nid_postfix(const char* Path, int Flags) {
+  if ((Flags & ~0x103) || (Flags & 3) == 0 || (Flags & 3) == 3) {
+    errno = EINVAL;
+    return nullptr;
+  }
+  if (!Path) {
+    return reinterpret_cast<void*>(std::intptr_t {1});
+  }
+  if (!*Path) {
+    errno = ENOENT;
+    return nullptr;
+  }
+  const std::string Name = std::filesystem::path(Path).filename().string();
+  for (std::size_t i = 0; i < Modules.size(); ++i) {
+    if (Modules[i]->Name == Name) {
+      return reinterpret_cast<void*>(static_cast<std::intptr_t>(i + 1));
+    }
+  }
+  if (std::string_view(Path).starts_with("/app0/")) {
+    int Started = 0;
+    const int Handle = RuntimeModules::LoadStartModule(Path, 0, 0, 0, nullptr, &Started);
+    if (Handle > 0) {
+      return reinterpret_cast<void*>(static_cast<std::intptr_t>(Handle));
+    }
+    errno = ENOENT;
+    return nullptr;
+  }
+  std::lock_guard Guard(RuntimeModules::HostLibrariesLock);
+  auto& Names = RuntimeModules::HostLibraries;
+  auto Found = std::find(Names.begin(), Names.end(), Name);
+  if (Found == Names.end()) {
+    Names.push_back(Name);
+    Found = Names.end() - 1;
+  }
+  return reinterpret_cast<void*>(RuntimeModules::HostLibraryHandles + (Found - Names.begin()));
+}
 }
 
 namespace {

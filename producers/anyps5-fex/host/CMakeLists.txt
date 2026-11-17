@@ -8,7 +8,8 @@ set(ANYPS5_GENERATED_THUNKS "" CACHE STRING "the thunk translation units generat
 set(ANYPS5_ARM64_LINK "" CACHE STRING "static libraries, dynamic libraries and frameworks the AnyPS5 objects link")
 set(ANYPS5_ARM64_INCLUDES "" CACHE STRING "include directories the AnyPS5 libraries' headers need (SDL, Vulkan, generated headers)")
 set(ANYPS5_ARM64_DEFINES "" CACHE STRING "compile definitions the AnyPS5 libraries' headers need")
-add_executable(anyps5-fex-proof ${H}/AnyPS5FexProof.cpp ${H}/KernelThreadRecord.cpp ${H}/GuestImages.cpp ${ANYPS5_ARM64_OBJECTS})
+set(ANYPS5_PROOF_STUBS "" CACHE STRING "trapping definitions of what the proof references and does not link (unreached-exports.py); the start host takes none")
+add_executable(anyps5-fex-proof ${H}/AnyPS5FexProof.cpp ${H}/KernelThreadRecord.cpp ${H}/GuestImages.cpp ${ANYPS5_ARM64_OBJECTS} ${ANYPS5_PROOF_STUBS})
 add_executable(anyps5-fex-abi ${H}/AnyPS5FexAbi.cpp ${H}/GenericBridge.S)
 add_executable(anyps5-fex-start ${H}/AnyPS5FexStart.cpp ${H}/KernelThreadRecord.cpp ${H}/GuestImages.cpp ${H}/GuestThreads.cpp ${ANYPS5_GENERATED_THUNKS} ${ANYPS5_ARM64_OBJECTS}
   ${ANYPS5_SOURCE_DIR}/core/libs/nid/src/NidCompute.cpp ${ANYPS5_SOURCE_DIR}/core/libs/nid/src/Sha1.cpp)
