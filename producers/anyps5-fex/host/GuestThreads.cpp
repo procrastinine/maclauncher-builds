@@ -1442,6 +1442,21 @@ int scePthreadGetthreadid() {
 void pthread_set_name_np_nid_postfix(std::uint64_t Handle, const char* Name) {
   PosixSetnameNp(Handle, Name);
 }
+// The standard library's named mutex (std::_Mtx_init_with_name, which _Mtx_init_with_default_name_override calls):
+// _Mtx_recursive (0x100) makes it recursive, and any other type is the layer's default. The result is _Thrd_success (0)
+// or _Thrd_error (4).
+int _ZNSt8__sce_v219_Mtx_init_with_nameEPP13pthread_mutexiPKc_nid_postfix(std::uint64_t* Slot, int Type, const char* Name) {
+  std::uint64_t Attributes = 0;
+  if (MutexattrInit(&Attributes) != 0) {
+    return 4;
+  }
+  if ((Type & 0x100) != 0) {
+    MutexattrSettype(&Attributes, MutexRecursive);
+  }
+  const int Result = SceMutexInit(Slot, &Attributes, Name);
+  MutexattrDestroy(&Attributes);
+  return Result == 0 ? 0 : 4;
+}
 }
 
 bool GuestThreadStackHostRangeOverlaps(std::uintptr_t, std::uintptr_t) {
