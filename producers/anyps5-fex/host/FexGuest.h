@@ -83,7 +83,7 @@ public:
 
 // Guest memory the host owns: every MapGuest allocation. The Darwin signal delegator asks for these ranges; faults
 // outside them go to the handlers installed before it (InstallFaultReport). No guest page is write-protected for code
-// tracking yet, so WriteProtectedForCode stays false. Any thread maps guest memory, and a fault handler on any thread
+// tracking, so WriteProtectedForCode stays false. Any thread maps guest memory, and a fault handler on any thread
 // reads the table, so entries are only appended: a writer fills the next entry under the mutex, then publishes the
 // count.
 constexpr std::size_t MaximumOwnedRanges = 1 << 16;
@@ -107,7 +107,7 @@ inline void (*DescribeGuestAddress)(std::uint64_t Address, char* Text, std::size
 // Drops FEX's translated code for a guest range: the shared code buffers and the host's one guest thread's cache.
 // FEX requires its code invalidation mutex held uniquely around both calls. Its check of that, try_lock(), is still
 // evaluated with assertions off, so a call without the lock takes the mutex and keeps it, and the thread's next
-// compile then waits for it forever (test-sequence 0481: __ulock_wait2 with the guest at main).
+// compile then waits for it forever in __ulock_wait2.
 inline void InvalidateGuestCode(FEXCore::Core::InternalThreadState* Calling, std::uint64_t Start, std::uint64_t Length) {
   auto Lock = FEXCore::GuardSignalDeferringSection(Calling->CTX->GetCodeInvalidationMutex(), Calling);
   Calling->CTX->InvalidateCodeBuffersCodeRange(Start, Length);
@@ -131,7 +131,7 @@ inline FEXCore::Darwin::SignalCallbacks GuestSignalCallbacks() {
     InvalidateGuestCode(Thread, Start, Length);
     return true;
   };
-  // The host has no guest exception handlers yet: report the guest exception, then let the fault report end the run.
+  // The host installs no guest exception handlers: report the guest exception, then let the fault report end the run.
   Callbacks.DeliverException = [](FEXCore::Core::InternalThreadState*, const FEXCore::Darwin::GuestException& Exception, void*) {
     char Where[96] = "?";
     if (DescribeGuestAddress) {
@@ -242,7 +242,7 @@ inline int DescribeMapping(const char* Label, std::uint64_t Address, char* Text,
 // The faulting thread's guest side (defined below, after the thread state it reads).
 inline void ReportGuestState(void* Context);
 
-// The host has no guest fault handling yet, so a fault ends the run with its signal number, the faulting host code and
+// The host does not hand faults to the guest, so a fault ends the run with its signal number, the faulting host code and
 // its callers (the link register, then the frame-pointer chain on this thread's host stack) instead of a crash report.
 // It also names the exception syndrome, the thread, the mappings of the pc and the address, and the guest state.
 inline void InstallFaultReport() {
@@ -419,7 +419,7 @@ inline void (*AdoptHostThread)() = nullptr;
 inline GuestResult CallGuest(std::uint64_t Function, std::span<const std::uint64_t> Integers, std::span<const double> Floats) {
   static constexpr int Registers[] = {X86::REG_RDI, X86::REG_RSI, X86::REG_RDX, X86::REG_RCX, X86::REG_R8, X86::REG_R9};
   if (Integers.size() > 6 || Floats.size() > 8) {
-    std::printf("guest callback with stack arguments is not supported yet\nFAIL\n");
+    std::printf("guest callback with stack arguments is not supported\nFAIL\n");
     std::exit(1);
   }
   if (!Thread) {
@@ -471,8 +471,8 @@ inline GuestResult CallGuest(std::uint64_t Function, std::span<const std::uint64
 // and from translated guest code alike. An unaligned access stays the delegator's, which rewrites the instruction.
 //
 // Host code that calls a guest function pointer it read from guest memory (Agc keeps a command buffer's out-of-space
-// callback in the guest's buffer struct) jumps into x86-64 code, and the instruction fetch faults (test-sequence 0721:
-// SIGBUS at Hollow Knight's eboot+0x3ae140). On a guest thread inside a host call, and on a host thread with or without a
+// callback in the guest's buffer struct) jumps into x86-64 code, and the instruction fetch faults with SIGBUS. On a
+// guest thread inside a host call, and on a host thread with or without a
 // guest thread of its own (CallGuest adopts it), the handler turns that jump into a call of the host's HostToGuestBridge,
 // which runs the function with CallGuest: x16, which a call may clobber, carries the guest function, and the host
 // caller's x0-x5, d0-d7, stack pointer and return address stay as they were.

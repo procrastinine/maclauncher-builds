@@ -4,8 +4,8 @@
 // handler writes a result to rax and advances rip past the instruction; the stub returns and the guest stores rax
 // and stops at a HLT.
 // With a PS5 module, the check also runs one of its functions whose import slot points at the same kind of stub, the
-// shape in which RAX was once seen corrupted: DOOM's I_GetTime calls sceKernelGetProcessTime through its GOT, and the
-// handler answers with a time from which the function's tic count is known.
+// shape of a timing function that calls sceKernelGetProcessTime through its GOT; the handler answers with a time from
+// which the function's result is known.
 //
 // Usage: anyps5-fex-syscall [<eboot.elf> <function vaddr> <GOT slot vaddr> <bss vaddr>]
 #include "Ps5Module.h"

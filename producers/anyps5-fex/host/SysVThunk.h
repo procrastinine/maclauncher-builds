@@ -18,7 +18,7 @@
 //   structs the exports pass by value from the struct's field list, and Classify checks that list against the layout;
 // - function pointer arguments: guest code addresses; the export receives a host function pointer that runs the
 //   guest function under FEXCore (GuestFunction, through FexGuest::CallGuest).
-// ThunkFor<Export>() is the thunk, or nullptr for a prototype these rules do not cover yet (a small struct without a
+// ThunkFor<Export>() is the thunk, or nullptr for a prototype these rules do not cover (a small struct without a
 // valid SysVEightbytes, variadic functions without a va_list counterpart).
 #pragma once
 
@@ -626,7 +626,7 @@ constexpr FexGuest::Thunk VariadicThunkFor() {
   }
 }
 
-// The thunk for Export, or nullptr when its prototype needs a case the thunks do not cover yet.
+// The thunk for Export, or nullptr when its prototype needs a case the thunks do not cover.
 template<auto Export>
 constexpr FexGuest::Thunk ThunkFor() {
   if constexpr (Supported<decltype(Export)>::value) {

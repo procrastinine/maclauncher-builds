@@ -88,7 +88,7 @@ int main(int argc, char** argv) {
   std::printf("module at 0x%llx; import slot 0x%llx -> 0x%llx (%s)\n", static_cast<unsigned long long>(GuestBase), static_cast<unsigned long long>(Slot),
               static_cast<unsigned long long>(*reinterpret_cast<std::uint64_t*>(GuestBase + Slot)), Bound ? "bound" : "unbound");
 
-  // The function returns (now - base) * 35 / 1000000, DOOM's 35 Hz tic count, for its base-time variable. The export
+  // The function returns (now - base) * 35 / 1000000, a 35 Hz tic count, for its base-time variable. The export
   // counts microseconds from process start; half a second in, a base of 1 gives about 17 tics.
   usleep(500000);
   const std::uint64_t BaseTime = 1;

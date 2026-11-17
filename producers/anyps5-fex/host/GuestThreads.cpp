@@ -272,7 +272,8 @@ std::uint64_t SelfHandle() {
 
 int Exit(std::uint64_t Value) {
   if (Self == &InitialThread || !Self) {
-    // The initial thread's exit ends the process once no other thread remains; the host has no such wait yet.
+    // FreeBSD ends the process when the initial thread exits and no other thread remains; this host ends it at once,
+    // without waiting for the other threads.
     std::printf("guest pthread_exit on the initial thread\n");
     std::fflush(stdout);
     std::_Exit(0);

@@ -10,7 +10,7 @@
 # listed under the name without it, which is the name its NID is computed from. An export several sources declare is
 # generated once. A variadic export (snprintf) runs as its va_list counterpart, the export named v<name> (vsnprintf)
 # whose last parameter is a VaList*, through SysV::VariadicThunkFor; a variadic export without one is left out.
-# Prototypes the thunks do not cover yet compile to nullptr through SysV::ThunkFor.
+# Prototypes the thunks do not cover compile to nullptr through SysV::ThunkFor.
 #
 # A struct an export takes or returns by value gets a SysV::SysVEightbytes specialization in the unit, listing its
 # members (SYSV_FIELD), when the AnyPS5 tree defines a struct of that name exactly once and its members are plain

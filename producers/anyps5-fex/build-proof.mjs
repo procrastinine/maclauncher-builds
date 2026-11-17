@@ -77,8 +77,8 @@ function project(directory,destination,paths=[]){
 }
 
 // The objects, static libraries and other link inputs of the PRX libraries named, and of the PRX libraries they link,
-// from the arm64 CMake build: libc and libkernel are left out, since their arm64 PRX libraries do not link yet and the
-// per-source objects provide what the host needs of them. CMake gives every object and custom command of a target
+// from the arm64 CMake build: libc and libkernel are left out, since the per-source objects provide what the host
+// needs of them. CMake gives every object and custom command of a target
 // order-only dependencies on the shared libraries it links, so Ninja runs on a copy of build.ninja without libc.prx and
 // libkernel.prx among them. Objects of a source the per-source list compiles are left out too.
 // overlaid is the projection this producer's overlays edited: an object whose source differs there is compiled from that
@@ -291,7 +291,7 @@ if(options.anyps5Arm64){
  // This producer's own overlays for the arm64 translation host (producers/anyps5-fex/overlays), after those.
  for(const [directory,method] of recipe.anyps5.hostOverlays)
   (await import(new URL('overlays/'+directory+'/apply.mjs',import.meta.url)))[method](path.join(stage,'anyps5'));
- // The arm64 library overlay's steps that the per-source objects need (owned by the PS5 library lane): its shared sources
+ // The arm64 library overlay's steps that the per-source objects need (the overlay belongs to the anyps5 producer): its shared sources
  // (GuestCpuArm64, the standard stream objects) and its raw x87 long double parsing and formatting, each a function of
  // a module in that overlay's directory, in the listed order.
  for(const [script,name] of recipe.anyps5.arm64Libraries.steps)
