@@ -38,3 +38,4 @@ vkd3d-proton=3.1-MCLv2
 
 java-steamworks=1.9.0-MCLv8
 love=0.10.2-MCLv1
+freearc=0.67-MCLv1
