@@ -133,6 +133,30 @@
       "summary": "FEXCore/Darwin/SignalDelegator.h and GuestState.h: signal installation, code-write faults, guest exception delivery, per-thread guest binding and CPU accessors"
     },
     {
+      "file": "overlays/fex/0004-darwin-context-state.patch",
+      "target": "fex",
+      "license": "MIT",
+      "summary": "FEXCore/Darwin/ContextState.h: guest register and FXSAVE64 capture and restore for the embedding library"
+    },
+    {
+      "file": "overlays/fex/0005-darwin-single-step-writes.patch",
+      "target": "fex",
+      "license": "MIT",
+      "summary": "scoped JIT writes for single-instruction compilation"
+    },
+    {
+      "file": "overlays/fex/0006-x87-status.patch",
+      "target": "fex",
+      "license": "MIT",
+      "summary": "x87 exception status kept through environment restoration, status reads, FNCLEX and FNINIT (Avery Felts, MetalSharp-Wine FEX series)"
+    },
+    {
+      "file": "overlays/fex/0007-precise-memory-pop.patch",
+      "target": "fex",
+      "license": "MIT",
+      "summary": "RSP committed after a memory POP store succeeds (Alexander Thei\u00dfen, Mach9 FEX fork)"
+    },
+    {
       "file": "overlays/anyps5/guestcpu-arm64.patch",
       "target": "anyps5",
       "license": "GPL-2.0-only",

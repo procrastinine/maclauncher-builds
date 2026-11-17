@@ -339,6 +339,52 @@ inline GuestResult CallGuest(std::uint64_t Function, std::span<const std::uint64
   return Result;
 }
 
+// FEX's return-prediction stack (x25 in translated code) has a guard page on each side. Deep call chains and calls
+// without returns run into one; FEX's Linux frontend then puts x25 back at the stack's default position and resumes the
+// faulting instruction (SyscallsSMCTracking.cpp, HandleSegfault). This handler does the same for the calling thread's
+// stack and passes every other SIGBUS or SIGSEGV to the Darwin signal delegator installed before it.
+inline struct sigaction DelegatorActions[2] {};
+inline void CallRetGuard(int Signal, siginfo_t* Info, void* Context) {
+  if (auto* Bound = Thread; Bound && Bound->CallRetStackBase) {
+    const std::uintptr_t Base = reinterpret_cast<std::uintptr_t>(Bound->CallRetStackBase), Page = getpagesize();
+    const std::uintptr_t Fault = reinterpret_cast<std::uintptr_t>(Info->si_addr);
+    constexpr std::uintptr_t Size = FEXCore::Core::InternalThreadState::CALLRET_STACK_SIZE;
+    if (Fault >= Base - Page && Fault < Base + Size + Page) {
+      static_cast<ucontext_t*>(Context)->uc_mcontext->__ss.__x[25] = Base + Size / 4;
+      return;
+    }
+  }
+  const auto& Next = DelegatorActions[Signal == SIGBUS ? 0 : 1];
+  if (Next.sa_flags & SA_SIGINFO) {
+    Next.sa_sigaction(Signal, Info, Context);
+  } else if (Next.sa_handler != SIG_DFL && Next.sa_handler != SIG_IGN) {
+    Next.sa_handler(Signal);
+  } else {
+    signal(Signal, SIG_DFL);
+  }
+}
+inline void InstallCallRetGuard() {
+  for (int Index = 0; Index < 2; ++Index) {
+    const int Signal = Index == 0 ? SIGBUS : SIGSEGV;
+    sigaction(Signal, nullptr, &DelegatorActions[Index]);
+    struct sigaction Action {};
+    Action.sa_sigaction = CallRetGuard;
+    Action.sa_flags = SA_SIGINFO | SA_ONSTACK;
+    sigaction(Signal, &Action, nullptr);
+  }
+}
+
+// The delegator's handlers run on an alternate signal stack (SA_ONSTACK); each OS thread that runs a guest gets one.
+inline void InstallSignalStack() {
+  constexpr std::size_t Size = 256 << 10;
+  stack_t Stack {};
+  Stack.ss_sp = mmap(nullptr, Size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
+  Stack.ss_size = Size;
+  if (Stack.ss_sp != MAP_FAILED) {
+    sigaltstack(&Stack, nullptr);
+  }
+}
+
 // A FEX guest thread with Initial's state: a flat 64-bit code segment, as FEX's Linux frontend sets up for a new
 // thread, and the call-return stack FEXCore uses to predict returns, with a guard page on each side.
 inline FEXCore::Core::InternalThreadState* NewThread(CPUState& Initial) {
@@ -379,6 +425,7 @@ inline std::uint64_t RunNewThread(std::uint64_t Entry, std::uint64_t Argument, s
   Initial.gregs[X86::REG_RDI] = Argument;
   Initial.gregs[X86::REG_RSP] = StackTop;
   Initial.fs_cached = FsBase;
+  InstallSignalStack();
   Thread = NewThread(Initial);
   struct Release {
     ~Release() {
@@ -420,6 +467,8 @@ inline const CPUState& Run(CPUState& Initial, std::span<const Thunk> Thunks, std
       std::printf("Darwin signal delegator install failed\nFAIL\n");
       std::exit(1);
     }
+    InstallCallRetGuard();
+    InstallSignalStack();
     static SyscallHandler Syscalls;
     CTX->SetSignalDelegator(&Signals);
     CTX->SetSyscallHandler(SyscallHandlerOverride ? SyscallHandlerOverride : &Syscalls);
