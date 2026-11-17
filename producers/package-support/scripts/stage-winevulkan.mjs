@@ -61,7 +61,7 @@ export function stageWineVulkan(directory) {
   for (const [folder, native] of libraries) {
     if (!folder.endsWith('-unix')) continue;
     const client = libraries.get(folder.slice(0, -5) + '-windows');
-    if (!client || path.posix.basename(client) === 'winevulkan.dll') continue;
+    if (!client) continue;
     const nativeRecord = records.get(base + native), clientRecord = records.get(base + client);
     if (nativeRecord.format !== 'mach-o' || clientRecord.format !== 'pe' || !native.endsWith('.so') || !client.endsWith('.dll') ||
         !Array.isArray(nativeRecord.architectures) || !nativeRecord.architectures.length ||
