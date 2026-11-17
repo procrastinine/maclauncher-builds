@@ -17,6 +17,7 @@ export function stageFSR4Provider({directory,upstream}){
   const owned=new Map();
   const archive=metadata.sourceInputs?.find(row=>row.path==="source-inputs/weights_lossy2.npz");
   owned.set("maclauncher/temporal/fsr4/inputs/weights_lossy2.npz",path.join(path.dirname(directory),archive.path));
+  for(const row of metadata.sourceInputs||[])if(row.path!==archive.path)owned.set('maclauncher/temporal/fsr4/inputs/'+path.basename(row.path),path.join(path.dirname(directory),row.path));
   if(!upstream)throw Error("Supply the exact FSR 4 source checkout for this provider.");
   files.set("provider.json",path.join(directory,"provider.json"));
   return {files:new Map([...files].map(([name,file])=>["temporal/fsr4/"+name,file])),owned,profiles:[...metadata.supportedProfiles],

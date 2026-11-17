@@ -1,0 +1,223 @@
+From: Avery Felts <averyfelts@aol.com>
+Date: Wed, 28 Oct 2026 23:41:58 -0600
+Subject: [PATCH] d3d9: snapshot render targets sampled by a hazardous draw
+
+Independent DXVK 3.1.1 adaptation of the render-target feedback-copy change
+by Avery Felts in metalsharp/DXVK-MacOS b400bccffe46a1836e743f7220f5423c28ce3af7
+(review snapshot a7ed93c450a215fbd96f59d9f6129ef46b92de65).
+
+Use the existing texture slot mapping. Reuse allocations only; refresh contents
+for every hazardous draw, including after writes, copies, clears and replacement.
+Preserve depth/stencil feedback barriers and layouts. No sampler de-aliasing,
+shared-content mode or feature admission changes. DXVK's zlib notice applies.
+
+diff --git a/src/d3d9/d3d9_device.cpp b/src/d3d9/d3d9_device.cpp
+index 9b72bb2e..0845a83f 100644
+--- a/src/d3d9/d3d9_device.cpp
++++ b/src/d3d9/d3d9_device.cpp
+@@ -6418,7 +6418,9 @@ namespace dxvk {
+       uint8_t RT : 1;
+       uint8_t DS : 1;
+     } hazardState;
+-    hazardState.RT = m_textureSlotTracking.unresolvableHazardRT != 0;
++    const uint32_t hazardRT = m_d3d9Options.renderTargetHazardCopies
++      ? 0u : m_textureSlotTracking.unresolvableHazardRT;
++    hazardState.RT = hazardRT != 0;
+     hazardState.DS = m_textureSlotTracking.unresolvableHazardDS != 0;
+ 
+     EmitCs([
+@@ -6443,7 +6445,7 @@ namespace dxvk {
+         VK_ACCESS_SHADER_READ_BIT);
+     });
+ 
+-    for (uint32_t samplerIdx : bit::BitMask(m_textureSlotTracking.unresolvableHazardRT | m_textureSlotTracking.unresolvableHazardDS)) {
++    for (uint32_t samplerIdx : bit::BitMask(hazardRT | m_textureSlotTracking.unresolvableHazardDS)) {
+       auto tex = GetCommonTexture(m_state.textures[samplerIdx]);
+ 
+       if (unlikely(!tex->MarkTransitionedToHazardLayout())) {
+@@ -6816,7 +6818,7 @@ namespace dxvk {
+     VkImageAspectFlags feedbackLoopAspects = 0u;
+ 
+     if (m_hazardLayout == VK_IMAGE_LAYOUT_ATTACHMENT_FEEDBACK_LOOP_OPTIMAL_EXT) {
+-      if (m_textureSlotTracking.unresolvableHazardRT != 0)
++      if (m_textureSlotTracking.unresolvableHazardRT != 0 && !m_d3d9Options.renderTargetHazardCopies)
+         feedbackLoopAspects |= VK_IMAGE_ASPECT_COLOR_BIT;
+       if (m_textureSlotTracking.unresolvableHazardDS != 0)
+         feedbackLoopAspects |= VK_IMAGE_ASPECT_DEPTH_BIT;
+@@ -7277,6 +7279,77 @@ namespace dxvk {
+   }
+ 
+ 
++  void D3D9DeviceEx::ResolveRenderTargetHazards(uint32_t usedSamplerMask) {
++    for (uint32_t samplerIdx : bit::BitMask(m_textureSlotTracking.unresolvableHazardRT & usedSamplerMask)) {
++      auto texture = GetCommonTexture(m_state.textures[samplerIdx]);
++      const bool srgb = m_state.samplerStates[samplerIdx][D3DSAMP_SRGBTEXTURE] & 0x1;
++
++      EmitCs([this,
++        cSlot = samplerIdx,
++        cSource = texture->GetSampleView(srgb)
++      ] (DxvkContext* ctx) {
++        auto snapshot = GetRenderTargetSnapshot(ctx, cSource);
++        auto [stage, slot] = D3D9ShaderResourceMapping::getTextureSlotInfo(cSlot);
++        ctx->bindResourceImageView(stage, slot, std::move(snapshot));
++      });
++
++      m_hazardCopyMask |= 1u << samplerIdx;
++    }
++  }
++
++
++  Rc<DxvkImageView> D3D9DeviceEx::GetRenderTargetSnapshot(
++          DxvkContext*           ctx,
++    const Rc<DxvkImageView>&      source) {
++    auto entry = m_renderTargetCopies.find(source.ptr());
++
++    if (entry == m_renderTargetCopies.end()) {
++      // Bound retained allocations and references to replaced render targets.
++      if (m_renderTargetCopies.size() >= 64u)
++        m_renderTargetCopies.clear();
++
++      DxvkImageCreateInfo imageInfo = source->image()->info();
++      imageInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
++      imageInfo.stages = VK_PIPELINE_STAGE_TRANSFER_BIT
++                       | VK_PIPELINE_STAGE_VERTEX_SHADER_BIT
++                       | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
++      imageInfo.access = VK_ACCESS_TRANSFER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT;
++      imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
++      imageInfo.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
++      imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
++      imageInfo.shared = VK_FALSE;
++      imageInfo.transient = VK_FALSE;
++      imageInfo.sharing = DxvkSharedHandleInfo();
++      imageInfo.debugName = "D3D9 render target snapshot";
++
++      auto image = m_dxvkDevice->createImage(imageInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
++      DxvkImageViewKey viewInfo = source->info();
++      viewInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT;
++      viewInfo.layout = imageInfo.layout;
++
++      D3D9RenderTargetCopy copy;
++      copy.source = source;
++      copy.snapshot = image->createView(viewInfo);
++      entry = m_renderTargetCopies.emplace(source.ptr(), std::move(copy)).first;
++    }
++
++    // Refresh unconditionally before this draw. Only allocations are reused;
++    // no write, clear, upload or target replacement can leave valid old contents.
++    const auto viewInfo = source->info();
++    for (uint32_t i = 0u; i < viewInfo.mipCount; i++) {
++      VkImageSubresourceLayers layers = {
++        viewInfo.aspects, uint32_t(viewInfo.mipIndex + i),
++        viewInfo.layerIndex, viewInfo.layerCount };
++      ctx->copyImage(
++        entry->second.snapshot->image(), layers, VkOffset3D { 0, 0, 0 },
++        source->image(), layers, VkOffset3D { 0, 0, 0 },
++        source->image()->mipLevelExtent(viewInfo.mipIndex + i));
++    }
++
++    return entry->second.snapshot;
++  }
++
++
+   void D3D9DeviceEx::BindTexture(DWORD StateSampler) {
+     bool srgb = m_state.samplerStates[StateSampler][D3DSAMP_SRGBTEXTURE] & 0x1;
+     D3D9CommonTexture* commonTex = GetCommonTexture(m_state.textures[StateSampler]);
+@@ -7367,7 +7440,11 @@ namespace dxvk {
+     if (unlikely(!UseProgrammablePS()) && m_dirty.test(D3D9DeviceDirtyFlag::FFPixelShader))
+       UpdateFixedFunctionPS();
+ 
+-    if (unlikely(m_textureSlotTracking.unresolvableHazardRT != 0 || m_textureSlotTracking.unresolvableHazardDS != 0))
++    const bool rtHazardCopies = m_d3d9Options.renderTargetHazardCopies
++      && m_textureSlotTracking.unresolvableHazardRT != 0;
++
++    if (unlikely((m_textureSlotTracking.unresolvableHazardRT != 0 && !rtHazardCopies)
++              || m_textureSlotTracking.unresolvableHazardDS != 0))
+       EmitFeedbackLoopBarriers();
+ 
+     if (likely(UploadVBOs)) {
+@@ -7409,10 +7486,16 @@ namespace dxvk {
+     if (unlikely(activeDirtySamplers))
+       UndirtySamplers(activeDirtySamplers);
+ 
++    // Restore original image bindings before selecting this draw's snapshots.
++    m_textureSlotTracking.textureDirty |= std::exchange(m_hazardCopyMask, 0u);
++
+     const uint32_t usedDirtyTextures = m_textureSlotTracking.textureDirty & usedSamplerMask;
+     if (likely(usedDirtyTextures))
+       UndirtyTextures(usedDirtyTextures);
+ 
++    if (unlikely(rtHazardCopies))
++      ResolveRenderTargetHazards(usedSamplerMask);
++
+     if (unlikely(m_dirty.test(D3D9DeviceDirtyFlag::BlendState)))
+       BindBlendState();
+ 
+diff --git a/src/d3d9/d3d9_device.h b/src/d3d9/d3d9_device.h
+index 83d72c2f..846b25e5 100644
+--- a/src/d3d9/d3d9_device.h
++++ b/src/d3d9/d3d9_device.h
+@@ -940,6 +940,13 @@ namespace dxvk {
+ 
+     void EmitFeedbackLoopBarriers();
+ 
++    void ResolveRenderTargetHazards(uint32_t usedSamplerMask);
++
++    Rc<DxvkImageView> GetRenderTargetSnapshot(
++            DxvkContext*           ctx,
++      const Rc<DxvkImageView>&      source);
++
++
+     void UpdateActiveFetch4(uint32_t stateSampler);
+ 
+     void UploadManagedTexture(D3D9CommonTexture* pResource);
+@@ -1639,6 +1646,19 @@ namespace dxvk {
+ 
+     VkImageLayout                   m_hazardLayout = VK_IMAGE_LAYOUT_GENERAL;
+ 
++    // Image bindings to restore after sampling a render-target snapshot.
++    uint32_t                        m_hazardCopyMask = 0u;
++
++    struct D3D9RenderTargetCopy {
++      Rc<DxvkImageView> source;
++      Rc<DxvkImageView> snapshot;
++    };
++
++    // CS-thread-only allocation cache. Contents are never valid across draws:
++    // every hazardous draw copies again, including after writes, copies, clears
++    // and target replacement. Keep the source alive to prevent key reuse.
++    std::unordered_map<DxvkImageView*, D3D9RenderTargetCopy> m_renderTargetCopies;
++
+     uint32_t                        m_resetCtr = 0u;
+ 
+     DxvkDepthBiasRepresentation     m_depthBiasRepresentation = { VK_DEPTH_BIAS_REPRESENTATION_LEAST_REPRESENTABLE_VALUE_FORMAT_EXT, false };
+diff --git a/src/d3d9/d3d9_options.cpp b/src/d3d9/d3d9_options.cpp
+index e46864e2..cae8633e 100644
+--- a/src/d3d9/d3d9_options.cpp
++++ b/src/d3d9/d3d9_options.cpp
+@@ -58,6 +58,12 @@ namespace dxvk {
+     this->disableA8RT                   = config.getOption<bool>        ("d3d9.disableA8RT",                   false);
+     this->memoryTrackTest               = config.getOption<bool>        ("d3d9.memoryTrackTest",               false);
+     this->forceSamplerTypeSpecConstants = config.getOption<bool>        ("d3d9.forceSamplerTypeSpecConstants", false);
++    // Preserve the native feedback-loop path when the device supports it.
++    // Otherwise use snapshots rather than sampling a live color attachment.
++    const Tristate hazardCopies = config.getOption<Tristate>("d3d9.renderTargetHazardCopies", Tristate::Auto);
++    this->renderTargetHazardCopies = hazardCopies == Tristate::Auto
++      ? device != nullptr && !device->features().extAttachmentFeedbackLoopLayout.attachmentFeedbackLoopLayout
++      : hazardCopies == Tristate::True;
+     this->forceSampleRateShading        = config.getOption<bool>        ("d3d9.forceSampleRateShading",        false);
+     this->forceAspectRatio              = config.getOption<std::string> ("d3d9.forceAspectRatio",              "");
+     this->forceRefreshRate              = config.getOption<int32_t>     ("d3d9.forceRefreshRate",              0u);
+diff --git a/src/d3d9/d3d9_options.h b/src/d3d9/d3d9_options.h
+index e69a39a6..f298eacb 100644
+--- a/src/d3d9/d3d9_options.h
++++ b/src/d3d9/d3d9_options.h
+@@ -110,6 +110,9 @@ namespace dxvk {
+     /// Works around a game bug in Halo CE where it gives cube textures to 2d/volume samplers
+     bool forceSamplerTypeSpecConstants;
+ 
++    /// Snapshot render targets sampled by the same draw that writes them.
++    bool renderTargetHazardCopies;
++
+     /// Forces sample rate shading
+     bool forceSampleRateShading;
+ 

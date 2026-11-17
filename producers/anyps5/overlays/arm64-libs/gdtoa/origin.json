@@ -1,0 +1,373 @@
+{
+  "repository": "https://github.com/NetBSD/src.git",
+  "revision": "27b67ba5e8beed35a0cb707eb52cf6c5a898bc95",
+  "directory": "lib/libc/gdtoa",
+  "files": [
+    {
+      "path": "lib/libc/gdtoa/arithchk.c",
+      "file": "arithchk.c",
+      "blob": "305aec4157fb8359c952cb8003e89ef162b75ef7",
+      "sha256": "56a6f9a4f0d3dfed85ccc1613f253205f6eab6d8284c5c34f139cbd2ba7e2286"
+    },
+    {
+      "path": "lib/libc/gdtoa/dmisc.c",
+      "file": "dmisc.c",
+      "blob": "121f8bbee39a988ff0970b1f40b76fad0491de8e",
+      "sha256": "6a512d2b1da38c7e97945f398efc17dccbd4cb92022370b0a78de3928740ccf0"
+    },
+    {
+      "path": "lib/libc/gdtoa/dtoa.c",
+      "file": "dtoa.c",
+      "blob": "f2cea211dd69ca9b1a2955fb32d92c768dd8bc14",
+      "sha256": "58e5b79bc07c86e9c267766ca9d700910a30e3473a229fc23fdfd030c982028a"
+    },
+    {
+      "path": "lib/libc/gdtoa/g__fmt.c",
+      "file": "g__fmt.c",
+      "blob": "052978368c43a077588f237d141f6d0f9759195b",
+      "sha256": "dd7c3d1428a320ab566631041b513f69ffafdfa11fbc0456d89ca043bdbca847"
+    },
+    {
+      "path": "lib/libc/gdtoa/g_ddfmt.c",
+      "file": "g_ddfmt.c",
+      "blob": "742eee98cc05dc0033800245797b26cdfa104cf6",
+      "sha256": "07741e2fd015b4521273072e2df437de4d05d65a6625c5ba35bc1403e59ca7fe"
+    },
+    {
+      "path": "lib/libc/gdtoa/g_dfmt.c",
+      "file": "g_dfmt.c",
+      "blob": "68af2335bd553ce4c368fafdfe634a8f30280673",
+      "sha256": "261ff1a81317fb7f59d5d69da2d07b50bfe3547d186fde0073e63dd3d9c491ab"
+    },
+    {
+      "path": "lib/libc/gdtoa/g_ffmt.c",
+      "file": "g_ffmt.c",
+      "blob": "edd9eaf3b534111501460e515ca0f7a31a928948",
+      "sha256": "e1fc8593ff50cf99936549daea2b86ed81278c2564bd602ed5e0524b7ef52106"
+    },
+    {
+      "path": "lib/libc/gdtoa/g_Qfmt.c",
+      "file": "g_Qfmt.c",
+      "blob": "aa00047658354d1fdcb2bf8bf95ec4ae3e1f7e6c",
+      "sha256": "11426c81d25729f58dba3aff1f1485aeac822c198f601efcf6ad4becf8afd2ad"
+    },
+    {
+      "path": "lib/libc/gdtoa/g_xfmt.c",
+      "file": "g_xfmt.c",
+      "blob": "2da208ab9b35afd89e6c9ed1d38a4eb63b16a07f",
+      "sha256": "36f0d010a6d60daf3534d33de060968d10c1535bea73cb5e9cda887f7779d659"
+    },
+    {
+      "path": "lib/libc/gdtoa/g_xLfmt.c",
+      "file": "g_xLfmt.c",
+      "blob": "79fbb88379798ddccac210e1cb9ddc6bc3e7d377",
+      "sha256": "d2a9e0644614cb4762561e995359553aeecf4eabafaf94daa93eddc5ccb630d8"
+    },
+    {
+      "path": "lib/libc/gdtoa/gdtoa_fltrnds.h",
+      "file": "gdtoa_fltrnds.h",
+      "blob": "f170de5fd158d5af4b1a890589ddfa1f72bc979f",
+      "sha256": "72b98a743de59e628e96d65ad93ab378acd888096aabb6b68665db1eef4d4262"
+    },
+    {
+      "path": "lib/libc/gdtoa/gdtoa_locks.c",
+      "file": "gdtoa_locks.c",
+      "blob": "af02c089753f32c961e5cafc389fac4fb6596e89",
+      "sha256": "d6dc1cffea85ad2172cf6ce1f3aa6343065154bd81d70683b3f74944e0aecaa2"
+    },
+    {
+      "path": "lib/libc/gdtoa/gdtoa.c",
+      "file": "gdtoa.c",
+      "blob": "a121d91f7caeb50d02616c263ececbe5f23d3303",
+      "sha256": "ae1bbfee932ccbf0283629974b57a3102d6afdb0baedc3ee361057f5f52bd031"
+    },
+    {
+      "path": "lib/libc/gdtoa/gdtoa.h",
+      "file": "gdtoa.h",
+      "blob": "94b822a63c663bec11d1f28a4c888d5dd40fd2b4",
+      "sha256": "c6b09e41f274b903de60be80963e9176dcd7ef03f29c49b26756256d4f39dfdb"
+    },
+    {
+      "path": "lib/libc/gdtoa/gdtoaimp.h",
+      "file": "gdtoaimp.h",
+      "blob": "53070656e5172f9bf5a008b8f92cafe164403053",
+      "sha256": "fab87542fd83827a010dde0a4619fcb5a6e3dc12dd5dfc185a732cfa0ad282df"
+    },
+    {
+      "path": "lib/libc/gdtoa/gethex.c",
+      "file": "gethex.c",
+      "blob": "69267cc94d2236edc4153066483daa773bd80e24",
+      "sha256": "50c3680964f9eb28baacf4fac39f8dec21f6fefa8351c98e5f9ea0003811f3b3"
+    },
+    {
+      "path": "lib/libc/gdtoa/gmisc.c",
+      "file": "gmisc.c",
+      "blob": "9c54580f9de107a37c7fbbbf4eaaac734e171e26",
+      "sha256": "9e054de44403d0f34a1ad2bfeb7335150d83c87c3a478d9fe3cc4bb16f3ee9c0"
+    },
+    {
+      "path": "lib/libc/gdtoa/hd_init.c",
+      "file": "hd_init.c",
+      "blob": "55d5d426c3815436de584c6f25df14655c5e6b4b",
+      "sha256": "88824b8cb77416881dbe3b07f846107107d03dc9f16b9c5fc443940b6074b60c"
+    },
+    {
+      "path": "lib/libc/gdtoa/hdtoa.c",
+      "file": "hdtoa.c",
+      "blob": "75d74efcf7d751bf68a193625fc8ef2a39d975f0",
+      "sha256": "133d76691ca3e46538d163a9660b1fb78c0e7041fb2b789f79b8264bb7af62a3"
+    },
+    {
+      "path": "lib/libc/gdtoa/hexnan.c",
+      "file": "hexnan.c",
+      "blob": "267703e784018a060662937be8e0f25250e47e38",
+      "sha256": "81cb719067b7a1c5460331653a5979bb85542ada77b8a0ccd5136f7192c40ff0"
+    },
+    {
+      "path": "lib/libc/gdtoa/ldtoa.c",
+      "file": "ldtoa.c",
+      "blob": "516a18584b252b4ad486b830027ce1649759706e",
+      "sha256": "7d3659eea7b385686c5be8c3abf89f720d35db3205517f0eace846fc7c8f0818"
+    },
+    {
+      "path": "lib/libc/gdtoa/makefile",
+      "file": "makefile",
+      "blob": "62f14df2e1c7fae76b0d890ee0be75e3ff5f6329",
+      "sha256": "86447e8847bd9512eb98b23da3e4847831cf70d475fbeef9314656fbac07ba07"
+    },
+    {
+      "path": "lib/libc/gdtoa/Makefile.inc",
+      "file": "Makefile.inc",
+      "blob": "cb495d3ebb3426c84acbbb64214aa6b5552ce390",
+      "sha256": "96d0daafd3a303fd0ab19d3f8490bccbb9193d3629712b4ac931d7d7c616caa4"
+    },
+    {
+      "path": "lib/libc/gdtoa/misc.c",
+      "file": "misc.c",
+      "blob": "9f3d4c008d2c51c86c417da633a588b50e632b13",
+      "sha256": "2eba7ba828fbadfe20bd320f5ca8884fe193bb407c6032f56191e5bb399a674d"
+    },
+    {
+      "path": "lib/libc/gdtoa/qnan.c",
+      "file": "qnan.c",
+      "blob": "2e5ce89249bfbe31ff3d37a94a6f98aadb09d62d",
+      "sha256": "5ec4f57b7823b11e1d9bf525dcf0573a90346db94d9a8d6d2b96429da639dbb9"
+    },
+    {
+      "path": "lib/libc/gdtoa/README",
+      "file": "README",
+      "blob": "0c034f1bf19dbc21941bbfa402fba93c2629af36",
+      "sha256": "0df734cd025753750c451b298de607408b8075bfeca82d3a81efbb5bce95db28"
+    },
+    {
+      "path": "lib/libc/gdtoa/smisc.c",
+      "file": "smisc.c",
+      "blob": "27b9d6a8c0376f8fd0da3566b4b66df21d791111",
+      "sha256": "200f5f167d82967664b0d9883c743778e4e8df995f67a7852653f81b14f9bac2"
+    },
+    {
+      "path": "lib/libc/gdtoa/strtod.c",
+      "file": "strtod.c",
+      "blob": "489ddae3b35026b2793798e8082a83189639cf8e",
+      "sha256": "b974f02b5c7f70c71fafc2737e094cad3792299bc404418b6eeb47fa4a5a8eb5"
+    },
+    {
+      "path": "lib/libc/gdtoa/strtodg.c",
+      "file": "strtodg.c",
+      "blob": "d87bf718d3ee8fc0e0d5a0b38881eeffa5c0a1c2",
+      "sha256": "b7f7faed4a2f50361c10f0f0259be7367e73bd36331151daede50dd3d25c7048"
+    },
+    {
+      "path": "lib/libc/gdtoa/strtodI.c",
+      "file": "strtodI.c",
+      "blob": "a44af8b66a126785cb84ae0ad92fcc0cf91b828f",
+      "sha256": "c90fe5df15fd9558e422b46e81805ad5c892deb047380226aa7714e98d7559f0"
+    },
+    {
+      "path": "lib/libc/gdtoa/strtodnrp.c",
+      "file": "strtodnrp.c",
+      "blob": "1c5dc7242759e446305deaee150f80cd94cdae53",
+      "sha256": "e8d6742a430bbece6abdbb9285860f7541be083d944bbfddc2769aeae7cf7bb5"
+    },
+    {
+      "path": "lib/libc/gdtoa/strtof_vaxf.c",
+      "file": "strtof_vaxf.c",
+      "blob": "8eaeec89ac35597f4f1404cce9fb30c8f6afa342",
+      "sha256": "b9200d78c183d37003eed4d8bb7f4871d579dbb47b91cccfedc9073397470f5f"
+    },
+    {
+      "path": "lib/libc/gdtoa/strtof.c",
+      "file": "strtof.c",
+      "blob": "ca2d268bfb4b328244d4b1f1c215a7db0a012e80",
+      "sha256": "19f3684aafa570ba66f31f289251e920e889e57da19f9ead1538f7f5d7b26324"
+    },
+    {
+      "path": "lib/libc/gdtoa/strtoId.c",
+      "file": "strtoId.c",
+      "blob": "f15a38542375549819b25746b6556dfbf571f732",
+      "sha256": "0b45c24d2651f2682a98aba5245ab7950da842dd4b1e38d9b5b00301b88dc82b"
+    },
+    {
+      "path": "lib/libc/gdtoa/strtoIdd.c",
+      "file": "strtoIdd.c",
+      "blob": "afd7f8142314951d3c957b46a6d65a154ff2ec60",
+      "sha256": "544bb6114e6fc9bcc1777599def458dc9323ea0c1dbe8f066d90bd0eb8ead2e0"
+    },
+    {
+      "path": "lib/libc/gdtoa/strtoIf.c",
+      "file": "strtoIf.c",
+      "blob": "189a43853fdafd40ffc4cfa5a18ac74d4e331d46",
+      "sha256": "10466ae22eba66f08fffaca9f834ba9215583702e1a9232e58de5f45424eb082"
+    },
+    {
+      "path": "lib/libc/gdtoa/strtoIg.c",
+      "file": "strtoIg.c",
+      "blob": "0af36eb81a6265d8de9a70795724632d59e0ec29",
+      "sha256": "8e30e49a5c800729c6e180d0d790eec7812d81250d3ceb7ceaf7512e42e1d6ea"
+    },
+    {
+      "path": "lib/libc/gdtoa/strtoIQ.c",
+      "file": "strtoIQ.c",
+      "blob": "b14f3e0e9fea0b6af413557b138e2361bd3fbe3a",
+      "sha256": "748b4ecac3f59f8e00328dd36fcc9248a719e3ae946d943474d61ef05d012cb0"
+    },
+    {
+      "path": "lib/libc/gdtoa/strtoIx.c",
+      "file": "strtoIx.c",
+      "blob": "f23c58e819184211632ded59b31c3be02b6020ca",
+      "sha256": "b35c3b0626f4c25f17e33eb94b4d3b75255f43d2cd463acec5ae75872356479a"
+    },
+    {
+      "path": "lib/libc/gdtoa/strtoIxL.c",
+      "file": "strtoIxL.c",
+      "blob": "08f97b7a970f19b2b5fe01bf11b75577528e2d03",
+      "sha256": "14e8303067338afb2e733fe0c53dd2085523e04d85cae671a4084243ccbf558b"
+    },
+    {
+      "path": "lib/libc/gdtoa/strtold_pQ.c",
+      "file": "strtold_pQ.c",
+      "blob": "630d9dfe68fdb616a35e11d66ae0bb0f8508a0d2",
+      "sha256": "4239cfee754ddf2caf067031b8ec342b7019fb1e99a86fa30b9f0cc11c9c066c"
+    },
+    {
+      "path": "lib/libc/gdtoa/strtold_px.c",
+      "file": "strtold_px.c",
+      "blob": "779da854a89a36dc9bd4af3e2f555fc0792cfd73",
+      "sha256": "4b9194a949b50ca14184a99bf36ee109487d54d448afec2abf8e38ab6f6abe26"
+    },
+    {
+      "path": "lib/libc/gdtoa/strtold_pxL.c",
+      "file": "strtold_pxL.c",
+      "blob": "04c019320c152dcc9eced4c4af243d45304e9abe",
+      "sha256": "2ad75878a96e2693fe50fec8ca336fc05fa99a17d033a411ae721e47182ef899"
+    },
+    {
+      "path": "lib/libc/gdtoa/strtold_subr.c",
+      "file": "strtold_subr.c",
+      "blob": "1f5e1aa5900f589ba955ba9c043184e3063f989e",
+      "sha256": "156e21706ea44a469d5d3fa738e9b1391f84b75a16c6e09fc383f8d9b41c4eda"
+    },
+    {
+      "path": "lib/libc/gdtoa/strtopd.c",
+      "file": "strtopd.c",
+      "blob": "5b7f2d38021e76bde98fc640ca8a89106dc287a0",
+      "sha256": "0138d8de7743064a2758eaa31fea3d25ead00b19cbd49f439bce0b98658559b9"
+    },
+    {
+      "path": "lib/libc/gdtoa/strtopdd.c",
+      "file": "strtopdd.c",
+      "blob": "3d0aa9cfd3d157cff1ee01cf80214d5d8d2c4980",
+      "sha256": "a69404e04a1fdef67cf56023428399b8d8859d878a10b983cbb30252ff19f9fc"
+    },
+    {
+      "path": "lib/libc/gdtoa/strtopf.c",
+      "file": "strtopf.c",
+      "blob": "08887407040e5c62e2f407b703b97e398ec30fa4",
+      "sha256": "8474e481fc4cb0c7082014d905711e86144374dd2dc04ef956e8ad3e576f58c0"
+    },
+    {
+      "path": "lib/libc/gdtoa/strtopQ.c",
+      "file": "strtopQ.c",
+      "blob": "9833cc384db05903be42df0af207e9e03cdf2fbe",
+      "sha256": "fc54e01c0ca61e476a6867f6a9eee3c2f0a823d639ef66950d0f798ddba9ddc9"
+    },
+    {
+      "path": "lib/libc/gdtoa/strtopx.c",
+      "file": "strtopx.c",
+      "blob": "79b5e4f6830ea485b5e83f6ecc419ced4beacb0a",
+      "sha256": "4067d9ec1bab6d0a184ab034dfc5c870765770a55645a405687b75564b8f51ca"
+    },
+    {
+      "path": "lib/libc/gdtoa/strtopxL.c",
+      "file": "strtopxL.c",
+      "blob": "4624be407dee441507fe71274205fbfba2ba2d79",
+      "sha256": "3c702c29015a5fa3588d1cd81bad27c6037b4f7e1c6bfbacae93bfa0ca4a9289"
+    },
+    {
+      "path": "lib/libc/gdtoa/strtord.c",
+      "file": "strtord.c",
+      "blob": "9b8c215c19b3b0b41575eb4bce4f0b7eae6c7f90",
+      "sha256": "2449558fe20e6ba672b0f86394906cfffeb35d24b7f1739773c335e3eafdea5a"
+    },
+    {
+      "path": "lib/libc/gdtoa/strtordd.c",
+      "file": "strtordd.c",
+      "blob": "d60f52941f423417bb0b938b5fa65ca598bc9ca4",
+      "sha256": "06bc6acb80028cb7b768daf1a6f1f2fabd89cb2548644fac7c1cf41e9b7e3249"
+    },
+    {
+      "path": "lib/libc/gdtoa/strtorf.c",
+      "file": "strtorf.c",
+      "blob": "5cf3c2dc4c493deba997101039e8f4466a4ba26c",
+      "sha256": "ffb9b974b2dee4321ef72f51a471c1731a39e50ed5cde9809bbd0f35e8c46759"
+    },
+    {
+      "path": "lib/libc/gdtoa/strtorQ.c",
+      "file": "strtorQ.c",
+      "blob": "645d65e45d30a0530f9f33400f85b56328cf8409",
+      "sha256": "e86c9fa77e5c4b468404b63b00876db771ab34107a5866fbc2891ce6650772e2"
+    },
+    {
+      "path": "lib/libc/gdtoa/strtorx.c",
+      "file": "strtorx.c",
+      "blob": "d0305a2acca5ed4cdd6aab5a0ff3d5e5b51163f3",
+      "sha256": "eb3c7decf86955a9627dbc51bab01897c80751bec5c48f1fa43563a955b393e3"
+    },
+    {
+      "path": "lib/libc/gdtoa/strtorxL.c",
+      "file": "strtorxL.c",
+      "blob": "a8f7b403f4d431bba4b1edea92d8ddb5cfb5b3fc",
+      "sha256": "5c85cd80b04dc8a467c2ae417eaea01729037a05a6c49855790efbe370047063"
+    },
+    {
+      "path": "lib/libc/gdtoa/sum.c",
+      "file": "sum.c",
+      "blob": "6a987a1a4caa5b63b66dc19a31770e7a277b297c",
+      "sha256": "cca3669ef190221c60d04775399765b1b191bc608e618a8b3269946c536b3691"
+    },
+    {
+      "path": "lib/libc/gdtoa/ulp.c",
+      "file": "ulp.c",
+      "blob": "2da0c03367e0c766e8c834426a1825620003401f",
+      "sha256": "8ce2d383f07da238cd80dd409d65045d300340128f8ff4725ef8d06e27f579fe"
+    },
+    {
+      "path": "lib/libc/gdtoa/xsum0.out",
+      "file": "xsum0.out",
+      "blob": "e9c29bc239882c33cca5848406b424844886ca6b",
+      "sha256": "26c1792f2b77f635de797ea1919e413b4b7aa8461f134a9055ac5011d2bd6876"
+    },
+    {
+      "path": "lib/libc/arch/x86_64/gdtoa/arith.h",
+      "file": "arch/arith.h",
+      "blob": "1513f1fd296dd0711bfd08124f77515848f7e030",
+      "sha256": "b2d407d1de83415a95ff202396c5fb3475776e72d29c19c09f583fc4f0aaf91c"
+    },
+    {
+      "path": "lib/libc/arch/x86_64/gdtoa/gd_qnan.h",
+      "file": "arch/gd_qnan.h",
+      "blob": "d702c679271341131dfed3ca6b357cace2108236",
+      "sha256": "0a226a87251d19c6317d48e64112b1fc0be3da56ac039b87a398f63a83b6d9b3"
+    }
+  ]
+}

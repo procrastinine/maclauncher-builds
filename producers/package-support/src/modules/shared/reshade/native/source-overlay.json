@@ -263,6 +263,10 @@
       "source": "app:src/modules/shared/reshade/native/presentation.mm"
     },
     {
+      "path": "src/thread-stack.hpp",
+      "source": "app:src/modules/shared/reshade/native/thread-stack.hpp"
+    },
+    {
       "path": "src/presentation-api.mm",
       "source": "app:src/modules/shared/reshade/native/presentation-api.mm"
     },
@@ -1019,6 +1023,18 @@
       "path": "src/graphics-hardware.mm"
     },
     {
+      "source": "app:src/modules/shared/reshade/native/vulkan-features.c",
+      "path": "src/vulkan-features.c"
+    },
+    {
+      "source": "app:src/modules/shared/reshade/native/winemetal-layer.c",
+      "path": "src/winemetal-layer.c"
+    },
+    {
+      "source": "app:src/modules/shared/reshade/native/winemetal-runtime.tbd",
+      "path": "src/winemetal-runtime.tbd"
+    },
+    {
       "source": "app:src/modules/shared/reshade/native/retroarch-external.h",
       "path": "src/retroarch-external.h"
     },
@@ -1248,6 +1264,52 @@
     {
       "source": "app:src/modules/shared/reshade/native/iosurface-texture.hpp",
       "path": "src/iosurface-texture.hpp"
+    },
+    {
+      "path": "src/anr-generation.mm",
+      "source": "app:src/modules/shared/reshade/native/anr-generation.mm",
+      "nativeLink": true
+    },
+    {
+      "path": "src/anr-submission.h",
+      "source": "app:src/modules/shared/reshade/generation/anr/native/submission.h"
+    },
+    {
+      "source": "app:src/modules/shared/reshade/native/image-copy-chain.hpp",
+      "path": "src/image-copy-chain.hpp"
+    },
+    {
+      "source": "app:src/modules/shared/reshade/native/caller-copy.hpp",
+      "path": "src/caller-copy.hpp"
+    },
+    {
+      "source": "app:src/modules/shared/reshade/native/caller-copy.mm",
+      "path": "src/caller-copy.mm",
+      "nativeLink": true
+    },
+    {
+      "source": "app:src/modules/shared/reshade/native/hud-split.hpp",
+      "path": "src/hud-split.hpp"
+    },
+    {
+      "source": "app:src/modules/shared/reshade/native/hud-difference.hpp",
+      "path": "src/hud-difference.hpp"
+    },
+    {
+      "source": "app:src/modules/shared/reshade/native/late-camera.hpp",
+      "path": "src/late-camera.hpp"
+    },
+    {
+      "source": "app:src/modules/shared/reshade/native/layer-composition.h",
+      "path": "src/layer-composition.h"
+    },
+    {
+      "source": "app:src/modules/shared/reshade/native/temporal-frame-policy.hpp",
+      "path": "src/temporal-frame-policy.hpp"
+    },
+    {
+      "source": "app:src/modules/shared/reshade/native/presentation-capture-policy.hpp",
+      "path": "src/presentation-capture-policy.hpp"
     }
   ]
 }

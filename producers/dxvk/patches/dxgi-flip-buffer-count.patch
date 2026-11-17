@@ -1,0 +1,25 @@
+From: Avery Felts <averyfelts@aol.com>
+Date: Wed, 28 Oct 2026 21:59:56 -0600
+Subject: [PATCH] dxgi: validate flip-model swap-chain buffer counts
+
+Only the five-line CreateSwapChainBase validation hunk from MetalSharp
+93d57c744ab563084b4fe0ac52ba831c94000e21, adjusted for the owned composition
+parameter. Other imported-device and D3D11On12 logging hunks are excluded.
+DXVK's zlib notice applies.
+
+diff --git a/src/dxgi/dxgi_factory.cpp b/src/dxgi/dxgi_factory.cpp
+index d374a790..d52fde15 100644
+--- a/src/dxgi/dxgi_factory.cpp
++++ b/src/dxgi/dxgi_factory.cpp
+@@ -533,6 +533,11 @@ namespace dxvk {
+           IDXGIOutput*          pRestrictToOutput,
+           IDXGISwapChain1**     ppSwapChain,
+           bool                  composition) {
++    // Flip-model swap chains take 2 to 16 buffers, as on Windows
++    if ((pDesc->SwapEffect == DXGI_SWAP_EFFECT_FLIP_DISCARD || pDesc->SwapEffect == DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL)
++     && (pDesc->BufferCount < 2 || pDesc->BufferCount > DXGI_MAX_SWAP_CHAIN_BUFFERS))
++      return E_INVALIDARG;
++
+     // Make sure the back buffer size is not zero
+     DXGI_SWAP_CHAIN_DESC1 desc = *pDesc;
+ 
