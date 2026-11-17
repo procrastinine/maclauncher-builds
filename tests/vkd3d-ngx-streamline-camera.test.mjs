@@ -247,7 +247,7 @@ test('an exactly followed direct camera is recorded before the next evaluation, 
  assert.match(hooks,/Late camera scene recorded for frame/);
 });
 
-test('immediate late tags retain valid-now inputs and reject another frame or viewport',t=>{
+test('immediate late tags retain valid-now inputs and reject another frame or viewport',{skip:process.platform==='win32'?'Fixture uses a POSIX compiler.':!fs.existsSync(path.join(process.env.STREAMLINE_HEADERS||headers,'sl_core_types.h'))?'Streamline headers are not checked out.':false},t=>{
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'late-tags-'));t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
  const source=String.raw`#include "streamline_inputs.hpp"
 #include <cassert>
