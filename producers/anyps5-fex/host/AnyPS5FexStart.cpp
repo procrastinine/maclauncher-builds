@@ -772,6 +772,12 @@ int GetModuleSegmentInfo(SegmentInfo* Result) {
 }
 } // namespace RuntimeModules
 
+// libSceLibcInternal's thread_local destructor pass (_sceLibcInternalForceTlsDestructor) asks which module holds a
+// destructor's DSO handle, through the same lookup as the guest's import of it.
+extern "C" int sceKernelGetModuleInfoFromAddr(std::uint64_t Address, int Flags, RuntimeModules::ModuleInfoEx* Info) {
+  return RuntimeModules::GetModuleInfoFromAddr(Address, Flags, Info);
+}
+
 namespace {
 std::vector<std::string> SceModules(const std::string& Directory) {
   std::vector<std::string> Names;

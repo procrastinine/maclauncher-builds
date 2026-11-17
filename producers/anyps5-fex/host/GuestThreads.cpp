@@ -74,6 +74,9 @@ struct Thread {
   bool Finished = false, Detached = false;
   // Under Lock: the OS thread, once it runs the guest, for sceKernelRaiseException's signal.
   bool Started = false;
+  // Created by AnyPS5's own arm64 code with a host entry (scePthreadCreate called from a host library): the entry runs
+  // natively, and the thread gets a guest thread only if it calls guest code (AdoptHostThread).
+  bool HostEntry = false;
   pthread_t Host {};
   FexGuest::PendingException Exception;
   std::array<std::uint64_t, KeyCount> Specific {};
@@ -161,9 +164,6 @@ void* Start(void* Opaque) {
   if (!T->Name.empty()) {
     pthread_setname_np(T->Name.substr(0, 63).c_str());
   }
-  const auto Stack = TakeStack(T->Settings.StackSize);
-  T->Settings.StackAddr = Stack.first;
-  T->Settings.StackSize = Stack.second;
   FexGuest::ThreadException = &T->Exception;
   {
     std::lock_guard Lock(T->Lock);
@@ -171,12 +171,24 @@ void* Start(void* Opaque) {
     T->Started = true;
   }
   std::uint64_t Result;
-  try {
-    Result = FexGuest::RunNewThread(T->Entry, T->Argument, Stack.first + Stack.second, T->ThreadPointer, RunKeyDestructors);
-  } catch (const ExitRequest& Exit) {
-    Result = Exit.Value;
+  if (T->HostEntry) {
+    try {
+      Result = reinterpret_cast<std::uint64_t>(reinterpret_cast<void* (*)(void*)>(T->Entry)(reinterpret_cast<void*>(T->Argument)));
+      RunKeyDestructors();
+    } catch (const ExitRequest& Exit) {
+      Result = Exit.Value;
+    }
+  } else {
+    const auto Stack = TakeStack(T->Settings.StackSize);
+    T->Settings.StackAddr = Stack.first;
+    T->Settings.StackSize = Stack.second;
+    try {
+      Result = FexGuest::RunNewThread(T->Entry, T->Argument, Stack.first + Stack.second, T->ThreadPointer, RunKeyDestructors);
+    } catch (const ExitRequest& Exit) {
+      Result = Exit.Value;
+    }
+    ReturnStack(Stack);
   }
-  ReturnStack(Stack);
   FexGuest::ThreadException = nullptr;
   {
     std::lock_guard Lock(T->Lock);
@@ -191,11 +203,13 @@ Thread* ThreadOf(std::uint64_t Handle) {
   return reinterpret_cast<Thread*>(Handle);
 }
 
-int Create(std::uint64_t* Out, const std::uint64_t* AttributeSlot, std::uint64_t Entry, std::uint64_t Argument, const char* Name) {
+int Create(std::uint64_t* Out, const std::uint64_t* AttributeSlot, std::uint64_t Entry, std::uint64_t Argument, const char* Name,
+           bool HostEntry = false) {
   if (!Out || Entry == 0) {
     return EINVAL;
   }
   auto* T = new Thread;
+  T->HostEntry = HostEntry;
   if (AttributeSlot && *AttributeSlot) {
     T->Settings = *reinterpret_cast<const Attributes*>(*AttributeSlot);
   }
@@ -908,6 +922,10 @@ int SceOf(A... Arguments) {
 int SceCreate(std::uint64_t* Out, const std::uint64_t* Attributes, std::uint64_t Entry, std::uint64_t Argument, const char* Name) {
   return Sce(Create(Out, Attributes, Entry, Argument, Name));
 }
+int SceCreateWith(std::uint64_t* Out, const std::uint64_t* Attributes, std::uint64_t Entry, std::uint64_t Argument, const char* Name,
+                  bool HostEntry) {
+  return Sce(Create(Out, Attributes, Entry, Argument, Name, HostEntry));
+}
 int SceMutexInit(std::uint64_t* Slot, const std::uint64_t* Attributes, const char*) {
   return Sce(MutexInit(Slot, Attributes));
 }
@@ -1252,22 +1270,24 @@ struct HostAdoption {
 };
 thread_local HostAdoption Adoption;
 void AdoptHostThread() {
-  auto* T = new Thread;
-  T->Id = NextThreadId.fetch_add(1);
-  T->Name = "host";
-  T->Detached = true;
-  T->ThreadPointer = Ps5::AllocateStaticTls();
-  reinterpret_cast<std::uint64_t*>(T->ThreadPointer)[2] = reinterpret_cast<std::uint64_t>(T);
-  Adoption.Stack = TakeStack(std::max(T->Settings.StackSize, MinimumStackSize));
-  T->Settings.StackAddr = Adoption.Stack.first;
-  T->Settings.StackSize = Adoption.Stack.second;
-  Self = T;
-  FexGuest::ThreadException = &T->Exception;
-  {
+  // A thread this layer started with a host entry already has its record and static TLS.
+  auto* T = Self;
+  if (!T) {
+    T = new Thread;
+    T->Id = NextThreadId.fetch_add(1);
+    T->Name = "host";
+    T->Detached = true;
+    T->ThreadPointer = Ps5::AllocateStaticTls();
+    reinterpret_cast<std::uint64_t*>(T->ThreadPointer)[2] = reinterpret_cast<std::uint64_t>(T);
+    Self = T;
+    FexGuest::ThreadException = &T->Exception;
     std::lock_guard Lock(T->Lock);
     T->Host = pthread_self();
     T->Started = true;
   }
+  Adoption.Stack = TakeStack(std::max(T->Settings.StackSize, MinimumStackSize));
+  T->Settings.StackAddr = Adoption.Stack.first;
+  T->Settings.StackSize = Adoption.Stack.second;
   FexGuest::AdoptCallingThread(Adoption.Stack.first + Adoption.Stack.second, T->ThreadPointer);
 }
 
@@ -1316,6 +1336,112 @@ extern "C" int scePthreadGetprio(std::uint64_t Handle, int* Priority) {
 }
 extern "C" void sceKernelSetThreadDtors(void (*Dtors)()) {
   ThreadDtors.store(Dtors, std::memory_order_release);
+}
+
+// The rest of the thread exports AnyPS5's arm64 libraries call directly (libSceJson2's kernel mutex, libSceNpCommon's
+// mutexes, conditions and threads, libSceNet's sync objects, libc's _Mtx* and _Cnd*): the same records and results as
+// the guest's imports of them. A thread created with a host entry runs it natively.
+extern "C" {
+int scePthreadMutexattrInit(std::uint64_t* Attributes) {
+  return SceOf<&MutexattrInit, std::uint64_t*>(Attributes);
+}
+int scePthreadMutexattrDestroy(std::uint64_t* Attributes) {
+  return SceOf<&MutexattrDestroy, std::uint64_t*>(Attributes);
+}
+int scePthreadMutexattrSettype(std::uint64_t* Attributes, int Type) {
+  return SceOf<&MutexattrSettype, std::uint64_t*, int>(Attributes, Type);
+}
+int scePthreadMutexInit(std::uint64_t* Slot, const std::uint64_t* Attributes, const char* Name) {
+  return SceMutexInit(Slot, Attributes, Name);
+}
+int scePthreadMutexDestroy(std::uint64_t* Slot) {
+  return SceOf<&MutexDestroy, std::uint64_t*>(Slot);
+}
+int scePthreadMutexLock(std::uint64_t* Slot) {
+  return SceOf<&MutexLock, std::uint64_t*>(Slot);
+}
+int scePthreadMutexTrylock(std::uint64_t* Slot) {
+  return SceOf<&MutexTrylock, std::uint64_t*>(Slot);
+}
+int scePthreadMutexUnlock(std::uint64_t* Slot) {
+  return SceOf<&MutexUnlock, std::uint64_t*>(Slot);
+}
+int pthread_mutex_lock_nid_postfix(std::uint64_t* Slot) {
+  return MutexLock(Slot);
+}
+int pthread_mutex_unlock_nid_postfix(std::uint64_t* Slot) {
+  return MutexUnlock(Slot);
+}
+int pthread_mutex_destroy_nid_postfix(std::uint64_t* Slot) {
+  return MutexDestroy(Slot);
+}
+int scePthreadCondattrInit(std::uint64_t* Attributes) {
+  return SceOf<&CondattrInit, std::uint64_t*>(Attributes);
+}
+int scePthreadCondattrDestroy(std::uint64_t* Attributes) {
+  return SceOf<&CondattrDestroy, std::uint64_t*>(Attributes);
+}
+int scePthreadCondInit(std::uint64_t* Slot, const std::uint64_t* Attributes, const char* Name) {
+  return SceCondInit(Slot, Attributes, Name);
+}
+int scePthreadCondDestroy(std::uint64_t* Slot) {
+  return SceOf<&CondDestroy, std::uint64_t*>(Slot);
+}
+int scePthreadCondWait(std::uint64_t* Slot, std::uint64_t* MutexSlot) {
+  return SceOf<&CondWait, std::uint64_t*, std::uint64_t*>(Slot, MutexSlot);
+}
+int scePthreadCondTimedwait(std::uint64_t* Slot, std::uint64_t* MutexSlot, std::uint32_t Microseconds) {
+  return SceCondTimedwait(Slot, MutexSlot, Microseconds);
+}
+int scePthreadCondSignal(std::uint64_t* Slot) {
+  return SceOf<&CondSignal, std::uint64_t*>(Slot);
+}
+int scePthreadCondBroadcast(std::uint64_t* Slot) {
+  return SceOf<&CondBroadcast, std::uint64_t*>(Slot);
+}
+// Signals the waiter on one thread: every waiter wakes, and the others see a spurious wakeup, which a condition allows.
+int scePthreadCondSignalto(std::uint64_t* Slot, std::uint64_t) {
+  return SceOf<&CondBroadcast, std::uint64_t*>(Slot);
+}
+int scePthreadAttrInit(std::uint64_t* Attributes) {
+  return SceOf<&AttrInit, std::uint64_t*>(Attributes);
+}
+int scePthreadAttrDestroy(std::uint64_t* Attributes) {
+  return SceOf<&AttrDestroy, std::uint64_t*>(Attributes);
+}
+int scePthreadAttrSetstacksize(std::uint64_t* Attributes, std::uint64_t Size) {
+  return SceOf<&AttrSetstacksize, std::uint64_t*, std::uint64_t>(Attributes, Size);
+}
+int scePthreadAttrSetinheritsched(std::uint64_t* Attributes, int Inherit) {
+  return SceOf<&AttrSetinheritsched, std::uint64_t*, int>(Attributes, Inherit);
+}
+int scePthreadAttrSetschedpolicy(std::uint64_t* Attributes, int Policy) {
+  return SceOf<&AttrSetschedpolicy, std::uint64_t*, int>(Attributes, Policy);
+}
+int scePthreadAttrSetschedparam(std::uint64_t* Attributes, const int* Parameter) {
+  return SceOf<&AttrSetschedparam, std::uint64_t*, const int*>(Attributes, Parameter);
+}
+int scePthreadAttrSetaffinity(std::uint64_t* Attributes, std::uint64_t Mask) {
+  return SceOf<&AttrSetaffinity, std::uint64_t*, std::uint64_t>(Attributes, Mask);
+}
+int scePthreadCreate(std::uint64_t* Out, const std::uint64_t* Attributes, std::uint64_t Entry, std::uint64_t Argument, const char* Name) {
+  return SceCreateWith(Out, Attributes, Entry, Argument, Name, !(FexGuest::IsGuestCode && FexGuest::IsGuestCode(Entry)));
+}
+int scePthreadJoin(std::uint64_t Handle, std::uint64_t* Value) {
+  return SceOf<&Join, std::uint64_t, std::uint64_t*>(Handle, Value);
+}
+int scePthreadEqual(std::uint64_t A, std::uint64_t B) {
+  return Equal(A, B);
+}
+void scePthreadExit(std::uint64_t Value) {
+  Exit(Value);
+}
+int scePthreadGetthreadid() {
+  return Getthreadid();
+}
+void pthread_set_name_np_nid_postfix(std::uint64_t Handle, const char* Name) {
+  PosixSetnameNp(Handle, Name);
+}
 }
 
 bool GuestThreadStackHostRangeOverlaps(std::uintptr_t, std::uintptr_t) {

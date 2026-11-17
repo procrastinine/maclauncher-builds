@@ -55,6 +55,7 @@
       "core/libs/prx/libc/src/GuestWriteWatch.cpp",
       "core/libs/prx/libkernel/File/src/SharedMemory.cpp",
       "core/libs/prx/libkernel/Socket/src/Socket.cpp",
+      "core/libs/prx/libkernel/Socket/src/AddressConversion.cpp",
       "core/libs/prx/libkernel/Equeue/src/Kqueue.cpp",
       "core/libs/prx/libkernel/Equeue/Equeue.cpp",
       "core/libs/prx/libkernel/DirectMemory/Jit.cpp",
