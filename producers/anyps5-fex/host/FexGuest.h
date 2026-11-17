@@ -17,6 +17,7 @@
 #include <FEXCore/Utils/SignalScopeGuards.h>
 
 #include <atomic>
+#include <cerrno>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
@@ -27,6 +28,7 @@
 #include <span>
 #include <sys/mman.h>
 #include <sys/sysctl.h>
+#include <type_traits>
 #include <unistd.h>
 #include <vector>
 
@@ -35,8 +37,9 @@ using FEXCore::Core::CPUState;
 namespace X86 = FEXCore::X86State;
 
 // Stub page layout: offset 0 is the HLT that ends the run (the guest entry's return address), offset 8 the HLT that
-// ends a guest callback (CallGuest), thunk i is the HLT at ThunkStubOffset + i * ThunkStubSize, and X87ReturnStub
-// loads st(0) from X87ReturnSlot and returns to the guest caller.
+// ends a guest callback (CallGuest), thunk i is the HLT at ThunkStubOffset + i * ThunkStubSize, X87ReturnStub
+// loads st(0) from X87ReturnSlot and returns to the guest caller, and ExceptionReturn is the HLT a guest exception
+// handler entered from translated code returns to.
 inline std::uint64_t StubBase = 0;
 constexpr std::uint64_t StackSize = 1 << 20;
 constexpr std::uint64_t CallbackReturnOffset = 8;
@@ -45,6 +48,7 @@ constexpr std::uint64_t ThunkStubSize = 16;
 constexpr std::uint64_t StubPageSize = 0x10000;
 constexpr std::uint64_t X87ReturnStubOffset = 0xF000;
 constexpr std::uint64_t X87ReturnSlotOffset = 0xF100;
+constexpr std::uint64_t ExceptionReturnOffset = 0xF080;
 constexpr std::size_t MaximumThunks = (X87ReturnStubOffset - ThunkStubOffset) / ThunkStubSize;
 inline std::uint64_t X87ReturnStub() {
   return StubBase + X87ReturnStubOffset;
@@ -256,11 +260,16 @@ inline void MapStubs(std::size_t ThunkCount) {
   X87[1] = 0x2D;
   std::memcpy(X87 + 2, &Displacement, 4);
   X87[6] = 0xC3;
+  Stubs[ExceptionReturnOffset] = 0xF4;
 }
 
 // A guest stack whose top holds the return address of the entry function: the HLT at stub offset 0.
-inline std::uint64_t MapStack() {
-  auto Stack = reinterpret_cast<std::uint64_t>(MapGuest(StackSize)) + StackSize - 16;
+inline std::uint64_t MapStack(std::uint64_t Size = StackSize, std::uint64_t* Base = nullptr) {
+  const auto Mapped = reinterpret_cast<std::uint64_t>(MapGuest(Size));
+  if (Base) {
+    *Base = Mapped;
+  }
+  auto Stack = Mapped + Size - 16;
   Stack -= 8;
   *reinterpret_cast<std::uint64_t*>(Stack) = StubBase;
   return Stack;
@@ -273,6 +282,10 @@ inline thread_local FEXCore::Core::InternalThreadState* Thread = nullptr;
 inline std::span<const Thunk> ActiveThunks;
 inline std::uint64_t* ActiveThunkCalls = nullptr;
 
+// Whether this OS thread is running a thunk, where its guest state is in memory and consistent.
+inline thread_local bool InHostCall = false;
+inline void FinishTranslatedException(CPUState& Guest);
+
 // Executes this OS thread's guest thread until its rip is StopAt or Breakpoint (0 for none), dispatching thunks on the
 // way.
 inline void Loop(std::uint64_t StopAt, std::uint64_t Breakpoint) {
@@ -282,6 +295,10 @@ inline void Loop(std::uint64_t StopAt, std::uint64_t Breakpoint) {
     if (Guest.rip == StopAt || (Breakpoint != 0 && Guest.rip == Breakpoint)) {
       return;
     }
+    if (Guest.rip == StubBase + ExceptionReturnOffset) {
+      FinishTranslatedException(Guest);
+      continue;
+    }
     const std::uint64_t Stop = Guest.rip - StubBase;
     if (Guest.rip < StubBase || Stop < ThunkStubOffset || (Stop - ThunkStubOffset) % ThunkStubSize != 0 ||
         (Stop - ThunkStubOffset) / ThunkStubSize >= ActiveThunks.size()) {
@@ -289,7 +306,10 @@ inline void Loop(std::uint64_t StopAt, std::uint64_t Breakpoint) {
       std::exit(1);
     }
     __atomic_fetch_add(ActiveThunkCalls, 1, __ATOMIC_RELAXED);
-    if (ActiveThunks[(Stop - ThunkStubOffset) / ThunkStubSize](Guest) == After::Return) {
+    InHostCall = true;
+    const After Next = ActiveThunks[(Stop - ThunkStubOffset) / ThunkStubSize](Guest);
+    InHostCall = false;
+    if (Next == After::Return) {
       auto& RSP = Guest.gregs[X86::REG_RSP];
       Guest.rip = *reinterpret_cast<std::uint64_t*>(RSP);
       RSP += 8;
@@ -330,7 +350,10 @@ inline GuestResult CallGuest(std::uint64_t Function, std::span<const std::uint64
   }
   Guest.gregs[X86::REG_RAX] = Floats.size();
   Guest.rip = Function;
+  const bool OuterHostCall = InHostCall;
+  InHostCall = false;
   Loop(StubBase + CallbackReturnOffset, 0);
+  InHostCall = OuterHostCall;
 
   const GuestResult Result {Guest.gregs[X86::REG_RAX], Guest.xmm.sse.data[0][0]};
   std::memcpy(Guest.gregs, SavedGregs, sizeof(SavedGregs));
@@ -395,6 +418,205 @@ inline void InstallSignalStack() {
   if (Stack.ss_sp != MAP_FAILED) {
     sigaltstack(&Stack, nullptr);
   }
+}
+
+// Asynchronous guest exceptions (libkernel's sceKernelRaiseException, which Unity's garbage collector uses to stop
+// threads). The raising thread sets the target's PendingException and sends it ExceptionSignal until the target takes
+// the exception. The target takes it
+// - in translated code: as the Darwin signal delegator does for a guest fault, the guest state is spilled from the
+//   host registers (the rip from the block's RIP entries), the handler is entered through the dispatcher with the
+//   exception context below the stack's red zone and ExceptionReturn as its return address, and that HLT restores the
+//   state, with the handler's edits to the context's general registers, rip and rflags;
+// - in a thunk blocked in a wait system call: the handler runs there, nested like a callback, with the thunk's guest
+//   state (its return address as rip).
+// Anywhere else (FEX's dispatcher or compiler, a FEX section that defers signals, host code between system calls,
+// the first instruction of a block) the target leaves the signal and the raiser sends it again.
+struct PendingException {
+  std::atomic<std::uint64_t> Handler {0};
+  int Signal = 0;
+};
+constexpr int ExceptionSignal = SIGUSR1;
+// This OS thread's record, set by the thread layer before its guest runs.
+inline thread_local PendingException* ThreadException = nullptr;
+// Set by the thread layer: writes the guest's exception context for State (with rip Rip and rflags Eflags) below
+// Below, 64-byte aligned, and returns its address; reads the general registers, rip and rflags back from it.
+inline std::uint64_t (*WriteExceptionContext)(const CPUState& State, std::uint64_t Rip, std::uint32_t Eflags, std::uint64_t Below) = nullptr;
+inline void (*ReadExceptionContext)(std::uint64_t Context, CPUState& State, std::uint32_t& Eflags) = nullptr;
+inline FEXCore::Darwin::SignalDelegator* Delegator = nullptr;
+
+// The state a handler entered from translated code returns to.
+struct InterruptedState {
+  std::uint64_t Gregs[16];
+  std::uint64_t Rip, CallRetSp, Context;
+  std::uint32_t Eflags, Mxcsr;
+  std::uint64_t AvxHigh[16][2];
+  decltype(CPUState::xmm) Xmm;
+  std::uint64_t Mm[8][2];
+};
+inline thread_local InterruptedState Interrupted;
+inline thread_local int InterruptDepth = 0;
+inline thread_local bool InNestedHandler = false;
+
+// The host register file a translated block keeps the guest's general and vector registers in (Darwin signal
+// delegator, Spill).
+inline void SpillTranslated(FEXCore::Core::InternalThreadState* Bound, std::remove_pointer_t<mcontext_t>& Machine) {
+  const auto& Config = Delegator->GetConfig();
+  auto& State = Bound->CurrentFrame->State;
+  std::uint64_t GPRs[32];
+  for (unsigned Index = 0; Index != 29; ++Index) {
+    GPRs[Index] = Machine.__ss.__x[Index];
+  }
+  GPRs[29] = __darwin_arm_thread_state64_get_fp(Machine.__ss);
+  GPRs[30] = __darwin_arm_thread_state64_get_lr(Machine.__ss);
+  GPRs[31] = __darwin_arm_thread_state64_get_sp(Machine.__ss);
+  State.rip = CTX->RestoreRIPFromHostPC(Bound, __darwin_arm_thread_state64_get_pc(Machine.__ss));
+  const std::uint32_t Ignore = Bound->CurrentFrame->InSyscallInfo & 0xffff;
+  for (std::size_t Index = 0; Index < Config.SRAGPRCount; ++Index) {
+    const auto Host = Config.SRAGPRMapping[Index];
+    if (!(Ignore & (1U << Host))) {
+      State.gregs[Index] = GPRs[Host];
+    }
+  }
+  for (std::size_t Index = 0; Index < Config.SRAFPRCount; ++Index) {
+    std::memcpy(&State.xmm.sse.data[Index][0], &Machine.__ns.__v[Config.SRAFPRMapping[Index]], sizeof(__uint128_t));
+  }
+  State.callret_sp = GPRs[25];
+  CTX->SetFlagsFromCompactedEFLAGS(Bound, CTX->ReconstructCompactedEFLAGS(Bound, true, GPRs, Machine.__ss.__cpsr));
+}
+
+// Whether PC is inside the block FEX entered last: only there do the block's RIP entries give the guest rip.
+inline bool InCurrentBlock(FEXCore::Core::InternalThreadState* Bound, std::uint64_t PC) {
+  const std::uint64_t Begin = Bound->CurrentFrame->State.InlineJITBlockHeader;
+  if (Begin == 0) {
+    return false;
+  }
+  const std::uint32_t TailOffset = *reinterpret_cast<const std::uint32_t*>(Begin);  // JITCodeHeader::OffsetToBlockTail
+  const std::size_t Size = *reinterpret_cast<const std::size_t*>(Begin + TailOffset); // JITCodeTail::Size
+  return PC > Begin && PC < Begin + Size;
+}
+
+// Darwin arm64 system calls a blocked thread waits in (x16 at the SVC): reads, polls, kevents, pthread and ulock
+// waits, semaphores and sleeps. Nothing else, since a thread in another system call may hold a lock the handler needs
+// (the allocator's, while it maps memory).
+inline bool BlockedInWait(const std::remove_pointer_t<mcontext_t>& Machine) {
+  const std::uint64_t PC = __darwin_arm_thread_state64_get_pc(Machine.__ss);
+  constexpr std::uint32_t Svc80 = 0xD4001001;
+  if (*reinterpret_cast<const std::uint32_t*>(PC) != Svc80 && *reinterpret_cast<const std::uint32_t*>(PC - 4) != Svc80) {
+    return false;
+  }
+  switch (static_cast<std::int64_t>(Machine.__ss.__x[16])) {
+  case 3: case 29: case 93: case 111: case 153: case 230: case 301: case 305: case 306: case 307: case 334: case 363:
+  case 369: case 374: case 396: case 403: case 407: case 414: case 417: case 423: case 515: case 544:
+  case -36: case -37: case -38: case -39: // semaphore_wait, wait_signal, timedwait, timedwait_signal traps
+    return true;
+  default:
+    return false;
+  }
+}
+
+// Runs Handler(Signal, context) now, from a thunk (or a wait inside one) of this thread: the context holds the guest
+// state of the thunk's caller.
+inline void RunExceptionHandlerHere(std::uint64_t Handler, int Signal) {
+  auto& Guest = Thread->CurrentFrame->State;
+  const std::uint64_t Rsp = Guest.gregs[X86::REG_RSP];
+  const std::uint32_t Eflags = CTX->ReconstructCompactedEFLAGS(Thread, false, nullptr, 0);
+  const std::uint64_t Context = WriteExceptionContext(Guest, *reinterpret_cast<const std::uint64_t*>(Rsp), Eflags, Rsp - 128);
+  // CallGuest puts the handler's frame below the red zone of this stack pointer, so below the context.
+  Guest.gregs[X86::REG_RSP] = Context + 128;
+  const std::uint64_t Arguments[] = {static_cast<std::uint64_t>(Signal), Context};
+  const bool Outer = InNestedHandler;
+  InNestedHandler = true;
+  CallGuest(Handler, Arguments, {});
+  InNestedHandler = Outer;
+  Guest.gregs[X86::REG_RSP] = Rsp;
+}
+
+inline void TakeException(int, siginfo_t*, void* Opaque) {
+  auto* Bound = Thread;
+  auto* Record = ThreadException;
+  if (!Bound || !Record || !Bound->CurrentFrame || !Delegator || Bound->CurrentFrame->State.DeferredSignalRefCount.Load() != 0) {
+    return;
+  }
+  std::uint64_t Handler = Record->Handler.load(std::memory_order_acquire);
+  if (Handler == 0) {
+    return;
+  }
+  const int Error = errno;
+  auto& Machine = *static_cast<ucontext_t*>(Opaque)->uc_mcontext;
+  const std::uint64_t PC = __darwin_arm_thread_state64_get_pc(Machine.__ss);
+  // One exception at a time, as a signal is masked while its handler runs: a raise during a handler waits for its end.
+  if (InterruptDepth != 0 || InNestedHandler) {
+    return;
+  }
+  if (!InHostCall && CTX->IsAddressInCodeBuffer(Bound, PC) && InCurrentBlock(Bound, PC)) {
+    if (!Record->Handler.compare_exchange_strong(Handler, 0, std::memory_order_acq_rel)) {
+      return;
+    }
+    SpillTranslated(Bound, Machine);
+    auto& Guest = Bound->CurrentFrame->State;
+    auto& Saved = Interrupted;
+    InterruptDepth = 1;
+    std::memcpy(Saved.Gregs, Guest.gregs, sizeof(Saved.Gregs));
+    Saved.Rip = Guest.rip;
+    Saved.CallRetSp = Guest.callret_sp;
+    Saved.Eflags = CTX->ReconstructCompactedEFLAGS(Bound, false, nullptr, 0);
+    Saved.Mxcsr = Guest.mxcsr;
+    std::memcpy(Saved.AvxHigh, Guest.avx_high, sizeof(Saved.AvxHigh));
+    std::memcpy(&Saved.Xmm, &Guest.xmm, sizeof(Saved.Xmm));
+    std::memcpy(Saved.Mm, Guest.mm, sizeof(Saved.Mm));
+    Saved.Context = WriteExceptionContext(Guest, Guest.rip, Saved.Eflags, Guest.gregs[X86::REG_RSP] - 128);
+    // The handler's frame: the return address below the context, 16-byte aligned plus 8 at entry.
+    const std::uint64_t Frame = Saved.Context - 8;
+    *reinterpret_cast<std::uint64_t*>(Frame) = StubBase + ExceptionReturnOffset;
+    Guest.gregs[X86::REG_RSP] = Frame;
+    Guest.gregs[X86::REG_RDI] = static_cast<std::uint64_t>(Record->Signal);
+    Guest.gregs[X86::REG_RSI] = Saved.Context;
+    Guest.gregs[X86::REG_RAX] = 0;
+    Guest.rip = Handler;
+    // Resume at the dispatcher, which fills the host registers from the guest state (Darwin signal delegator,
+    // ResumeDispatcher).
+    Machine.__ss.__x[28] = reinterpret_cast<std::uintptr_t>(Bound->CurrentFrame);
+    Machine.__ss.__x[25] = Guest.callret_sp;
+    Machine.__ss.__x[1] = 0;
+    Bound->CurrentFrame->InSyscallInfo = 0;
+    __darwin_arm_thread_state64_set_pc_fptr(Machine.__ss, reinterpret_cast<void*>(Delegator->GetConfig().AbsoluteLoopTopAddressFillSRA));
+  } else if (InHostCall && BlockedInWait(Machine)) {
+    if (!Record->Handler.compare_exchange_strong(Handler, 0, std::memory_order_acq_rel)) {
+      return;
+    }
+    RunExceptionHandlerHere(Handler, Record->Signal);
+  }
+  errno = Error;
+}
+
+// The HLT at ExceptionReturn: the handler entered from translated code returned.
+inline void FinishTranslatedException(CPUState& Guest) {
+  if (InterruptDepth == 0) {
+    std::printf("guest returned to the exception return stub with no exception taken\nFAIL\n");
+    std::exit(1);
+  }
+  const auto& Saved = Interrupted;
+  InterruptDepth = 0;
+  std::memcpy(Guest.gregs, Saved.Gregs, sizeof(Saved.Gregs));
+  Guest.rip = Saved.Rip;
+  std::uint32_t Eflags = Saved.Eflags;
+  ReadExceptionContext(Saved.Context, Guest, Eflags);
+  Guest.callret_sp = Saved.CallRetSp;
+  Guest.mxcsr = Saved.Mxcsr;
+  std::memcpy(Guest.avx_high, Saved.AvxHigh, sizeof(Saved.AvxHigh));
+  std::memcpy(&Guest.xmm, &Saved.Xmm, sizeof(Saved.Xmm));
+  std::memcpy(Guest.mm, Saved.Mm, sizeof(Saved.Mm));
+  CTX->SetFlagsFromCompactedEFLAGS(Thread, Eflags);
+}
+
+// Installed once, on the thread's own stack (not the signal stack): a nested handler runs guest code and FEX's
+// compiler from here.
+inline void InstallExceptionSignal() {
+  struct sigaction Action {};
+  Action.sa_sigaction = TakeException;
+  Action.sa_flags = SA_SIGINFO | SA_RESTART;
+  sigemptyset(&Action.sa_mask);
+  sigaction(ExceptionSignal, &Action, nullptr);
 }
 
 // A FEX guest thread with Initial's state: a flat 64-bit code segment, as FEX's Linux frontend sets up for a new
@@ -480,6 +702,8 @@ inline const CPUState& Run(CPUState& Initial, std::span<const Thunk> Thunks, std
       std::exit(1);
     }
     InstallCallRetGuard();
+    Delegator = &Signals;
+    InstallExceptionSignal();
     InstallSignalStack();
     static SyscallHandler Syscalls;
     CTX->SetSignalDelegator(&Signals);

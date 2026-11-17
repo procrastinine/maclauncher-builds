@@ -20,5 +20,7 @@ bool OwnsExport(const char* Name);
 
 // The calling OS thread runs the guest's initial thread, whose thread pointer is ThreadPointer.
 void AdoptInitialThread(std::uint64_t ThreadPointer);
+// The initial thread's guest stack, as its attributes report it.
+void SetInitialStack(std::uint64_t Base, std::uint64_t Size);
 
 } // namespace GuestThreads

@@ -987,7 +987,17 @@ int RunGame(int argc, char** argv) {
   FexGuest::CPUState Start {};
   Start.fs_cached = Kernel::ThreadPointer;
   Start.rip = Eboot.Base + Eboot.Entry;
-  Start.gregs[FexGuest::X86::REG_RSP] = FexGuest::MapStack();
+  // The main thread's stack: the size the process parameters ask for (sceUserMainThreadStackSize, at +0x30), and at
+  // least 8 MiB. Its attributes report it, since Unity's garbage collector scans it.
+  std::uint64_t MainStackSize = 8 << 20, MainStackBase = 0;
+  if (Kernel::ProcParam != 0 && *reinterpret_cast<const std::uint64_t*>(Kernel::ProcParam) >= 0x38) {
+    if (const auto Requested = *reinterpret_cast<const std::uint64_t*>(Kernel::ProcParam + 0x30); Requested != 0) {
+      MainStackSize = std::max<std::uint64_t>(MainStackSize, (*reinterpret_cast<const std::uint32_t*>(Requested) + 0x3fffULL) & ~0x3fffULL);
+    }
+  }
+  Start.gregs[FexGuest::X86::REG_RSP] = FexGuest::MapStack(MainStackSize, &MainStackBase);
+  GuestThreads::SetInitialStack(MainStackBase, MainStackSize);
+  std::printf("main thread stack: %llu KiB\n", static_cast<unsigned long long>(MainStackSize >> 10));
   Start.gregs[FexGuest::X86::REG_RDI] = reinterpret_cast<std::uint64_t>(Arguments);
   // Every 5 s for 55 s: the host call and stub counts, and the guest rip a SIGUSR2 sample of this thread reads.
   const auto Watch = [&ThunkCalls] {

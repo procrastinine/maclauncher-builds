@@ -15,6 +15,7 @@
 
 #include "Ps5Module.h"
 #include "SysVThunk.h"
+#include "prx/libkernel/System/include/UserContext.hpp"
 
 #include <algorithm>
 #include <array>
@@ -50,6 +51,8 @@ constexpr int MutexErrorCheck = 1, MutexRecursive = 2, MutexNormal = 3, MutexAda
 constexpr int ClockMonotonic = 4;
 
 struct Attributes {
+  // A running thread's attributes (scePthreadAttrGet) hold its guest stack; Unity's garbage collector scans from it.
+  std::uint64_t StackAddr = 0;
   std::uint64_t StackSize = DefaultStackSize.load();
   std::uint64_t GuardSize = 0x1000;
   int DetachState = 0;
@@ -69,6 +72,10 @@ struct Thread {
   std::mutex Lock;
   std::condition_variable Done;
   bool Finished = false, Detached = false;
+  // Under Lock: the OS thread, once it runs the guest, for sceKernelRaiseException's signal.
+  bool Started = false;
+  pthread_t Host {};
+  FexGuest::PendingException Exception;
   std::array<std::uint64_t, KeyCount> Specific {};
 };
 // Thread records stay allocated: a handle can outlive its thread.
@@ -148,6 +155,14 @@ void* Start(void* Opaque) {
     pthread_setname_np(T->Name.substr(0, 63).c_str());
   }
   const auto Stack = TakeStack(T->Settings.StackSize);
+  T->Settings.StackAddr = Stack.first;
+  T->Settings.StackSize = Stack.second;
+  FexGuest::ThreadException = &T->Exception;
+  {
+    std::lock_guard Lock(T->Lock);
+    T->Host = pthread_self();
+    T->Started = true;
+  }
   std::uint64_t Result;
   try {
     Result = FexGuest::RunNewThread(T->Entry, T->Argument, Stack.first + Stack.second, T->ThreadPointer, RunKeyDestructors);
@@ -155,6 +170,7 @@ void* Start(void* Opaque) {
     Result = Exit.Value;
   }
   ReturnStack(Stack);
+  FexGuest::ThreadException = nullptr;
   {
     std::lock_guard Lock(T->Lock);
     T->Result = Result;
@@ -672,6 +688,28 @@ int AttrSetguardsize(std::uint64_t* Slot, std::uint64_t Size) {
   AttributesOf(Slot)->GuardSize = Size;
   return 0;
 }
+int AttrSetstackaddr(std::uint64_t* Slot, std::uint64_t Address) {
+  if (!AttributesOf(Slot)) {
+    return EINVAL;
+  }
+  AttributesOf(Slot)->StackAddr = Address;
+  return 0;
+}
+int AttrGetstackaddr(const std::uint64_t* Slot, std::uint64_t* Address) {
+  if (!AttributesOf(Slot) || !Address) {
+    return EINVAL;
+  }
+  *Address = AttributesOf(Slot)->StackAddr;
+  return 0;
+}
+int AttrGetstack(const std::uint64_t* Slot, std::uint64_t* Address, std::uint64_t* Size) {
+  if (!AttributesOf(Slot) || !Address || !Size) {
+    return EINVAL;
+  }
+  *Address = AttributesOf(Slot)->StackAddr;
+  *Size = AttributesOf(Slot)->StackSize;
+  return 0;
+}
 int AttrGetguardsize(const std::uint64_t* Slot, std::uint64_t* Size) {
   if (!AttributesOf(Slot) || !Size) {
     return EINVAL;
@@ -887,6 +925,153 @@ int SceRwlockTimedwrlock(std::uint64_t* Slot, std::uint32_t Microseconds) {
 std::uint64_t SceGetspecific(std::uint32_t Key) {
   return GetSpecific(Key);
 }
+
+// Exception handlers (libkernel System/src/Exception.cpp's exports). A handler is a guest function
+// handler(int signal, ucontext*); sceKernelRaiseException runs the signal-30 handler on another thread, which is how
+// Unity's garbage collector stops threads (PS5Util.prx). The host delivers it through FexGuest's asynchronous
+// exceptions. Fault signals keep their handlers for the guest to read back; guest faults still end the run.
+constexpr int RaisedSignal = 30;
+std::array<std::atomic<std::uint64_t>, 32> ExceptionHandlers {};
+bool ExceptionSignalAllowed(int Signal) {
+  return Signal == 1 || Signal == 4 || Signal == 8 || Signal == 10 || Signal == 11 || Signal == RaisedSignal;
+}
+int InstallExceptionHandler(int Signal, std::uint64_t Handler) {
+  if (!ExceptionSignalAllowed(Signal) || Handler == 0) {
+    return Sce(EINVAL);
+  }
+  std::uint64_t Expected = 0;
+  return ExceptionHandlers[Signal].compare_exchange_strong(Expected, Handler) ? 0 : Sce(EAGAIN);
+}
+int RemoveExceptionHandler(int Signal) {
+  if (!ExceptionSignalAllowed(Signal)) {
+    return Sce(EINVAL);
+  }
+  ExceptionHandlers[Signal].store(0);
+  return 0;
+}
+int RaiseException(std::uint64_t Handle, int Signal) {
+  if (Signal != RaisedSignal) {
+    return Sce(EINVAL);
+  }
+  auto* T = ThreadOf(Handle);
+  const std::uint64_t Handler = ExceptionHandlers[Signal].load();
+  if (!T || Handler == 0) {
+    return Sce(!T ? ESRCH : EINVAL);
+  }
+  if (T == &Current()) {
+    FexGuest::RunExceptionHandlerHere(Handler, Signal);
+    return 0;
+  }
+  {
+    std::lock_guard Lock(T->Lock);
+    if (T->Finished || !T->Started) {
+      return Sce(ESRCH);
+    }
+  }
+  T->Exception.Signal = Signal;
+  std::uint64_t Expected = 0;
+  if (!T->Exception.Handler.compare_exchange_strong(Expected, Handler, std::memory_order_acq_rel)) {
+    return 0; // already pending
+  }
+  // The target takes the exception only at a delivery point (FexGuest::TakeException); until then it is signalled
+  // again every 100 microseconds.
+  const auto Deadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
+  for (;;) {
+    {
+      std::lock_guard Lock(T->Lock);
+      if (T->Finished) {
+        T->Exception.Handler.store(0);
+        return Sce(ESRCH);
+      }
+      if (T->Exception.Handler.load(std::memory_order_acquire) == 0) {
+        return 0;
+      }
+      pthread_kill(T->Host, FexGuest::ExceptionSignal);
+    }
+    for (int Wait = 0; Wait < 10; ++Wait) {
+      if (T->Exception.Handler.load(std::memory_order_acquire) == 0) {
+        return 0;
+      }
+      std::this_thread::sleep_for(std::chrono::microseconds(10));
+    }
+    if (std::chrono::steady_clock::now() > Deadline) {
+      std::printf("sceKernelRaiseException: thread %d (%s) reached no delivery point in 10 s\n", T->Id, T->Name.c_str());
+      std::fflush(stdout);
+      Expected = Handler;
+      T->Exception.Handler.compare_exchange_strong(Expected, 0);
+      return Sce(EBUSY);
+    }
+  }
+}
+
+// The guest's exception context: FreeBSD's amd64 ucontext with an FXSAVE image (UserContext.hpp).
+std::uint64_t WriteExceptionContext(const FexGuest::CPUState& State, std::uint64_t Rip, std::uint32_t Eflags, std::uint64_t Below) {
+  namespace X86 = FexGuest::X86;
+  const std::uint64_t Address = (Below - sizeof(UserUcontext)) & ~63ULL;
+  auto* Context = reinterpret_cast<UserUcontext*>(Address);
+  std::memset(Context, 0, sizeof(*Context));
+  auto& M = Context->mcontext;
+  M.rdi = State.gregs[X86::REG_RDI];
+  M.rsi = State.gregs[X86::REG_RSI];
+  M.rdx = State.gregs[X86::REG_RDX];
+  M.rcx = State.gregs[X86::REG_RCX];
+  M.r8 = State.gregs[X86::REG_R8];
+  M.r9 = State.gregs[X86::REG_R9];
+  M.rax = State.gregs[X86::REG_RAX];
+  M.rbx = State.gregs[X86::REG_RBX];
+  M.rbp = State.gregs[X86::REG_RBP];
+  M.r10 = State.gregs[X86::REG_R10];
+  M.r11 = State.gregs[X86::REG_R11];
+  M.r12 = State.gregs[X86::REG_R12];
+  M.r13 = State.gregs[X86::REG_R13];
+  M.r14 = State.gregs[X86::REG_R14];
+  M.r15 = State.gregs[X86::REG_R15];
+  M.rsp = State.gregs[X86::REG_RSP];
+  M.rip = Rip;
+  M.rflags = Eflags;
+  M.cs = 0x43; // FreeBSD's user code and stack selectors
+  M.ss = 0x3b;
+  M.len = sizeof(UserMcontext);
+  M.fpformat = 0x10002; // _MC_FPFMT_XMM
+  M.ownedfp = 0x20001;  // _MC_FPOWNED_PCB
+  auto* Fx = reinterpret_cast<std::uint8_t*>(M.fpstate);
+  const std::uint16_t ControlWord = 0x37f;
+  const std::uint32_t MxcsrMask = 0xffbf;
+  std::memcpy(Fx, &ControlWord, sizeof(ControlWord));
+  std::memcpy(Fx + 24, &State.mxcsr, sizeof(State.mxcsr));
+  std::memcpy(Fx + 28, &MxcsrMask, sizeof(MxcsrMask));
+  for (int Index = 0; Index < 8; ++Index) {
+    std::memcpy(Fx + 32 + Index * 16, State.mm[Index], 10);
+  }
+  for (int Index = 0; Index < 16; ++Index) {
+    std::memcpy(Fx + 160 + Index * 16, State.xmm.sse.data[Index], 16);
+  }
+  M.fsbase = State.fs_cached;
+  M.gsbase = State.gs_cached;
+  return Address;
+}
+void ReadExceptionContext(std::uint64_t Address, FexGuest::CPUState& State, std::uint32_t& Eflags) {
+  namespace X86 = FexGuest::X86;
+  const auto& M = reinterpret_cast<const UserUcontext*>(Address)->mcontext;
+  State.gregs[X86::REG_RDI] = M.rdi;
+  State.gregs[X86::REG_RSI] = M.rsi;
+  State.gregs[X86::REG_RDX] = M.rdx;
+  State.gregs[X86::REG_RCX] = M.rcx;
+  State.gregs[X86::REG_R8] = M.r8;
+  State.gregs[X86::REG_R9] = M.r9;
+  State.gregs[X86::REG_RAX] = M.rax;
+  State.gregs[X86::REG_RBX] = M.rbx;
+  State.gregs[X86::REG_RBP] = M.rbp;
+  State.gregs[X86::REG_R10] = M.r10;
+  State.gregs[X86::REG_R11] = M.r11;
+  State.gregs[X86::REG_R12] = M.r12;
+  State.gregs[X86::REG_R13] = M.r13;
+  State.gregs[X86::REG_R14] = M.r14;
+  State.gregs[X86::REG_R15] = M.r15;
+  State.gregs[X86::REG_RSP] = M.rsp;
+  State.rip = M.rip;
+  Eflags = static_cast<std::uint32_t>(M.rflags);
+}
 } // namespace
 
 namespace GuestThreads {
@@ -1030,6 +1215,15 @@ const std::pair<const char*, FexGuest::Thunk> Functions[] = {
   {"scePthreadGetname", SysV::Thunk<&SceOf<&Getname, std::uint64_t, char*>>},
   {"scePthreadYield", SysV::Thunk<&Yield>},
   {"scePthreadSetDefaultstacksize", SysV::Thunk<&SceOf<&SetDefaultstacksize, std::uint64_t>>},
+  {"pthread_attr_setstackaddr", SysV::Thunk<&AttrSetstackaddr>},
+  {"pthread_attr_getstackaddr", SysV::Thunk<&AttrGetstackaddr>},
+  {"pthread_attr_getstack", SysV::Thunk<&AttrGetstack>},
+  {"scePthreadAttrSetstackaddr", SysV::Thunk<&SceOf<&AttrSetstackaddr, std::uint64_t*, std::uint64_t>>},
+  {"scePthreadAttrGetstackaddr", SysV::Thunk<&SceOf<&AttrGetstackaddr, const std::uint64_t*, std::uint64_t*>>},
+  {"scePthreadAttrGetstack", SysV::Thunk<&SceOf<&AttrGetstack, const std::uint64_t*, std::uint64_t*, std::uint64_t*>>},
+  {"sceKernelInstallExceptionHandler", SysV::Thunk<&InstallExceptionHandler>},
+  {"sceKernelRemoveExceptionHandler", SysV::Thunk<&RemoveExceptionHandler>},
+  {"sceKernelRaiseException", SysV::Thunk<&RaiseException>},
 };
 const std::size_t FunctionCount = std::size(Functions);
 
@@ -1043,6 +1237,17 @@ void AdoptInitialThread(std::uint64_t ThreadPointer) {
   InitialThread.ThreadPointer = ThreadPointer;
   InitialThread.Name = "main";
   reinterpret_cast<std::uint64_t*>(ThreadPointer)[2] = reinterpret_cast<std::uint64_t>(&InitialThread);
+  FexGuest::ThreadException = &InitialThread.Exception;
+  FexGuest::WriteExceptionContext = WriteExceptionContext;
+  FexGuest::ReadExceptionContext = ReadExceptionContext;
+  std::lock_guard Lock(InitialThread.Lock);
+  InitialThread.Host = pthread_self();
+  InitialThread.Started = true;
+}
+
+void SetInitialStack(std::uint64_t Base, std::uint64_t Size) {
+  InitialThread.Settings.StackAddr = Base;
+  InitialThread.Settings.StackSize = Size;
 }
 
 } // namespace GuestThreads
