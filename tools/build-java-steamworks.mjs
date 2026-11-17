@@ -31,11 +31,12 @@ export async function compile({project:id,version,arch,output,work}){
   if(rebuilt){fs.copyFileSync(rebuilt.library,library);fs.copyFileSync(rebuilt.dependency,path.join(payload,'libsteam_api.dylib'));}
   else fs.writeFileSync(library,execFileSync('/usr/bin/unzip',['-p',publisher,'libsteamworks4j.dylib'],{maxBuffer:Infinity}),{mode:0o755});
   const agent=build(jdkBin,path.join(payload,'steam-agent.jar'));
-  return {original,project,agent,jdkBin,library,rebuilt};
+  const agentCompilerRuntime=execFileSync(path.join(jdkBin,'javac'),['-version'],{maxBuffer:Infinity,encoding:'utf8'}).trim();
+  return {original,project,agent,agentCompilerRuntime,library,rebuilt};
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
 }
 /** Add the notices and describe the payload. */
-export async function assemble({arch,version,output,work,compiled:{original,project,agent,jdkBin,library,rebuilt}}){
+export async function assemble({arch,version,output,work,compiled:{original,project,agent,agentCompilerRuntime,library,rebuilt}}){
  const payload=path.join(output,'payload');
  try {
   addLicenses(payload,'MacLauncher',root);
@@ -43,7 +44,7 @@ export async function assemble({arch,version,output,work,compiled:{original,proj
   if(rebuilt)addLicenses(payload,'Steamworks SDK',rebuilt.sdk);
   return helperPackage({id:project.id,version,arch,output,minimumMacOS:rebuilt?'11.0':arch==='x64'?'10.9':'11.0',sourceSha256:agent.sourceSha256,rosettaFiles:arch==='x64'?['libsteamworks4j.dylib']:[],
    record:{wrapperVersion:original.version,sourceRevision:original.sourceRevision,sourceUrl:original.sourceUrl,sourceKind:rebuilt?'source':'reviewed-binary',verifiedBuild:Boolean(rebuilt),...(rebuilt?{sourceBuild:rebuilt.sourceBuild}:{}),publisherUrl:original.archiveUrl,publisherJarSha256:original.archiveSha256,
-    librarySha256:sha(library),agentSha256:agent.sha256,agentCompilerRuntime:execFileSync(path.join(jdkBin,'javac'),['-version'],{maxBuffer:Infinity,encoding:'utf8'}).trim(),agentClassMajor:52,abiProfile:original.abiProfile,interfaces:original.interfaces,symbols:original.symbols}});
+    librarySha256:sha(library),agentSha256:agent.sha256,agentCompilerRuntime,agentClassMajor:52,abiProfile:original.abiProfile,interfaces:original.interfaces,symbols:original.symbols}});
  }catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}finally{fs.rmSync(work,{recursive:true,force:true});}
 }
 recipeMain(import.meta,{compile,assemble});

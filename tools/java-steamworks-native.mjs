@@ -54,5 +54,5 @@ export async function compileNative({original,arch,work,jdkBin}){
  run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',library]);
  const actual=Native.readMachOArchitectures(library,{allowLibrary:true}).sort();
  if(JSON.stringify(actual)!==JSON.stringify(cpus.slice().sort()))throw Error('The JNI output differs from its requested CPUs.');
- return {library,dependency,sdk,source,classes,sourceBuild:{sourceRevision:original.sourceRevision,sourceArchiveSha256:original.source.sha256,sdkRevision:inputs.sdk.revision,sdkPublisherLibrarySha256:sha(publisherDependency),sdkLibrarySha256:sha(dependency),jnigenSha256:inputs.jnigen.sha256,javaparserSha256:inputs.javaparser.sha256}};
+ return {library,dependency,sdk,source,classes,sourceBuild:{sourceRevision:original.sourceRevision,sourceArchiveSha256:original.source.archive.sha256,sdkRevision:inputs.sdk.revision,sdkPublisherLibrarySha256:sha(publisherDependency),sdkLibrarySha256:sha(dependency),jnigenSha256:inputs.jnigen.sha256,javaparserSha256:inputs.javaparser.sha256}};
 }
