@@ -1,0 +1,447 @@
+{
+  "id": "love",
+  "version": "0.10.2-MCLv1",
+  "arch": "universal",
+  "minimumMacOS": "12.0",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "sourceRelative": null,
+  "sourceSha256": "bea3f586a18c6ebf3a254886d5891319f4af0ff90cc1fed84dee9b36c9fe1c0b",
+  "directoryRelative": "love/0.10.2-MCLv1/universal",
+  "manifestRelative": "helper.json",
+  "manifestSha256": "d0e986893ec2beeab287e0683ac6a343d9d78e8cfc2a650e1136e7376b6f49f1",
+  "files": [
+    {
+      "path": "helper.json",
+      "size": 23342,
+      "sha256": "d0e986893ec2beeab287e0683ac6a343d9d78e8cfc2a650e1136e7376b6f49f1",
+      "mode": 420
+    },
+    {
+      "path": "licenses/components.txt",
+      "size": 669,
+      "sha256": "0bd9f5caecb60a704df0adbbbcf442dd44a331882995baf259fdfe1482f4d1ce",
+      "mode": 420
+    },
+    {
+      "path": "licenses/L-VE-0.10.2-2.txt",
+      "size": 2935,
+      "sha256": "5b79fb4754728487cf43d55b213bb68369912484f2dd7ab68380435e994bce39",
+      "mode": 420
+    },
+    {
+      "path": "licenses/L-VE-0.10.2-3.txt",
+      "size": 5345,
+      "sha256": "bdb0a645ea18c60507d0368379b1ac5474b92255fcc2d115e07486a7672ba526",
+      "mode": 420
+    },
+    {
+      "path": "licenses/L-VE-0.10.2-4.txt",
+      "size": 878,
+      "sha256": "8876cdca96eb380d16d5ea32bf4529d85e87dedc7765ae2861a9bec7f34acbed",
+      "mode": 420
+    },
+    {
+      "path": "licenses/L-VE-0.10.2-5.txt",
+      "size": 1036,
+      "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+      "mode": 420
+    },
+    {
+      "path": "licenses/L-VE-0.10.2.txt",
+      "size": 49753,
+      "sha256": "c3f5ff3f68697284680220b029134c6560d16a269f991d0b96d020cb5e292a63",
+      "mode": 420
+    },
+    {
+      "path": "licenses/libmodplug-0.8.8.4.txt",
+      "size": 57,
+      "sha256": "49942e7b3b175f549e751feb08b5270ca6f6c5fb7a1be9f9517db275ec32c92e",
+      "mode": 420
+    },
+    {
+      "path": "licenses/libogg-1.3.2.txt",
+      "size": 1466,
+      "sha256": "d2ab5758336489da61c12cc5bb757da5339c4ae9001f9bb0562b4370249af814",
+      "mode": 420
+    },
+    {
+      "path": "licenses/libtheora-1.1.1-2.txt",
+      "size": 964,
+      "sha256": "654a0238f789f4435c4818f50005b141d013c5a09a31d861efc1d0d67ba975a4",
+      "mode": 420
+    },
+    {
+      "path": "licenses/libtheora-1.1.1.txt",
+      "size": 1470,
+      "sha256": "8417fad7da775735564e209484a2e011e0fa201e94f01fdbee6e4977e478e6fc",
+      "mode": 420
+    },
+    {
+      "path": "licenses/libvorbis-1.3.5.txt",
+      "size": 1470,
+      "sha256": "5c0905d21494102e4d579a3c42216f8de1c2ac738443db4f189f93a01ca31a93",
+      "mode": 420
+    },
+    {
+      "path": "licenses/lua-5.1.5.txt",
+      "size": 1528,
+      "sha256": "ee5e3e82af1e1b543c4f216e399d7c8cfee797711913f349e385101c4ae60a79",
+      "mode": 420
+    },
+    {
+      "path": "licenses/LuaJIT.txt",
+      "size": 2932,
+      "sha256": "c4e8c9ce2933970598d6946abd616e01ffcbba30f3ea41f3ef681e2a50272010",
+      "mode": 420
+    },
+    {
+      "path": "licenses/mpg123-1.15.3.txt",
+      "size": 41537,
+      "sha256": "ce91819728ca4a7cbbf187217395a3fa97beb6e5d5190e4c56d9c8d7b6b9f7c6",
+      "mode": 420
+    },
+    {
+      "path": "licenses/openal-soft.txt",
+      "size": 25383,
+      "sha256": "b7993225104d90ddd8024fd838faf300bea5e83d91203eab98e29512acebd69c",
+      "mode": 420
+    },
+    {
+      "path": "licenses/physfs-2.0.3.txt",
+      "size": 1787,
+      "sha256": "5fa3097cc0193acf434f50c92ce6266fd558191e87fb58e1388f81130da53f88",
+      "mode": 420
+    },
+    {
+      "path": "licenses/SDL2.txt",
+      "size": 930,
+      "sha256": "a884f0831135c64fda998323e3bf292521e5f588c162c6c1ab9e45198c30b460",
+      "mode": 420
+    },
+    {
+      "path": "licenses/zlib-1.2.8-2.txt",
+      "size": 8734,
+      "sha256": "23f684d8e8ea133f5a4ee443c8dcfccfb8fed7e120d2735a315835d8c8289822",
+      "mode": 420
+    },
+    {
+      "path": "licenses/zlib-1.2.8-3.txt",
+      "size": 87883,
+      "sha256": "726b0569915917b967f87f3f08a1eec039101bf9dcc29d61c0b2b0b8f271b58d",
+      "mode": 420
+    },
+    {
+      "path": "licenses/zlib-1.2.8-4.txt",
+      "size": 1192,
+      "sha256": "2b133e742e41f08cc4e993ceddbd43ee9d2d1b76da60c53b8405e1f811274a85",
+      "mode": 420
+    },
+    {
+      "path": "licenses/zlib-1.2.8-5.txt",
+      "size": 294,
+      "sha256": "2f1d0b18ce37c2af415a469857f02aee2c41a58877aff21d29e9c6db32b55cb7",
+      "mode": 420
+    },
+    {
+      "path": "licenses/zlib-1.2.8-6.txt",
+      "size": 254,
+      "sha256": "04c01cc2e1a0ed123518b5855f585c93a24526dd88982c414111ea1fc9f07997",
+      "mode": 420
+    },
+    {
+      "path": "licenses/zlib-1.2.8.txt",
+      "size": 4236,
+      "sha256": "621d9c7afa32fac41b28219c0d38a4a7179fdc05358bd2f7bdf7116d25d0cecd",
+      "mode": 420
+    },
+    {
+      "path": "love.app/Contents/_CodeSignature/CodeResources",
+      "size": 5633,
+      "sha256": "c7693dc022cd1651f13741367f9078ac1a8ebb668a3b069c40229ff3580eb7e0",
+      "mode": 420
+    },
+    {
+      "path": "love.app/Contents/Frameworks/FreeType.framework/_CodeSignature/CodeResources",
+      "size": 2442,
+      "sha256": "99a25cc6dde74eaee7d80f76cb092c5e1bfc3f1d27062b9fbd65302a2f24ec23",
+      "mode": 420
+    },
+    {
+      "path": "love.app/Contents/Frameworks/FreeType.framework/FreeType",
+      "size": 1899136,
+      "sha256": "6f5bb50272372d0d447f74a90d0c59cb600fbab2d2d11234dfb8caf3e51ea42e",
+      "mode": 493,
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "path": "love.app/Contents/Frameworks/FreeType.framework/Resources/Info.plist",
+      "size": 800,
+      "sha256": "92145dcb4efec2adaf580f7726846c0f27cf9a807dfe848fb86cc66bf76c8159",
+      "mode": 420
+    },
+    {
+      "path": "love.app/Contents/Frameworks/libmodplug.framework/_CodeSignature/CodeResources",
+      "size": 2442,
+      "sha256": "b7b3728b823f3cb653e1b7902c5eeb2f637ade051aa5955977c0da23b8a1b8c6",
+      "mode": 420
+    },
+    {
+      "path": "love.app/Contents/Frameworks/libmodplug.framework/libmodplug",
+      "size": 759248,
+      "sha256": "d4f71dedbec59c5c81e26d25435ea9c74b6ca96568712c18fe11146af997c804",
+      "mode": 493,
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "path": "love.app/Contents/Frameworks/libmodplug.framework/Resources/Info.plist",
+      "size": 804,
+      "sha256": "afeabfcf11b6068e83b740ad7e0640aaf170e3b336861369271287cd3a65ce26",
+      "mode": 420
+    },
+    {
+      "path": "love.app/Contents/Frameworks/love.framework/_CodeSignature/CodeResources",
+      "size": 2442,
+      "sha256": "7c0b8681a0e536f066d9c5dbb9f4e953553405d1054f42b9a5a9a750f06bcdcb",
+      "mode": 420
+    },
+    {
+      "path": "love.app/Contents/Frameworks/love.framework/love",
+      "size": 5176064,
+      "sha256": "cf7bc3422ad2424c39ab3ee05a74835b35ed520cf1d43359da68f3ba897a42ad",
+      "mode": 493,
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "path": "love.app/Contents/Frameworks/love.framework/Resources/Info.plist",
+      "size": 792,
+      "sha256": "2de6b4987191977f75b6da744439448ce6aa8cc48c2323865a23cf467c8dd2e5",
+      "mode": 420
+    },
+    {
+      "path": "love.app/Contents/Frameworks/Lua.framework/_CodeSignature/CodeResources",
+      "size": 2442,
+      "sha256": "2c6501b28d1b754acccc66c2c81e3354aedc0d1d69da4f882bad6f7c5916d15b",
+      "mode": 420
+    },
+    {
+      "path": "love.app/Contents/Frameworks/Lua.framework/Lua",
+      "size": 1212128,
+      "sha256": "ba9dcbbe862342401e9bedc1c4cd9473633d032edccb2c121ab81a36286c3b25",
+      "mode": 493,
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "path": "love.app/Contents/Frameworks/Lua.framework/Resources/Info.plist",
+      "size": 332,
+      "sha256": "10be8ec77621d265b54cdcea9260f4586f70d790ff084d879393dafd925f145f",
+      "mode": 420
+    },
+    {
+      "path": "love.app/Contents/Frameworks/mpg123.framework/_CodeSignature/CodeResources",
+      "size": 2442,
+      "sha256": "9a3a14b98789dc8e3f557c3375cbe50ae6e365119324e89a53a3d4998b420996",
+      "mode": 420
+    },
+    {
+      "path": "love.app/Contents/Frameworks/mpg123.framework/mpg123",
+      "size": 494384,
+      "sha256": "591fe2d71b95e9af7e74ae94e646982456393086013139d007166c296b0f0bdd",
+      "mode": 493,
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "path": "love.app/Contents/Frameworks/mpg123.framework/Resources/Info.plist",
+      "size": 796,
+      "sha256": "222256a1afb9db09f731152e3001187b84352189b9bd46764d50152267f6bd24",
+      "mode": 420
+    },
+    {
+      "path": "love.app/Contents/Frameworks/Ogg.framework/_CodeSignature/CodeResources",
+      "size": 2442,
+      "sha256": "8fe3fe2216d568f0cb3a42dbce8ad6823cab940b1ee371bcc56e843e7dcdb3f1",
+      "mode": 420
+    },
+    {
+      "path": "love.app/Contents/Frameworks/Ogg.framework/Ogg",
+      "size": 102848,
+      "sha256": "1f77bb153e9ec4874698690d417f6ce77a8cb8567ada6383aceead2fdf35a988",
+      "mode": 493,
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "path": "love.app/Contents/Frameworks/Ogg.framework/Resources/Info.plist",
+      "size": 790,
+      "sha256": "b4c59e68f4f84a2909708a783b9cfc25a1834be483519861b92a8cbb4cf0e09b",
+      "mode": 420
+    },
+    {
+      "path": "love.app/Contents/Frameworks/OpenAL-Soft.framework/_CodeSignature/CodeResources",
+      "size": 2442,
+      "sha256": "01d1b1bb08fa831c9790cbe4e650b7899b867d9be49c79016854f601354f4d64",
+      "mode": 420
+    },
+    {
+      "path": "love.app/Contents/Frameworks/OpenAL-Soft.framework/OpenAL-Soft",
+      "size": 1097472,
+      "sha256": "1c99fde65e47b0d0c3d87b45afde2d5d5217607cdb518d427767a76c4a532f20",
+      "mode": 493,
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "path": "love.app/Contents/Frameworks/OpenAL-Soft.framework/Resources/Info.plist",
+      "size": 806,
+      "sha256": "df838670b28d27467e9adc7f55bf8b9d62664458a29523610584c028feb90c2e",
+      "mode": 420
+    },
+    {
+      "path": "love.app/Contents/Frameworks/physfs.framework/_CodeSignature/CodeResources",
+      "size": 2442,
+      "sha256": "ed943148c0e957bc0dbdeb48e16faa446b7102514a2f170344c4bf6a2e1e3031",
+      "mode": 420
+    },
+    {
+      "path": "love.app/Contents/Frameworks/physfs.framework/physfs",
+      "size": 427936,
+      "sha256": "2308052a1188fa1e4d2d4fd1e16038a7fbbdb99f7e4ac5f80ac8423d48fccb7c",
+      "mode": 493,
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "path": "love.app/Contents/Frameworks/physfs.framework/Resources/Info.plist",
+      "size": 796,
+      "sha256": "2c66a69a3ad689f656ce4ad49816a2282226fd1b9d416775732c0fd5cbd59d2d",
+      "mode": 420
+    },
+    {
+      "path": "love.app/Contents/Frameworks/SDL2.framework/_CodeSignature/CodeResources",
+      "size": 2442,
+      "sha256": "4c3629b260d1bbfd535d128411adb959c91513f2536d62a202b20a7a88facaf7",
+      "mode": 420
+    },
+    {
+      "path": "love.app/Contents/Frameworks/SDL2.framework/Resources/Info.plist",
+      "size": 792,
+      "sha256": "59ef9f8b66f40ad07fa8e989018d7465c2d8181097753b493e1e839ce32b18b7",
+      "mode": 420
+    },
+    {
+      "path": "love.app/Contents/Frameworks/SDL2.framework/SDL2",
+      "size": 2014880,
+      "sha256": "70b5f9af38cc1bcece19a3e75ff273afc27ebdc549fd21339473e9896093b81c",
+      "mode": 493,
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "path": "love.app/Contents/Frameworks/Theora.framework/_CodeSignature/CodeResources",
+      "size": 2442,
+      "sha256": "b3461bb5dfb107448e3bd2d5590202e1e23f03373270d9017cc344ea3412eea0",
+      "mode": 420
+    },
+    {
+      "path": "love.app/Contents/Frameworks/Theora.framework/Resources/Info.plist",
+      "size": 796,
+      "sha256": "64a5ecd468cdc5df94dcaf06864289beb0ee30a2fb74ee82ba5ff2ec8270ddd9",
+      "mode": 420
+    },
+    {
+      "path": "love.app/Contents/Frameworks/Theora.framework/Theora",
+      "size": 556704,
+      "sha256": "3f190bb675a619c5dbb35f7fbe82b0d2d06e419517bed83ebe29a10dc8545125",
+      "mode": 493,
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "path": "love.app/Contents/Frameworks/Vorbis.framework/_CodeSignature/CodeResources",
+      "size": 2442,
+      "sha256": "36ee2da0ab102b63cab9edd3598b1b3022a959542256d5147470ec545caade4c",
+      "mode": 420
+    },
+    {
+      "path": "love.app/Contents/Frameworks/Vorbis.framework/Resources/Info.plist",
+      "size": 796,
+      "sha256": "50c17f1b022be8aaff0eb369a98e070e38fbc076e68baa397c70dde5c4765ce2",
+      "mode": 420
+    },
+    {
+      "path": "love.app/Contents/Frameworks/Vorbis.framework/Vorbis",
+      "size": 1896192,
+      "sha256": "2a5f5016798420aca9a0e6a7ab1e8817ce9b20606851641c713e730855fc6a70",
+      "mode": 493,
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "path": "love.app/Contents/Frameworks/Vorbisfile.framework/_CodeSignature/CodeResources",
+      "size": 2442,
+      "sha256": "4df2b798db1a5c3fb42ac2c0bc4b43e9e2bdad7050505a075f8f70b4e18cab42",
+      "mode": 420
+    },
+    {
+      "path": "love.app/Contents/Frameworks/Vorbisfile.framework/Resources/Info.plist",
+      "size": 804,
+      "sha256": "84e46b96b9f41a0d401b53234fc1263cbddaeded4a704c958327a4c6015937b1",
+      "mode": 420
+    },
+    {
+      "path": "love.app/Contents/Frameworks/Vorbisfile.framework/Vorbisfile",
+      "size": 120816,
+      "sha256": "d40fe991373a75b0ddc0d6f00c8f1814609aa41f0c1778ba751bdbff29c3f5ad",
+      "mode": 493,
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "path": "love.app/Contents/Info.plist",
+      "size": 544,
+      "sha256": "93925a673d1c1557c72cea694ed0fe14c33164bd24562e87452b159226717b4a",
+      "mode": 420
+    },
+    {
+      "path": "love.app/Contents/MacOS/love",
+      "size": 152624,
+      "sha256": "56ab347d15d663099d9a037a8d4bfba9b958a5beb48ebbb45d0a612fabcb6c16",
+      "mode": 493,
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    }
+  ]
+}

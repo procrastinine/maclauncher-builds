@@ -2,5 +2,46 @@
   "schemaVersion": 2,
   "projectId": "love",
   "updatePolicy": "manual",
-  "packages": []
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "love",
+      "version": "0.10.2-MCLv1",
+      "arch": "universal",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "12.0",
+      "manifestRelative": "helper.json",
+      "manifestSha256": "d0e986893ec2beeab287e0683ac6a343d9d78e8cfc2a650e1136e7376b6f49f1",
+      "sourceSha256": "bea3f586a18c6ebf3a254886d5891319f4af0ff90cc1fed84dee9b36c9fe1c0b",
+      "updatePolicy": "manual",
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "52c350e0ec913ccff8b5532cdde25e6687cba730"
+      },
+      "asset": {
+        "filename": "love-0.10.2-MCLv1-universal.tar.gz",
+        "sha256": "936dab4737c3bc86765aaa665e53777d5d6594da7bf442dd76cfa9ce6e7650b7",
+        "bytes": 6407130,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/love%2Fv0.10.2-MCLv1%2Funiversal/love-0.10.2-MCLv1-universal.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "52c350e0ec913ccff8b5532cdde25e6687cba730",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.2",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "44018829363",
+        "runAttempt": "1",
+        "definitionDigest": "9bf2d2286d5ea5512b4aaa1404b4fcbf852deebd7d6fb72b278c3b6a25f42be4"
+      },
+      "tag": "love/v0.10.2-MCLv1/universal"
+    }
+  ]
 }
