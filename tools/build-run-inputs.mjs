@@ -64,7 +64,7 @@ export async function prepareBuildInputs({project,output,directory=root,environm
  }
  // The definition's source archives are fetched here, before compilation; the recipe reads the
  // verified bytes from buildInput's cache. An archive listed for one architecture is fetched only for it.
- for(const archive of reports[project]?.definition?.archives||[])if(!archive.arch||archive.arch===consumerArch)await fetchArchive(archive);
+ for(const archive of reports[project]?.definition?.recipe?.archives||reports[project]?.definition?.archives||[])if(!archive.arch||archive.arch===consumerArch)await fetchArchive(archive);
  const file=path.join(output,'inputs.json');fs.writeFileSync(file,JSON.stringify(result,null,2)+'\n',{flag:'wx'});
  if(environment.GITHUB_ENV)fs.appendFileSync(environment.GITHUB_ENV,'MACLAUNCHER_BUILD_INPUTS='+file+'\n');return result;
 }
