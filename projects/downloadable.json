@@ -4521,5 +4521,63 @@
         "ninja"
       ]
     }
+  },
+  {
+    "id": "maclauncher-crossover-winemac",
+    "name": "CrossOver Vulkan macOS driver",
+    "purpose": "Optional matched macOS driver for CrossOver Vulkan launches.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "entries": [
+        "producers/crossover-winemac",
+        "producers/dependencies/crossoverWine.json",
+        "producers/dependencies/llvmMingw.json"
+      ],
+      "sourceDirectory": "producers/crossover-winemac",
+      "sourceRepository": "https://github.com/wine-mirror/wine"
+    },
+    "upstreams": [],
+    "packageProfiles": [
+      {
+        "version": "26.3.0-MCLv1",
+        "label": "CrossOver 26.3 macOS Vulkan driver"
+      }
+    ],
+    "build": {
+      "version": "26.3.0-MCLv1",
+      "command": "producers/crossover-winemac/build.mjs",
+      "architectures": [
+        "x64"
+      ],
+      "tools": [
+        "bison",
+        "pkgconf"
+      ],
+      "archives": [
+        {
+          "file": "producers/dependencies/crossoverWine.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/llvmMingw.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/crossover-winemac/source.json",
+          "pointer": "/bison"
+        },
+        {
+          "file": "producers/crossover-winemac/source.json",
+          "pointer": "/vulkanLinkInput/archive"
+        }
+      ]
+    },
+    "versionBindings": [
+      {
+        "file": "producers/crossover-winemac/source.json",
+        "pointer": "/version"
+      }
+    ]
   }
 ]
