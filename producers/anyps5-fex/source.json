@@ -234,7 +234,8 @@
       "GuestImages.cpp",
       "GuestImages.h",
       "GuestThreads.cpp",
-      "GuestThreads.h"
+      "GuestThreads.h",
+      "HostLibc.cpp"
     ],
     "guest": {
       "source": "guest-abi.c",

@@ -11,8 +11,8 @@
 // the PRX libraries they link) come from that build as objects and static libraries.
 // The FEX checkout (with the submodules source.json lists) and the AnyPS5 paths are projected into
 // <directory>, the overlays are applied there, AnyPS5's arm64 library objects are compiled, and the
-// proof executable is linked against static FEXCore. AnyPS5 internals that the selected exports
-// reference but the proof never reaches are linked as trapping stubs (host/unreached-exports.py).
+// proof executable is linked against static FEXCore. Every host links every symbol it references (the proof takes the
+// AnyPS5 objects it reaches from their archive), so a missing definition fails the build.
 // The ABI proof's guest code (host/guest-abi.c) is compiled for x86-64 and its text extracted for the host to map.
 // --check runs the module function twice, with the import slot unbound (must fail) and bound to the thunk (must
 // print PASS), and the ABI proof twice, through the generic register shim (must fail) and through per-signature
@@ -206,14 +206,13 @@ function prefixMaps(out){
  return ['-ffile-prefix-map='+out+'=/anyps5-fex','-fmacro-prefix-map='+path.join(out,'anyps5')+'/=','-fmacro-prefix-map='+out+'=/anyps5-fex'];
 }
 
-// stubs: link-stub objects only the proof links. The start host takes none, so a symbol no object defines fails its link.
-function link(out,objects,log,stubs=[]){
+function link(out,objects,log){
  const build=path.join(out,'build');
  run('cmake',['-S',path.join(out,'fex'),'-B',build,'-G','Ninja','-DCMAKE_BUILD_TYPE=Release','-DBUILD_TESTING=OFF','-DBUILD_FEXCONFIG=OFF',
   '-DENABLE_JEMALLOC_GLIBC_ALLOC=OFF','-DENABLE_OFFLINE_TELEMETRY=OFF','-DENABLE_CCACHE=OFF','-DENABLE_LTO=OFF','-DTUNE_CPU=none','-DTUNE_ARCH=generic',
   '-DCMAKE_PROJECT_FEX_INCLUDE='+path.join(out,'host',recipe.host.entry),'-DANYPS5_ARM64_OBJECTS='+objects.join(';'),'-DANYPS5_SOURCE_DIR='+path.join(out,'anyps5'),'-DANYPS5_GENERATED_THUNKS='+generatedFiles.join(';'),
   '-DANYPS5_ARM64_LINK='+[...cmake.archives,...cmake.link].join(';'),'-DANYPS5_ARM64_INCLUDES='+cmake.includes.join(';'),
-  '-DANYPS5_ARM64_DEFINES='+cmake.defines.join(';'),'-DANYPS5_PROOF_STUBS='+stubs.join(';')],{stdio:['ignore','ignore','inherit']});
+  '-DANYPS5_ARM64_DEFINES='+cmake.defines.join(';')],{stdio:['ignore','ignore','inherit']});
  // -k 0: every target's link errors, not only the first failing target's.
  const result=spawnSync('ninja',['-C',build,'-k','0',...recipe.host.targets],{encoding:'utf8',maxBuffer:Infinity});
  fs.writeFileSync(log,result.stdout+result.stderr);
@@ -358,47 +357,23 @@ if(options.anyps5Arm64){
 const generatedThunks=path.join(options.out,'generated-thunks.cpp');
 const generatedFiles=execFileSync('python3',['-I',path.join(import.meta.dirname,recipe.host.directory,recipe.host.generator.script),generatedThunks,
  [path.join(options.out,'anyps5/core/libs'),...cmake.includes].join(':'),...[...recipe.anyps5.objects,...cmake.sources.filter(source=>fs.existsSync(path.join(options.out,'anyps5',source)))].map(source=>path.join(options.out,'anyps5',source)),'--',...objects],{encoding:'utf8',stdio:['ignore','pipe','inherit']}).trim().split('\n');
-const firstLog=path.join(options.out,'link-exports.log');
-const assembly=path.join(options.out,'anyps5-unreached-exports.s'),stubs=path.join(options.out,'anyps5-unreached-exports.o');
-// Stubs of an earlier build never stand for this one.
-for(const file of [assembly,stubs])fs.rmSync(file,{force:true});
-if(!link(options.out,objects,firstLog)){
- if(!/Undefined symbols/.test(fs.readFileSync(firstLog,'utf8')))throw Error('The proof build failed; see '+firstLog);
- execFileSync('python3',['-I',path.join(import.meta.dirname,recipe.host.directory,'unreached-exports.py'),firstLog,assembly,...objects,...cmake.archives],{stdio:'inherit'});
- run('clang',['-c','-arch','arm64',assembly,'-o',stubs]);
- const secondLog=path.join(options.out,'link-proof.log');
- if(!link(options.out,objects,secondLog,[stubs])){
-  const missing=[...fs.readFileSync(secondLog,'utf8').matchAll(/^  "(.*)", referenced from:/gm)].map(match=>match[1]);
-  throw Error((missing.length?'anyps5-fex-start references '+missing.length+' symbols no object defines ('+missing.slice(0,40).join(', ')+(missing.length>40?', ...':'')+')':'The proof build failed')+'; see '+secondLog);
- }
+const linkLog=path.join(options.out,'link.log');
+// Links and stub files of an earlier build never stand for this one.
+for(const file of ['link-exports.log','link-proof.log','anyps5-unreached-exports.s','anyps5-unreached-exports.o','reachable-roots.txt','reachable-stubs.txt'])
+ fs.rmSync(path.join(options.out,file),{force:true});
+if(!link(options.out,objects,linkLog)){
+ const missing=[...fs.readFileSync(linkLog,'utf8').matchAll(/^  "(.*)", referenced from:/gm)].map(match=>match[1]);
+ throw Error((missing.length?missing.length+' symbols no object defines ('+missing.slice(0,40).join(', ')+(missing.length>40?', ...':'')+')':'The host build failed')+'; see '+linkLog);
 }
 const [proof,abi,start,syscall]=recipe.host.targets.map(target=>path.join(options.out,'build/Bin',target));
 // The dynamic libraries the AnyPS5 libraries link (SDL) load from next to the executables (@executable_path).
 for(const library of cmake.link.filter(item=>item.endsWith('.dylib')))fs.copyFileSync(library,path.join(options.out,'build/Bin',path.basename(library)));
 process.stdout.write(proof+'\n'+abi+' '+guestText+' '+guestOffsets.join(' ')+'\n'+start+'\n'+syscall+'\n');
 // The start host's static initializers include the AnyPS5 objects' registrations. Run without arguments, it stops at
-// its usage message (exit 2) unless an initializer reaches one of the unreached-export stubs above (SIGTRAP).
+// its usage message (exit 2) when every initializer returns.
 {
  const usage=spawnSync(start,[],{encoding:'utf8',timeout:20000});
- if(usage.status!==2){
-  // Name the stubs that the initializers reach directly.
-  const initializers=execFileSync('nm',['-j',start],{encoding:'utf8'}).split('\n').filter(symbol=>symbol.includes('GLOBAL__sub_I'));
-  const reach=spawnSync('python3',['-I',path.join(import.meta.dirname,recipe.host.directory,'reachable-stubs.py'),start,
-   path.join(options.out,'anyps5-unreached-exports.s'),...initializers],{encoding:'utf8',maxBuffer:Infinity});
-  throw Error(path.basename(start)+' did not reach main (status '+usage.status+', signal '+usage.signal+
-   '): a static initializer called a symbol the proof does not link.\n'+reach.stdout+reach.stderr);
- }
-}
-// Every link stub that an AnyPS5 export reaches through direct calls, with one call path each, in reachable-stubs.txt.
-if(fs.existsSync(path.join(options.out,'anyps5-unreached-exports.s'))){
- const exports=objects.flatMap(object=>execFileSync('nm',['-gU','-j',object],{encoding:'utf8'}).split('\n')).filter(symbol=>symbol.endsWith('_nid_postfix'));
- const roots=path.join(options.out,'reachable-roots.txt'),report=path.join(options.out,'reachable-stubs.txt');
- fs.writeFileSync(roots,[...new Set(exports)].join('\n')+'\n');
- const reach=spawnSync('python3',['-I',path.join(import.meta.dirname,recipe.host.directory,'reachable-stubs.py'),start,
-  path.join(options.out,'anyps5-unreached-exports.s'),'@'+roots],{encoding:'utf8',maxBuffer:Infinity});
- if(reach.status!==0)throw Error('reachable-stubs.py failed: '+reach.stderr);
- fs.writeFileSync(report,reach.stdout);
- process.stdout.write(reach.stderr.trim().split('\n').pop()+'; see '+report+'\n');
+ if(usage.status!==2)throw Error(path.basename(start)+' did not reach main (status '+usage.status+', signal '+usage.signal+'): a static initializer failed.\n'+usage.stdout+usage.stderr);
 }
 if(options.check){
  const [eboot,functionAddress,slot,bss,main]=options.check;

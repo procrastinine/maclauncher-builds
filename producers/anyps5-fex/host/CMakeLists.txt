@@ -8,11 +8,17 @@ set(ANYPS5_GENERATED_THUNKS "" CACHE STRING "the thunk translation units generat
 set(ANYPS5_ARM64_LINK "" CACHE STRING "static libraries, dynamic libraries and frameworks the AnyPS5 objects link")
 set(ANYPS5_ARM64_INCLUDES "" CACHE STRING "include directories the AnyPS5 libraries' headers need (SDL, Vulkan, generated headers)")
 set(ANYPS5_ARM64_DEFINES "" CACHE STRING "compile definitions the AnyPS5 libraries' headers need")
-set(ANYPS5_PROOF_STUBS "" CACHE STRING "trapping definitions of what the proof references and does not link (unreached-exports.py); the start host takes none")
-add_executable(anyps5-fex-proof ${H}/AnyPS5FexProof.cpp ${H}/KernelThreadRecord.cpp ${H}/GuestImages.cpp ${ANYPS5_ARM64_OBJECTS} ${ANYPS5_PROOF_STUBS})
-add_executable(anyps5-fex-abi ${H}/AnyPS5FexAbi.cpp ${H}/GenericBridge.S)
-add_executable(anyps5-fex-start ${H}/AnyPS5FexStart.cpp ${H}/KernelThreadRecord.cpp ${H}/GuestImages.cpp ${H}/GuestThreads.cpp ${ANYPS5_GENERATED_THUNKS} ${ANYPS5_ARM64_OBJECTS}
+# The proof calls one export, so it links the AnyPS5 objects as an archive and takes only the members that export
+# reaches; the start host binds every export, so it links them whole. Both link every symbol they reference: a missing
+# definition fails the build.
+add_library(anyps5-arm64-objects STATIC ${ANYPS5_ARM64_OBJECTS})
+set_target_properties(anyps5-arm64-objects PROPERTIES LINKER_LANGUAGE CXX)
+set(ANYPS5_HOST_SOURCES ${H}/KernelThreadRecord.cpp ${H}/GuestImages.cpp ${H}/GuestThreads.cpp ${H}/HostLibc.cpp
   ${ANYPS5_SOURCE_DIR}/core/libs/nid/src/NidCompute.cpp ${ANYPS5_SOURCE_DIR}/core/libs/nid/src/Sha1.cpp)
+add_executable(anyps5-fex-proof ${H}/AnyPS5FexProof.cpp ${ANYPS5_HOST_SOURCES})
+target_link_libraries(anyps5-fex-proof PRIVATE anyps5-arm64-objects)
+add_executable(anyps5-fex-abi ${H}/AnyPS5FexAbi.cpp ${H}/GenericBridge.S)
+add_executable(anyps5-fex-start ${H}/AnyPS5FexStart.cpp ${ANYPS5_HOST_SOURCES} ${ANYPS5_GENERATED_THUNKS} ${ANYPS5_ARM64_OBJECTS})
 foreach(Target anyps5-fex-proof anyps5-fex-start)
   target_include_directories(${Target} PRIVATE ${H} ${ANYPS5_SOURCE_DIR}/core/libs ${ANYPS5_SOURCE_DIR}/core/libs/nid/include ${ANYPS5_ARM64_INCLUDES})
   target_link_libraries(${Target} PRIVATE ${ANYPS5_ARM64_LINK})

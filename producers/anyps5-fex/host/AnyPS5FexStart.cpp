@@ -8,10 +8,11 @@
 // entry with the PS5 argument block; a HLT placed at main ends the "modules" run there, which passes when it reaches
 // main without calling any stub. "past-main" goes on into main.
 //
-// Usage: anyps5-fex-start <game directory> <game data directory> <main vaddr> modules|eboot-only|past-main|run
+// Usage: anyps5-fex-start <game directory> <game data directory> <main vaddr> modules|eboot-only|past-main|run|bind
 //                        [<executables directory>]
 //   eboot-only leaves out the sce_module PRX modules, so their exports stay unbound (expected to fail). run starts the
-//   eboot entry without a stop at main (the main vaddr is not used). The eboot is <game directory>/eboot.elf, or
+//   eboot entry without a stop at main (the main vaddr is not used). bind runs no guest code: it also loads every other
+//   .prx under the executables directory, as the game would at run time, and lists each import left on the stub. The eboot is <game directory>/eboot.elf, or
 //   eboot.bin when there is no eboot.elf (an unencrypted ELF, as a PS5 game folder holds it). The game directory is
 //   the guest's /app0. The executables directory, when given, holds the original eboot and sce_module PRX modules
 //   instead (a prepared AnyPS5 game keeps them in its source folder and only relinked copies in app0).
@@ -156,6 +157,7 @@ struct SegmentInfo {
   std::uint64_t Address, Size;
 };
 int LoadStartModule(const char* Path, std::uint64_t Arguments, std::uint64_t ArgumentPointer, std::uint32_t Flags, const void* Options, int* Result);
+int BindReport(const std::string& Executables);
 int StopUnloadModule(int Handle, std::uint64_t, std::uint64_t, std::uint32_t, const void*, int* Result);
 int Dlsym(int Handle, const char* Symbol, std::uint64_t* Address);
 int GetModuleInfoFromAddr(std::uint64_t Address, int Flags, ModuleInfoEx* Info);
@@ -267,96 +269,6 @@ unsigned int GuestAlarm_nid_no_patch(unsigned int Seconds) {
     GuestSignals::Report(14, 2);
   }
   return Remaining;
-}
-}
-
-// Dinkumware's scaled decimal parsers (_Stodx, _Stofx, _Stoldx), which the wide-string conversions (_WStod and the
-// others) call. DinkumwareInternals.cpp needs an 80-bit long double, which arm64 does not have, so they are written here
-// the same way: parse, then parse again with the power-of-ten scale added to the exponent.
-extern "C" int* __error_nid_postfix();
-extern "C" const char* NanSubjectEnd_nid_no_patch(const char* Text);
-extern "C" double strtod_nid_postfix(const char* Text, char** End);
-extern "C" float strtof_nid_postfix(const char* Text, char** End);
-namespace Dinkumware {
-constexpr long long ExponentLimit = 1000000000;
-constexpr int RangeError = 34;
-bool Hexadecimal(const char* Text) {
-  while (std::isspace(static_cast<unsigned char>(*Text))) {
-    ++Text;
-  }
-  if (*Text == '+' || *Text == '-') {
-    ++Text;
-  }
-  return Text[0] == '0' && (Text[1] == 'x' || Text[1] == 'X');
-}
-template<typename T>
-T Scaled(const char* Text, char** End, std::int64_t Pten, int* Error, T (*Parse)(const char*, char**)) {
-  int& Errno = *__error_nid_postfix();
-  const int Saved = Errno;
-  if (Error) {
-    *Error = 0;
-  }
-  if (const char* Stop = NanSubjectEnd_nid_no_patch(Text)) {
-    if (End) {
-      *End = const_cast<char*>(Stop);
-    }
-    return std::numeric_limits<T>::quiet_NaN();
-  }
-  Errno = 0;
-  char* Stop = nullptr;
-  T Value = Parse(Text, &Stop);
-  if (End) {
-    *End = Stop;
-  }
-  const bool Hex = Hexadecimal(Text);
-  if (Pten == 0 && Hex) {
-    Errno = Saved;
-    return Value;
-  }
-  const bool Overflowed = std::isinf(Value) && Errno == RangeError;
-  if (Pten != 0 && Stop != Text && (std::isfinite(Value) || Overflowed)) {
-    const long long Scale = std::clamp<std::int64_t>(Pten, -ExponentLimit, ExponentLimit);
-    if (Hex) {
-      Errno = 0;
-      Value = static_cast<T>(Value * std::pow(10.0L, static_cast<long double>(Scale)));
-      if (std::isinf(Value) || Value == 0) {
-        Errno = RangeError;
-      }
-    } else {
-      std::string Number(Text, static_cast<const char*>(Stop));
-      long long Exponent = 0;
-      if (const auto Marker = Number.find_first_of("eE"); Marker != std::string::npos) {
-        Exponent = std::strtoll(Number.c_str() + Marker + 1, nullptr, 10);
-        Number.resize(Marker);
-      }
-      Exponent = std::clamp(Exponent, -ExponentLimit, ExponentLimit) + Scale;
-      Number += 'e';
-      Number += std::to_string(Exponent);
-      Errno = 0;
-      Value = Parse(Number.c_str(), nullptr);
-    }
-  }
-  if (Errno == RangeError && (Value == 0 || std::isinf(Value))) {
-    if (Error) {
-      *Error = 1;
-    }
-  } else if (Errno == 0 || Errno == RangeError) {
-    Errno = Saved;
-  }
-  return Value;
-}
-} // namespace Dinkumware
-
-extern "C" {
-double _Stodx_nid_postfix(const char* Text, char** End, std::int64_t Pten, int* Error) {
-  return Dinkumware::Scaled<double>(Text, End, Pten, Error, strtod_nid_postfix);
-}
-float _Stofx_nid_postfix(const char* Text, char** End, std::int64_t Pten, int* Error) {
-  return Dinkumware::Scaled<float>(Text, End, Pten, Error, strtof_nid_postfix);
-}
-// long double is double on arm64, as Api.hpp declares _Stoldx there.
-long double _Stoldx_nid_postfix(const char* Text, char** End, std::int64_t Pten, int* Error) {
-  return Dinkumware::Scaled<double>(Text, End, Pten, Error, strtod_nid_postfix);
 }
 }
 
@@ -756,6 +668,32 @@ std::size_t Rebind(Ps5::Module& M) {
   return Count;
 }
 
+// Maps the module at a guest /app0 path and binds its imports, and the earlier imports that name it, as the PS5 runtime
+// linker does, without starting it. Under Lock. Returns nullptr and sets Error when the module cannot be loaded.
+Ps5::Module* Load(const char* Path, int& Error) {
+  const auto File = HostPath(Path);
+  if (File.empty()) {
+    std::printf("sceKernelLoadStartModule %s: no guest module there; SCE_KERNEL_ERROR_ENOENT\n", Path);
+    Error = ErrorNoEntry;
+    return nullptr;
+  }
+  auto M = std::make_unique<Ps5::Module>(Ps5::Load(File, std::filesystem::path(Path).filename().string()));
+  if (!Ps5::AddRuntimeTls(*M)) {
+    std::printf("sceKernelLoadStartModule %s: its %llu-byte TLS block does not fit in the static TLS surplus\n", Path,
+                static_cast<unsigned long long>(M->TlsMemSize));
+    Error = ErrorNoMemory;
+    return nullptr;
+  }
+  Modules.push_back(M.get());
+  FexGuest::RegisterGuestImage({M->Name.c_str(), M->Base, M->ProgramHeaders.data(), M->ProgramHeaderCount});
+  Ps5::Relocate(*M, [&M](const Ps5::Symbol& S) { return Resolve(*M, S); });
+  const auto Rebound = Rebind(*M);
+  FexGuest::ActiveThunks = Table; // the slots this module's imports added
+  std::printf("loaded %s for %s; %zu earlier imports bound to it\n", M->Name.c_str(), Path, Rebound);
+  Loaded.push_back(std::move(M));
+  return Loaded.back().get();
+}
+
 int LoadStartModule(const char* Path, std::uint64_t Arguments, std::uint64_t ArgumentPointer, std::uint32_t, const void*, int* Result) {
   if (Result) {
     *Result = 0;
@@ -771,23 +709,12 @@ int LoadStartModule(const char* Path, std::uint64_t Arguments, std::uint64_t Arg
       return HandleOf(M);
     }
   }
-  const auto File = HostPath(Path);
-  if (File.empty()) {
-    std::printf("sceKernelLoadStartModule %s: no guest module there; SCE_KERNEL_ERROR_ENOENT\n", Path);
-    return ErrorNoEntry;
+  // Load pushes the module into Loaded before its start runs: a start function may load further modules.
+  int Error = 0;
+  auto* M = Load(Path, Error);
+  if (!M) {
+    return Error;
   }
-  auto M = std::make_unique<Ps5::Module>(Ps5::Load(File, Name));
-  if (!Ps5::AddRuntimeTls(*M)) {
-    std::printf("sceKernelLoadStartModule %s: its %llu-byte TLS block does not fit in the static TLS surplus\n", Path,
-                static_cast<unsigned long long>(M->TlsMemSize));
-    return ErrorNoMemory;
-  }
-  Modules.push_back(M.get());
-  FexGuest::RegisterGuestImage({M->Name.c_str(), M->Base, M->ProgramHeaders.data(), M->ProgramHeaderCount});
-  Ps5::Relocate(*M, [&M](const Ps5::Symbol& S) { return Resolve(*M, S); });
-  const auto Rebound = Rebind(*M);
-  FexGuest::ActiveThunks = Table; // the slots this module's imports added
-  std::printf("loaded %s for %s; %zu earlier imports bound to it\n", M->Name.c_str(), Path, Rebound);
   int Started = 0;
   if (M->Init) {
     const std::uint64_t StartArguments[] = {Arguments, ArgumentPointer, 0};
@@ -797,9 +724,63 @@ int LoadStartModule(const char* Path, std::uint64_t Arguments, std::uint64_t Arg
   if (Result) {
     *Result = Started;
   }
-  const int Handle = HandleOf(M.get());
-  Loaded.push_back(std::move(M));
-  return Handle;
+  return HandleOf(M);
+}
+
+// The bind mode's report: loads every other .prx under the executables folder (the modules a game loads at run time,
+// such as Unity's Media/Modules and Media/Plugins), as sceKernelLoadStartModule would, without starting any, then prints
+// each import still bound to the ENOSYS stub as "unbound <importing module> <NID> <declared module>", and exits 1 when
+// any import is left.
+int BindReport(const std::string& Executables) {
+  std::vector<std::string> Paths;
+  std::error_code Error;
+  for (auto It = std::filesystem::recursive_directory_iterator(Executables, Error); !Error && It != std::filesystem::recursive_directory_iterator();
+       It.increment(Error)) {
+    const auto Name = It->path().filename().string();
+    if (It.depth() == 0 && Name == "sce_module") {
+      It.disable_recursion_pending(); // loaded at start
+      continue;
+    }
+    if (It->is_regular_file() && Name.ends_with(".prx") && !Name.ends_with(".guest.prx")) {
+      Paths.push_back("/app0/" + std::filesystem::relative(It->path(), Executables).generic_string());
+    }
+  }
+  if (Error) {
+    std::printf("bind: cannot list %s: %s\n", Executables.c_str(), Error.message().c_str());
+    return 1;
+  }
+  std::sort(Paths.begin(), Paths.end());
+  std::lock_guard Guard(Lock);
+  for (const auto& Path : Paths) {
+    int LoadError = 0;
+    if (!Load(Path.c_str(), LoadError)) {
+      std::printf("bind: %s did not load (0x%x)\n", Path.c_str(), static_cast<unsigned>(LoadError));
+      return 1;
+    }
+  }
+  constexpr std::uint32_t R_64 = 1, R_GLOB_DAT = 6, R_JUMP_SLOT = 7;
+  std::vector<std::pair<std::string, std::string>> Reported;
+  for (auto* M : Modules) {
+    for (const auto& R : M->Relocations) {
+      if (R.Symbol == 0 || (R.Type != R_64 && R.Type != R_GLOB_DAT && R.Type != R_JUMP_SLOT)) {
+        continue;
+      }
+      const std::uint64_t Target = *reinterpret_cast<const std::uint64_t*>(M->Base + R.Offset) - R.Addend;
+      if (Target < StubAddress(0) || Target >= StubAddress(Table.size()) || (Target - StubAddress(0)) % FexGuest::ThunkStubSize != 0) {
+        continue;
+      }
+      const std::size_t Index = (Target - StubAddress(0)) / FexGuest::ThunkStubSize;
+      std::pair<std::string, std::string> Entry {M->Name, TableNids[Index]};
+      if (Table[Index] != Unimplemented || std::find(Reported.begin(), Reported.end(), Entry) != Reported.end()) {
+        continue;
+      }
+      const auto Declared = Ps5::DeclaredModule(*M, M->Symbols.at(R.Symbol).Name);
+      std::printf("unbound %s %s %s\n", Entry.first.c_str(), Entry.second.c_str(), Declared.empty() ? "-" : Declared.c_str());
+      Reported.push_back(std::move(Entry));
+    }
+  }
+  std::printf("bind: %zu imports stay bound to the ENOSYS stub with every module loaded\n", Reported.size());
+  return Reported.empty() ? 0 : 1;
 }
 
 // The module stays loaded: other modules' imports keep pointing into it.
@@ -1214,8 +1195,8 @@ extern "C" void Aps5RunOnMainThread_nid_no_patch(void (*Function)(void*), void* 
 namespace {
 int RunGame(int argc, char** argv) {
   const std::string Mode = argc == 5 || argc == 6 ? argv[4] : "";
-  if (Mode != "modules" && Mode != "eboot-only" && Mode != "past-main" && Mode != "run") {
-    std::fprintf(stderr, "usage: %s <game directory> <game data directory> <main vaddr> modules|eboot-only|past-main|run [<executables directory>]\n",
+  if (Mode != "modules" && Mode != "eboot-only" && Mode != "past-main" && Mode != "run" && Mode != "bind") {
+    std::fprintf(stderr, "usage: %s <game directory> <game data directory> <main vaddr> modules|eboot-only|past-main|run|bind [<executables directory>]\n",
                  argv[0]);
     return 2;
   }
@@ -1344,6 +1325,10 @@ int RunGame(int argc, char** argv) {
   }
   std::printf("imports by NID: %zu bound to guest exports, %zu to generated thunks, %zu to stand-in host functions, %zu data, %zu stubs\n",
               Bound.Guest.size(), Bound.Generated.size(), Bound.StandIn.size(), Bound.Data.size(), Bound.Stub.size());
+  // bind: no guest code runs; the report covers the modules loaded at run time too.
+  if (Mode == "bind") {
+    return RuntimeModules::BindReport(Executables);
+  }
 
   const bool StopAtMain = Mode != "run";
   const std::uint64_t Main = StopAtMain ? Eboot.Base + MainOffset : 0;
