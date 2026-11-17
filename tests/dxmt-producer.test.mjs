@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import {crossFile,configureVersion,sourceVersion} from '../producers/dxmt/build.mjs';
+import {crossFile,nativeFile,configureVersion,sourceVersion} from '../producers/dxmt/build.mjs';
 import {applyWindowOverlay} from '../producers/dxmt/window-overlay.mjs';
 const temporary=t=>{const root=fs.mkdtempSync(path.join(os.tmpdir(),'dxmt-producer-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));return root;};
 
@@ -17,10 +17,24 @@ test('the DXMT cross file preserves the upstream ARM64X compile and link contrac
  fs.unlinkSync(files[1]);assert.throws(()=>crossFile({compiler:root}),/lacks ARM64EC clang\+\+/);
 });
 
+test('DXMT machine files hold only single-quoted Meson strings',t=>{
+ const root=temporary(t),bin=path.join(root,'bin');fs.mkdirSync(bin);
+ for(const name of ['clang','clang++','ar','strip','windres'])fs.writeFileSync(path.join(bin,'arm64ec-w64-mingw32-'+name),'');
+ const native=nativeFile({clang:"/X/it's/clang",clangxx:'/X/clang++',args:['-arch','arm64','-ffile-prefix-map=/w=source/dxmt']});
+ for(const text of [crossFile({compiler:root}),native])assert.doesNotMatch(text,/"/);
+ assert.ok(native.includes("c = '/X/it\\'s/clang'"));
+ assert.ok(native.includes("c_args = ['-arch', 'arm64', '-ffile-prefix-map=/w=source/dxmt']"));
+ assert.ok(native.includes("cpp_link_args = ['-arch', 'arm64']"));
+});
+
 test('DXMT version metadata comes from the declared source revision',t=>{
  const root=temporary(t),file=path.join(root,'meson.build'),revision='7c8dee1c2d73415301ceb7d1fa810861cef4cd67';
- fs.writeFileSync(file,"dxmt_version = vcs_tag(\n input: 'version.h.in',\n output: 'version.h'\n)\n");
- configureVersion(root,revision);assert.ok(fs.readFileSync(file,'utf8').includes(sourceVersion(revision)));
+ fs.mkdirSync(path.join(root,'include'));fs.writeFileSync(path.join(root,'version.h.in'),'#pragma once\n\n#define DXMT_VERSION "@VCS_TAG@"\n');
+ fs.writeFileSync(file,"dxmt_version = vcs_tag(\n input: 'version.h.in',\n output: 'version.h'\n)\nstatic_library('dxmt', dxmt_version)\n");
+ configureVersion(root,revision);
+ // The header sits in the searched include folder; Meson generates no second one.
+ assert.equal(fs.readFileSync(path.join(root,'include/version.h'),'utf8'),'#pragma once\n\n#define DXMT_VERSION "v0.80-244-g7c8dee1"\n');
+ assert.equal(fs.readFileSync(file,'utf8'),"dxmt_version = []\nstatic_library('dxmt', dxmt_version)\n");
  assert.throws(()=>configureVersion(root,revision),/source anchor changed/);
 });
 

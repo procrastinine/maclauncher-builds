@@ -19,14 +19,21 @@ import {applyCompilerShutdownOverlay} from '../package-support/src/modules/cross
 const sha=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const write=(file,value)=>fs.writeFileSync(file,JSON.stringify(value,null,2)+'\n');
 const read=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8',...options}).trim();
-const quote=value=>JSON.stringify(value);
+// Meson machine files take single-quoted strings only.
+const quote=value=>"'"+String(value).replaceAll('\\','\\\\').replaceAll("'","\\'")+"'";
+const list=values=>'['+values.map(quote).join(', ')+']';
 const owned=()=>appPath('src/modules/crossover/temporal/dxmt');
 export function sourceVersion(revision){return 'v0.80-244-g'+revision.slice(0,7);}
 export function configureVersion(source,revision){
  const file=path.join(source,'meson.build'),before=fs.readFileSync(file,'utf8');
  const expression=/dxmt_version = vcs_tag\([\s\S]*?\n\)/;
  if((before.match(new RegExp(expression.source,'g'))||[]).length!==1)throw Error('DXMT version source anchor changed.');
- fs.writeFileSync(file,before.replace(expression,"dxmt_version = configure_file(input: 'version.h.in', output: 'version.h', configuration: {'VCS_TAG': '"+sourceVersion(revision)+"'})"));
+ // The staged source has no Git metadata. Its version header joins the include folder its
+ // sources already search, as the x64 DXMT build writes it, and Meson generates none.
+ const template=fs.readFileSync(path.join(source,'version.h.in'),'utf8');
+ if(!template.includes('@VCS_TAG@'))throw Error('DXMT version template changed.');
+ fs.writeFileSync(path.join(source,'include/version.h'),template.replaceAll('@VCS_TAG@',sourceVersion(revision)));
+ fs.writeFileSync(file,before.replace(expression,'dxmt_version = []'));
 }
 async function extract(input,destination,{members,strip=1}={}){
  const archive=await buildInput(input);
@@ -76,6 +83,9 @@ export function crossFile(prepared){
  return '[binaries]\n'+Object.entries(commands).map(([key,value])=>key+' = '+quote(path.join(bin,prefix+value))).join('\n')+
   "\n[properties]\nneeds_exe_wrapper = true\n[built-in options]\nc_args = ['-marm64x']\ncpp_args = ['-marm64x']\nc_link_args = ['-marm64x']\ncpp_link_args = ['-marm64x']\n[host_machine]\nsystem = 'windows'\ncpu_family = 'aarch64'\ncpu = 'aarch64'\nendian = 'little'\n";
 }
+export function nativeFile({clang,clangxx,args}){
+ return '[binaries]\nc = '+quote(clang)+'\ncpp = '+quote(clangxx)+'\n[built-in options]\nc_args = '+list(args)+'\ncpp_args = '+list(args)+'\nc_link_args = '+list(['-arch','arm64'])+'\ncpp_link_args = '+list(['-arch','arm64'])+'\n';
+}
 export async function compile({work,prepared}){
  const cmake=findBuildTool('cmake'),ninja=path.join(prepared.tools.bin,'ninja'),meson=path.join(prepared.tools.bin,'meson');
  const sdk=read('/usr/bin/xcrun',['--sdk','macosx','--show-sdk-path']),clang=read('/usr/bin/xcrun',['--find','clang']),clangxx=read('/usr/bin/xcrun',['--find','clang++']);
@@ -92,7 +102,7 @@ export async function compile({work,prepared}){
  const cross=path.join(work,'arm64ec.ini'),native=path.join(work,'native.ini'),build=path.join(work,'renderer'),staged=path.join(work,'installed');
  fs.writeFileSync(cross,crossFile(prepared));
  const nativeArgs=['-arch','arm64','-mmacosx-version-min='+inputs.minimumMacOS,'-O2','-g0',...maps];
- fs.writeFileSync(native,'[binaries]\nc = '+quote(clang)+'\ncpp = '+quote(clangxx)+'\n[built-in options]\nc_args = '+JSON.stringify(nativeArgs)+'\ncpp_args = '+JSON.stringify(nativeArgs)+'\nc_link_args = '+JSON.stringify(['-arch','arm64'])+'\ncpp_link_args = '+JSON.stringify(['-arch','arm64'])+'\n');
+ fs.writeFileSync(native,nativeFile({clang,clangxx,args:nativeArgs}));
  run(meson,['setup',build,prepared.source,'--cross-file',cross,'--native-file',native,'--prefix','/','--buildtype','release',
   '-Dnative_llvm_path='+llvm,'-Dwine_install_path='+prepared.sdk,'-Dwine_builtin_dll=true','-Denable_tests=false','-Denable_nvngx=true','-Denable_d3d12=true'],{env:{...env,CFLAGS:maps.join(' '),CXXFLAGS:maps.join(' ')}});
  run(meson,['compile','-C',build,'-j','6'],{env});
