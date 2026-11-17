@@ -416,9 +416,7 @@ for (const [relative, input] of inputs) {
   if(externalModule&&(fs.statSync(output).size!==externalModule.size||digest(fs.readFileSync(output))!==externalModule.sha256))
     throw Error("A WineVulkan module input changed while staging: "+relative);
   files.push({ path: relative, sha256: digest(fs.readFileSync(output)), size: fs.statSync(output).size,
-    mode: executable ? 0o755 : 0o644, ...(externalBinary?{format:externalModule.format,architectures:externalModule.architectures,
-      ...(externalModule.executionArchitecture?{executionArchitecture:externalModule.executionArchitecture}:{}),
-      ...(externalModule.format==="mach-o"?{optionalLoad:{architectures:externalModule.architectures,minimumMacOS:wineVulkan.provider.minimumMacOS}}:{})}:executable ? { architectures: nativeArchitectures.get(relative),
+    mode: executable ? 0o755 : 0o644, ...(externalModule?wineVulkan.componentMetadata.get(relative):executable ? { architectures: nativeArchitectures.get(relative),
       ...(relative.startsWith("temporal/dxmt/") ? { executionArchitecture: "x86_64" } : temporalExecutionArchitectures.has(relative) ? { executionArchitecture: temporalExecutionArchitectures.get(relative) } : {}),
       ...(optionalLoad.has(relative)?{optionalLoad:{...optionalLoad.get(relative),architectures:nativeArchitectures.get(relative)}}:{}) } : {}) });
 }

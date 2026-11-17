@@ -71,7 +71,11 @@ export function stageWineVulkan(directory) {
       runtimeProfile: structuredClone(provider.runtimeProfile) });
   }
   if (!pairs.length) throw Error('The WineVulkan module has no complete owned-name client/native pair.');
-  return { files, records, provider, manifestFile, generated: new Map([
+  const componentMetadata = new Map([...records].map(([name, row]) => [name, row.format === 'mach-o'
+    ? {format: row.format, architectures: row.architectures,
+      optionalLoad: {architectures: row.architectures, minimumMacOS: provider.minimumMacOS}}
+    : {}]));
+  return { files, records, componentMetadata, provider, manifestFile, generated: new Map([
     [base + 'module-manifest.json', manifestBytes],
     [base + 'selection.json', Buffer.from(JSON.stringify({schema: 1, pairs}, null, 2) + '\n')],
   ]) };
