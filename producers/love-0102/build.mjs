@@ -7,6 +7,8 @@ import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url);
 const Native=require('../package-support/scripts/native-binary-tools.cjs');
 import {applyBuildOverlay} from './overlay.mjs';
+import {helperPackage} from '../../tools/helper-package.mjs';
+import {addLicenses} from '../../lib/licenses.mjs';
 const here=import.meta.dirname;
 // Match the publisher's declared macOS closure rather than optional host libraries.
 export const nativeProfileOptions=['-DWITH_HarfBuzz=OFF','-DWITH_PNG=ON','-DALSOFT_BACKEND_PORTAUDIO=OFF','-DALSOFT_BACKEND_COREAUDIO=ON'];
@@ -47,7 +49,6 @@ export function compile({work,prepared,architectures=['arm64','x86_64'],cc=proce
 }
 /** Assemble compiled slices, relocate their actual loader dependencies and measure every binary. */
 export async function assemble({compiled,output,version='0.10.2-MCLv1'}){
- const {helperPackage}=await import('../../tools/helper-package.mjs'),{addLicenses}=await import('../../lib/licenses.mjs');
  if(compiled.slices.length!==2||new Set(compiled.slices.map(s=>s.architecture)).size!==2)throw Error('Both native slices are required for the universal package.');
  const payload=path.join(output,'payload'),bundle=path.join(payload,'love.app'),frameworks=path.join(bundle,'Contents/Frameworks'),macos=path.join(bundle,'Contents/MacOS');
  if(fs.existsSync(payload))throw Error('Payload output already exists.');fs.mkdirSync(frameworks,{recursive:true});fs.mkdirSync(macos,{recursive:true});
