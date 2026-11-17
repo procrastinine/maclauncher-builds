@@ -4392,5 +4392,101 @@
         "mingw-w64"
       ]
     }
+  },
+  {
+    "id": "rlvm",
+    "name": "RLVM",
+    "purpose": "RealLive engine with native macOS application integration.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "sourceDirectory": "producers/rlvm",
+      "entries": [
+        "producers/rlvm/CMakeLists.txt",
+        "producers/rlvm/resources.mjs",
+        "producers/dependencies/sdl2.json",
+        "producers/dependencies/sdl12Compat.json",
+        "producers/dependencies/boost.json",
+        "producers/dependencies/libpng.json",
+        "producers/dependencies/freetype.json",
+        "producers/dependencies/ogg.json",
+        "producers/dependencies/vorbis.json",
+        "producers/dependencies/gettext.json",
+        "producers/rlvm/vorbis-callback-const.patch",
+        "producers/rlvm/boost-parent-path.patch",
+        "producers/rlvm/boost-directory-header.patch",
+        "producers/rlvm/standard-stream-headers.patch",
+        "producers/rlvm/boost-system-directory-header.patch",
+        "producers/rlvm/cocoa-application-class.patch"
+      ]
+    },
+    "upstreams": [
+      {
+        "id": "rlvm",
+        "provider": "github",
+        "url": "https://github.com/eglaysher/rlvm",
+        "repository": "eglaysher/rlvm",
+        "pin": {
+          "gitlink": "producers/rlvm/source"
+        }
+      }
+    ],
+    "compatibility": "Universal macOS engine for RealLive data; SDL1.2 application interface with SDL2-backed presentation.",
+    "packageProfiles": [
+      {
+        "version": "0.14-MCLv1",
+        "label": "RLVM 0.14 universal"
+      }
+    ],
+    "build": {
+      "version": "0.14-MCLv1",
+      "command": "tools/build-rlvm.mjs",
+      "architectures": [
+        "universal"
+      ],
+      "submodules": [
+        "producers/rlvm/source"
+      ],
+      "tools": [
+        "cmake",
+        "ninja",
+        "pkgconf",
+        "gettext"
+      ],
+      "archives": [
+        {
+          "file": "producers/dependencies/sdl2.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/sdl12Compat.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/boost.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/libpng.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/freetype.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/ogg.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/vorbis.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/gettext.json",
+          "pointer": ""
+        }
+      ]
+    }
   }
 ]

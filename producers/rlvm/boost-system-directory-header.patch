@@ -1,0 +1,15 @@
+RLVM: include the directory definitions used by the system file cache.
+
+The removed convenience header is not used for convenience functions here.
+Path operations already have direct headers; directory traversal requires
+its current owning header. Keep file-cache/save-directory behavior unchanged.
+Upstream RLVM copyright and GPL-3.0-or-later notices remain unchanged.
+
+diff --git a/src/systems/base/system.cc b/src/systems/base/system.cc
+--- a/src/systems/base/system.cc
++++ b/src/systems/base/system.cc
+@@ -30,3 +30,3 @@
+ #include <boost/algorithm/string.hpp>
+-#include <boost/filesystem/convenience.hpp>
++#include <boost/filesystem/directory.hpp>
+ #include <boost/filesystem/operations.hpp>

@@ -1,0 +1,30 @@
+RLVM: use the current Boost.Filesystem spelling for the parent path.
+
+branch_path was the former spelling of parent_path. Keep the path values and
+filesystem operations unchanged; update the two production callers only.
+Upstream RLVM copyright and GPL-3.0-or-later notices remain unchanged.
+
+diff --git a/src/libreallive/archive.cc b/src/libreallive/archive.cc
+--- a/src/libreallive/archive.cc
++++ b/src/libreallive/archive.cc
+@@ -132,7 +132,7 @@ void Archive::ReadTOC() {
+ void Archive::ReadOverrides() {
+   // Iterate over all files in the directory and override the table of contents
+   // if there is a free SEENXXXX.TXT file.
+-  fs::path seen_dir = fs::path(name_).branch_path();
++  fs::path seen_dir = fs::path(name_).parent_path();
+   fs::directory_iterator end;
+   for (fs::directory_iterator it(seen_dir); it != end; ++it) {
+     std::string filename = it->path().filename().string();
+diff --git a/src/utilities/file.cc b/src/utilities/file.cc
+--- a/src/utilities/file.cc
++++ b/src/utilities/file.cc
+@@ -72,7 +72,7 @@ fs::path CorrectPathCase(const fs::path& path) {
+   std::stack<std::string> pathElts;
+   while (!Path.empty() && !fs::exists(Path)) {
+     pathElts.push(Path.filename().string());
+-    Path = Path.branch_path();
++    Path = Path.parent_path();
+   }
+   // Now proceed forwards through the possibly-incorrect elements.
+   while (!pathElts.empty()) {

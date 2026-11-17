@@ -329,3 +329,6 @@
 [submodule "producers/package-support/src/external/mac-game-porter"]
 	path = producers/package-support/src/external/mac-game-porter
 	url = https://github.com/KarmSakha/mac-game-porter
+[submodule "rlvm"]
+	path = producers/rlvm/source
+	url = https://github.com/eglaysher/rlvm.git
