@@ -281,6 +281,9 @@ template<class R, class... A>
 struct FunctionTraits<R (*)(A...)> {
   using Parameters = std::tuple<A...>;
 };
+// noexcept is part of a function's type, and many AnyPS5 exports are declared noexcept.
+template<class R, class... A>
+struct FunctionTraits<R (*)(A...) noexcept> : FunctionTraits<R (*)(A...)> {};
 
 // A variadic export runs as its va_list counterpart (snprintf as vsnprintf), whose last parameter points to a System V
 // va_list. The thunk reads the fixed arguments as usual and passes a va_list that starts after them, as va_start would
@@ -345,6 +348,8 @@ template<class F>
 struct Supported : std::false_type {};
 template<class R, class... A>
 struct Supported<R (*)(A...)> : std::bool_constant<SupportedReturn<R> && (SupportedArgument<A> && ...)> {};
+template<class R, class... A>
+struct Supported<R (*)(A...) noexcept> : Supported<R (*)(A...)> {};
 
 // The variadic thunk for VaListExport, the va_list counterpart of a variadic export: its last parameter points to a
 // 24-byte System V va_list and its other parameters are ones the thunks cover. nullptr otherwise.
@@ -363,6 +368,8 @@ struct SupportedVaList<R (*)(A...)> {
     }
   }();
 };
+template<class R, class... A>
+struct SupportedVaList<R (*)(A...) noexcept> : SupportedVaList<R (*)(A...)> {};
 
 template<auto VaListExport>
 constexpr FexGuest::Thunk VariadicThunkFor() {
