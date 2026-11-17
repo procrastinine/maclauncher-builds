@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "winevulkan-scene",
-  "version": "11.20-MCLv1",
+  "version": "11.20-MCLv2",
   "profile": "metalsharp-wine11.20-scene-v1",
   "sourcePage": "https://github.com/metalsharp/MetalSharp-Wine",
   "wineVersion": "Wine version 11.20",
