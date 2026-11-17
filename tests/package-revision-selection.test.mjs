@@ -6,9 +6,12 @@ import{javaSteamworksProfile}from'../tools/build-java-steamworks.mjs';
 const require=createRequire(import.meta.url),producer=require('../producers/package-support/scripts/build-mkxpz-nfc.cjs');
 const originals=JSON.parse(fs.readFileSync(new URL('../producers/package-support/src/modules/java/runtime/steamworks/publisher-releases.json',import.meta.url)));
 test('new Steamworks package revisions retain the exact original ABI source and publisher pins',()=>{
- for(const base of ['1.9.0','1.10.0'])for(const revision of [1,3,42]){
-  const selected=javaSteamworksProfile(base+'-MCLv'+revision),original=originals.find(row=>row.version===base);
-  assert.deepEqual(selected,original);assert.equal(selected.sourceRevision,original.sourceRevision);assert.equal(selected.archiveSha256,original.archiveSha256);
+ // A row either pins its full source record (rebuilt from source) or names only the source
+ // revision of a reviewed binary; the profile is the row plus that pinned revision.
+ for(const original of originals)for(const revision of [1,3,42]){
+  const selected=javaSteamworksProfile(original.version+'-MCLv'+revision),pinned=original.source?original.source.revision:original.sourceRevision;
+  assert.match(pinned,/^[0-9a-f]{40}$/);
+  assert.deepEqual(selected,{...original,sourceRevision:pinned});assert.equal(selected.archiveSha256,original.archiveSha256);
  }
 });
 test('Steamworks rejects unknown upstream profiles and malformed revisions before acquisition',()=>{
