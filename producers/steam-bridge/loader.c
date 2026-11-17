@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <wchar.h>
+#include <winternl.h>
+#include "module-path.h"
 
 static void unsupported_export(void)
 {
@@ -23,10 +25,11 @@ static int executable(IMAGE_NT_HEADERS *nt, DWORD rva, SIZE_T size)
             size <= section[i].Misc.VirtualSize - (rva - section[i].VirtualAddress)) return 1;
     return 0;
 }
-static int prepare(void)
+static int prepare(HMODULE self)
 {
     WCHAR filename[32768];
     WCHAR builtin[32768];
+    WCHAR bootstrap[32768];
 #ifdef _WIN64
     const WCHAR name[] = L"steamclient64.dll";
     const WCHAR variable[] = L"MACLAUNCHER_STEAM_CLIENT64";
@@ -43,6 +46,9 @@ static int prepare(void)
     HMODULE genuine = LoadLibraryExW(filename, NULL, DONT_RESOLVE_DLL_REFERENCES);
     HMODULE bridge = genuine ? LoadLibraryW(builtin) : NULL;
     if (!genuine || !bridge) return 0;
+    DWORD bootstrap_length = GetEnvironmentVariableW(L"MACLAUNCHER_STEAM_BOOTSTRAP", bootstrap, 32768);
+    if (bootstrap_length >= 32768 || !bridge_record_module_path(genuine, filename) || !bridge_record_module_path(bridge, builtin) ||
+        (bootstrap_length && !bridge_record_module_path(self, bootstrap))) return 0;
     BYTE *base = (BYTE *)genuine;
     IMAGE_DOS_HEADER *dos = (IMAGE_DOS_HEADER *)base;
     IMAGE_NT_HEADERS *nt = (IMAGE_NT_HEADERS *)(base + dos->e_lfanew);
@@ -104,7 +110,7 @@ BOOL WINAPI DllMain(HINSTANCE module, DWORD reason, void *reserved)
     if (reason == DLL_PROCESS_ATTACH)
     {
         DisableThreadLibraryCalls(module);
-        if (!prepare())
+        if (!prepare(module))
         {
             fputs("Steam bridge: owned loader preparation failed; stopping before native Windows Steam initialization\n", stderr);
             fflush(stderr);
