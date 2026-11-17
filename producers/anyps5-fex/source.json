@@ -111,7 +111,8 @@
     ],
     "arm64HostOverlays": [
       ["arm64-standard-streams", "applyStandardStreamDeclarations"],
-      ["guest-va-list", "applyGuestVaListOverlay"]
+      ["guest-va-list", "applyGuestVaListOverlay"],
+      ["arm64-driver-memory", "applyDriverMemoryWindow"]
     ],
     "cmakeLibraries": ["libSceVideoOut", "libSceAgc", "libSceAgcDriver", "libSceAudioOut"],
     "arm64Libraries": {

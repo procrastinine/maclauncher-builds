@@ -26,6 +26,7 @@
 #include <dispatch/dispatch.h>
 #include <exception>
 #include <mach/mach.h>
+#include <mach/mach_error.h>
 #include <mach/mach_vm.h>
 #include <filesystem>
 #include <pthread.h>
@@ -297,32 +298,22 @@ std::vector<std::string> SceModules(const std::string& Directory) {
 }
 } // namespace
 
-// AnyPS5 keeps 0x7FFFFC000-0x1000000000 for the system (libc GuestArena's SystemReserved range), and AgcDriver maps its
-// driver memory at 0xEE0000000 there with an address hint (Driver/DriverMemory.hpp). The guest arena reserves the
-// application area around that range, so the host's own mappings without an address (FEX, Vulkan, Metal, large malloc
-// regions) fill that range once the space below 8 GiB is used. The host reserves it before anything else runs, all
-// but the driver's 2 MiB.
-namespace SystemRange {
-constexpr std::uint64_t Begin = 0x7FFFFC000ull;
-constexpr std::uint64_t End = 0x1000000000ull;
-constexpr std::uint64_t Driver = 0xEE0000000ull;
-constexpr std::uint64_t DriverBytes = 2ull << 20;
-
-void Reserve(std::uint64_t From, std::uint64_t To) {
-  constexpr std::uint64_t Chunk = 1ull << 30;
-  for (auto Cursor = From; Cursor < To;) {
-    const auto Bytes = std::min(Chunk - Cursor % Chunk, To - Cursor);
-    mach_vm_address_t Wanted = Cursor;
-    // A chunk something already maps stays as it is.
-    mach_vm_map(mach_task_self(), &Wanted, Bytes, 0, VM_FLAGS_FIXED, MEMORY_OBJECT_NULL, 0, FALSE, VM_PROT_NONE, VM_PROT_ALL,
-                VM_INHERIT_DEFAULT);
-    Cursor += Bytes;
-  }
-}
+// AgcDriver maps its 2 MiB of driver memory at a fixed address. In an arm64 process the shared region covers
+// 0x180000000-0x1000000000, AnyPS5's system range with it, so on arm64 the driver memory sits at 0xFE00000000, above
+// the guest arena's application area (overlays/arm64-driver-memory). The host reserves that window before anything else
+// runs, so no mapping without an address lands in it, and the driver maps over the reservation.
+namespace DriverWindow {
+constexpr std::uint64_t Begin = 0xFE00000000ull;
+constexpr std::uint64_t Bytes = 2ull << 20;
 
 __attribute__((constructor(101))) void ReserveAtStart() {
-  Reserve(Begin, Driver);
-  Reserve(Driver + DriverBytes, End);
+  mach_vm_address_t Wanted = Begin;
+  const auto Result = mach_vm_map(mach_task_self(), &Wanted, Bytes, 0, VM_FLAGS_FIXED, MEMORY_OBJECT_NULL, 0, FALSE, VM_PROT_NONE, VM_PROT_ALL,
+                                  VM_INHERIT_DEFAULT);
+  if (Result != KERN_SUCCESS) {
+    std::fprintf(stderr, "the AGC driver memory window 0x%llx could not be reserved: %s\n", static_cast<unsigned long long>(Begin),
+                 mach_error_string(Result));
+  }
 }
 
 // The mappings between From and To, with their protection and VM tag, for a failure report.
@@ -341,7 +332,7 @@ void Describe(std::uint64_t From, std::uint64_t To) {
     Address += Size;
   }
 }
-} // namespace SystemRange
+} // namespace DriverWindow
 
 // AnyPS5's VideoOut and AgcDriver run SDL and the game window on the process's main thread, through
 // Aps5RunOnMainThread (libkernel's MainThreadMacOs.cpp on the Rosetta route). Here the game runs on a second thread and
@@ -597,7 +588,7 @@ int RunGame(int argc, char** argv) {
 } // namespace
 
 int main(int argc, char** argv) {
-  // An exception no AnyPS5 caller catches ends the run; its message and the system range's mappings are reported.
+  // An exception no AnyPS5 caller catches ends the run; its message and the mappings around the driver window are reported.
   std::set_terminate([] {
     if (const auto Error = std::current_exception()) {
       try {
@@ -608,9 +599,8 @@ int main(int argc, char** argv) {
         std::fprintf(stderr, "uncaught exception of an unknown type\n");
       }
     }
-    std::fprintf(stderr, "mappings in the system range 0x%llx-0x%llx:\n", static_cast<unsigned long long>(SystemRange::Begin),
-                 static_cast<unsigned long long>(SystemRange::End));
-    SystemRange::Describe(SystemRange::Begin, SystemRange::End);
+    std::fprintf(stderr, "mappings around the AGC driver memory window 0x%llx:\n", static_cast<unsigned long long>(DriverWindow::Begin));
+    DriverWindow::Describe(DriverWindow::Begin - (1ull << 30), DriverWindow::Begin + (1ull << 30));
     std::abort();
   });
   struct Arguments {

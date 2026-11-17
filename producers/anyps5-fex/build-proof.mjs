@@ -81,7 +81,9 @@ function project(directory,destination,paths=[]){
 // per-source objects provide what the host needs of them. CMake gives every object and custom command of a target
 // order-only dependencies on the shared libraries it links, so Ninja runs on a copy of build.ninja without libc.prx and
 // libkernel.prx among them. Objects of a source the per-source list compiles are left out too.
-function cmakeLibraries(arm64,names,compiled){
+// overlaid is the projection this producer's overlays edited: an object whose source differs there is compiled from that
+// source with its own CMake command, outside the arm64 build tree.
+function cmakeLibraries(arm64,names,compiled,overlaid){
  const build=path.join(arm64,'build'),manifest=fs.readFileSync(path.join(build,'build.ninja'),'utf8').split('\n');
  const excluded=new Set(['core/libs/libs/unpatched/libc.prx','core/libs/libs/unpatched/libkernel.prx']);
  fs.writeFileSync(path.join(build,'objects-only.ninja'),manifest.map(line=>{
@@ -103,7 +105,7 @@ function cmakeLibraries(arm64,names,compiled){
  const commands=JSON.parse(execFileSync('ninja',['-C',build,'-t','compdb'],{encoding:'utf8',maxBuffer:Infinity}));
  const sourceOf=new Map(commands.map(entry=>[path.resolve(entry.directory,entry.output),path.resolve(entry.directory,entry.file)]));
  const commandOf=new Map(commands.map(entry=>[path.resolve(entry.directory,entry.output),entry.command]));
- const libraries=[],objects=[],archives=[],link=[],sources=[],includes=[],defines=new Map(),seen=new Set(),pending=names.map(name=>'core/libs/libs/unpatched/'+name+'.prx');
+ const libraries=[],objects=[],changed=[],archives=[],link=[],sources=[],includes=[],defines=new Map(),seen=new Set(),pending=names.map(name=>'core/libs/libs/unpatched/'+name+'.prx');
  while(pending.length){
   const target=pending.shift();
   if(seen.has(target)||excluded.has(target))continue;
@@ -114,7 +116,9 @@ function cmakeLibraries(arm64,names,compiled){
   for(const input of edge.inputs){
    const object=path.join(build,input),source=sourceOf.get(object);
    if(source&&compiled.has(path.relative(path.join(arm64,'source'),source)))continue;
-   objects.push(object);
+   const edited=source&&path.join(overlaid,path.relative(path.join(arm64,'source'),source));
+   if(edited&&fs.existsSync(edited)&&!fs.readFileSync(edited).equals(fs.readFileSync(source)))changed.push([object,edited]);
+   else objects.push(object);
    if(source)sources.push(path.relative(path.join(arm64,'source'),source));
    // The include directories outside the projected paths (SDL, the Vulkan headers, generated headers), which the
    // thunk units that include these sources' headers need as well.
@@ -140,7 +144,26 @@ function cmakeLibraries(arm64,names,compiled){
   if(edge.variables.LINK_FLAGS.includes('-fexperimental-library'))link.push('-fexperimental-library');
  }
  const unique=list=>[...new Set(list)];
- run('ninja',['-C',build,'-f','objects-only.ninja',...unique(objects).map(file=>path.relative(build,file)),...unique(archives).map(file=>path.relative(build,file))]);
+ // The unedited objects of the edited sources are built too, which makes the generated headers they include.
+ run('ninja',['-C',build,'-f','objects-only.ninja',...unique([...objects,...changed.map(([object])=>object)]).map(file=>path.relative(build,file)),...unique(archives).map(file=>path.relative(build,file))]);
+ for(const [object,edited] of new Map(changed)){
+  const words=commandOf.get(object).split(' '),source=sourceOf.get(object),output=path.join(path.dirname(overlaid),'objects-cmake',path.relative(path.join(arm64,'source'),source)+'.o');
+  if(/["'\\]/.test(commandOf.get(object)))throw Error('The CMake command of '+object+' is quoted; it is read word by word.');
+  const args=[];
+  for(let at=1;at<words.length;at++){
+   const word=words[at];
+   if(word==='-MD')continue;
+   if(word==='-MT'||word==='-MF'){at++;continue;}
+   if(word==='-o'){args.push('-o',output);at++;continue;}
+   if(word===source){args.push(edited);continue;}
+   args.push(word);
+  }
+  if(!args.includes(edited)||!args.includes(output))throw Error('The CMake command of '+object+' has no -o or source word.');
+  args.push('-ffile-prefix-map='+overlaid+'=/anyps5','-fmacro-prefix-map='+overlaid+'/=');
+  fs.mkdirSync(path.dirname(output),{recursive:true});
+  run(words[0],args,{cwd:build});
+  objects.push(output);
+ }
  return {libraries,objects:unique(objects),archives:unique(archives),link:unique(link),sources:unique(sources),includes:unique(includes),defines:[...defines.values()]};
 }
 
@@ -290,7 +313,7 @@ const libraryObjects=recipe.anyps5.objectLibraries.flatMap(file=>objectLibrary(p
 const objects=[...recipe.anyps5.objects.map(source=>compile(source)),...libraryObjects.map(([source,flags])=>compile(source,flags))];
 // The PRX libraries from the arm64 CMake build, after the per-source objects, so a name both define binds to the
 // per-source definition.
-const cmake=options.anyps5Arm64?cmakeLibraries(options.anyps5Arm64,recipe.anyps5.cmakeLibraries,new Set([...recipe.anyps5.objects,...libraryObjects.map(([source])=>source)])):
+const cmake=options.anyps5Arm64?cmakeLibraries(options.anyps5Arm64,recipe.anyps5.cmakeLibraries,new Set([...recipe.anyps5.objects,...libraryObjects.map(([source])=>source)]),path.join(options.out,'anyps5')):
  {libraries:[],objects:[],archives:[],link:[],sources:[],includes:[],defines:[]};
 // The thunk units repeat their sources' includes, which the per-source compile resolves with these directories too.
 cmake.includes.unshift(path.join(options.out,'anyps5/3rdparty/ZArchive/include'));
