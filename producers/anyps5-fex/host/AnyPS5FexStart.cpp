@@ -8,20 +8,26 @@
 // entry with the PS5 argument block; a HLT placed at main ends the "modules" run there, which passes when it reaches
 // main without calling any stub. "past-main" goes on into main.
 //
-// Usage: anyps5-fex-start <game directory> <game data directory> <main vaddr> modules|eboot-only|past-main
-//   eboot-only leaves out the sce_module PRX modules, so their exports stay unbound (expected to fail).
+// Usage: anyps5-fex-start <game directory> <game data directory> <main vaddr> modules|eboot-only|past-main|run
+//   eboot-only leaves out the sce_module PRX modules, so their exports stay unbound (expected to fail). run starts the
+//   eboot entry without a stop at main (the main vaddr is not used). The eboot is <game directory>/eboot.elf, or
+//   eboot.bin when there is no eboot.elf (an unencrypted ELF, as a PS5 game folder holds it).
 #include "Ps5Module.h"
 #include "GuestCpuHost.h"
 #include "GuestImages.h"
 #include "GuestThreads.h"
 #include "SysVThunk.h"
 
+#include <CoreFoundation/CoreFoundation.h>
 #include <atomic>
 #include <cmath>
 #include <cstdlib>
 #include <dirent.h>
+#include <dispatch/dispatch.h>
+#include <exception>
 #include <filesystem>
 #include <pthread.h>
+#include <stdexcept>
 #include <thread>
 #include <nid/NidCompute.hpp>
 #include <string>
@@ -289,10 +295,50 @@ std::vector<std::string> SceModules(const std::string& Directory) {
 }
 } // namespace
 
-int main(int argc, char** argv) {
+// AnyPS5's VideoOut and AgcDriver run SDL and the game window on the process's main thread, through
+// Aps5RunOnMainThread (libkernel's MainThreadMacOs.cpp on the Rosetta route). Here the game runs on a second thread and
+// the main thread serves the main dispatch queue until the game ends the process.
+namespace MainThread {
+std::atomic<bool> Serving {false};
+struct Invocation {
+  void (*Function)(void*);
+  void* Context;
+  std::exception_ptr Error;
+};
+void Invoke(void* Argument) {
+  auto& Call = *static_cast<Invocation*>(Argument);
+  try {
+    Call.Function(Call.Context);
+  } catch (...) {
+    Call.Error = std::current_exception();
+  }
+}
+void KeepAlive(CFRunLoopTimerRef, void*) {}
+} // namespace MainThread
+
+extern "C" void Aps5RunOnMainThread_nid_no_patch(void (*Function)(void*), void* Context) {
+  if (!Function) {
+    throw std::invalid_argument("Darwin main-thread callback is null");
+  }
+  if (pthread_main_np() != 0) {
+    Function(Context);
+    return;
+  }
+  if (!MainThread::Serving.load(std::memory_order_acquire)) {
+    throw std::runtime_error("Darwin main-thread service is unavailable");
+  }
+  MainThread::Invocation Call {Function, Context, nullptr};
+  dispatch_sync_f(dispatch_get_main_queue(), &Call, MainThread::Invoke);
+  if (Call.Error) {
+    std::rethrow_exception(Call.Error);
+  }
+}
+
+namespace {
+int RunGame(int argc, char** argv) {
   const std::string Mode = argc == 5 ? argv[4] : "";
-  if (Mode != "modules" && Mode != "eboot-only" && Mode != "past-main") {
-    std::fprintf(stderr, "usage: %s <game directory> <game data directory> <main vaddr> modules|eboot-only|past-main\n", argv[0]);
+  if (Mode != "modules" && Mode != "eboot-only" && Mode != "past-main" && Mode != "run") {
+    std::fprintf(stderr, "usage: %s <game directory> <game data directory> <main vaddr> modules|eboot-only|past-main|run\n", argv[0]);
     return 2;
   }
   FexGuest::DescribeGuestAddress = Describe;
@@ -378,7 +424,8 @@ int main(int argc, char** argv) {
   }
   FexGuest::MapStubs(FexGuest::MaximumThunks);
 
-  auto Eboot = Ps5::Load(Directory + "/eboot.elf", "eboot.elf");
+  const std::string EbootPath = std::filesystem::exists(Directory + "/eboot.elf") ? Directory + "/eboot.elf" : Directory + "/eboot.bin";
+  auto Eboot = Ps5::Load(EbootPath, "eboot.elf");
   std::vector<Ps5::Module> Prx;
   if (Mode != "eboot-only") {
     for (const auto& Name : SceModules(Directory)) {
@@ -407,9 +454,12 @@ int main(int argc, char** argv) {
   std::printf("imports by NID: %zu bound to guest exports, %zu to generated thunks, %zu to stand-in host functions, %zu data, %zu stubs\n",
               Bound.Guest.size(), Bound.Generated.size(), Bound.StandIn.size(), Bound.Data.size(), Bound.Stub.size());
 
-  const std::uint64_t Main = Eboot.Base + MainOffset;
-  const std::uint8_t MainByte = *reinterpret_cast<std::uint8_t*>(Main);
-  *reinterpret_cast<std::uint8_t*>(Main) = 0xF4;
+  const bool StopAtMain = Mode != "run";
+  const std::uint64_t Main = StopAtMain ? Eboot.Base + MainOffset : 0;
+  const std::uint8_t MainByte = StopAtMain ? *reinterpret_cast<std::uint8_t*>(Main) : 0;
+  if (StopAtMain) {
+    *reinterpret_cast<std::uint8_t*>(Main) = 0xF4;
+  }
   std::uint64_t ThunkCalls = 0;
   ThunkCallCounter = &ThunkCalls;
   FexGuest::CPUState State {};
@@ -435,6 +485,31 @@ int main(int argc, char** argv) {
   Start.rip = Eboot.Base + Eboot.Entry;
   Start.gregs[FexGuest::X86::REG_RSP] = FexGuest::MapStack();
   Start.gregs[FexGuest::X86::REG_RDI] = reinterpret_cast<std::uint64_t>(Arguments);
+  // Every 5 s for 55 s: the host call and stub counts, and the guest rip a SIGUSR2 sample of this thread reads.
+  const auto Watch = [&ThunkCalls] {
+    struct sigaction Sample {};
+    Sample.sa_sigaction = SampleGuest;
+    Sample.sa_flags = SA_SIGINFO;
+    sigaction(SIGUSR2, &Sample, nullptr);
+    const pthread_t GuestThread = pthread_self();
+    std::thread([GuestThread, &ThunkCalls] {
+      for (int Second = 5; Second <= 55; Second += 5) {
+        std::this_thread::sleep_for(std::chrono::seconds(5));
+        std::printf("watch %ds: %llu host calls past main, %llu stub calls\n", Second,
+                    static_cast<unsigned long long>(ThunkCalls - HostCallsAtMain), static_cast<unsigned long long>(StubCalls));
+        pthread_kill(GuestThread, SIGUSR2);
+      }
+    }).detach();
+  };
+  if (!StopAtMain) {
+    std::printf("running _start\n");
+    Watch();
+    FexGuest::Run(Start, Table, ThunkCalls);
+    std::printf("_start returned to the host after %llu host calls, %llu of them to stubs\n", static_cast<unsigned long long>(ThunkCalls),
+                static_cast<unsigned long long>(StubCalls));
+    std::fflush(stdout);
+    std::_Exit(0);
+  }
   const auto& Final = FexGuest::Run(Start, Table, ThunkCalls, Main);
   if (Final.rip != Main) {
     std::printf("_start returned without reaching main\nFAIL\n");
@@ -463,23 +538,40 @@ int main(int argc, char** argv) {
   Next.fs_cached = Final.fs_cached;
   Next.gs_cached = Final.gs_cached;
   std::printf("running main\n");
-  struct sigaction Sample {};
-  Sample.sa_sigaction = SampleGuest;
-  Sample.sa_flags = SA_SIGINFO;
-  sigaction(SIGUSR2, &Sample, nullptr);
-  const pthread_t GuestThread = pthread_self();
-  std::thread([GuestThread, &ThunkCalls] {
-    for (int Second = 5; Second <= 55; Second += 5) {
-      std::this_thread::sleep_for(std::chrono::seconds(5));
-      std::printf("watch %ds: %llu host calls past main, %llu stub calls\n", Second,
-                  static_cast<unsigned long long>(ThunkCalls - HostCallsAtMain), static_cast<unsigned long long>(StubCalls));
-      pthread_kill(GuestThread, SIGUSR2);
-    }
-  }).detach();
+  Watch();
   FexGuest::Run(Next, Table, ThunkCalls);
   std::printf("main and _start returned to the host after %llu host calls past main, %llu of them to stubs\n",
               static_cast<unsigned long long>(ThunkCalls - HostCallsAtMain), static_cast<unsigned long long>(StubCalls));
   // The watch thread still reads ThunkCalls: end the process without unwinding main's frame.
   std::fflush(stdout);
   std::_Exit(0);
+}
+} // namespace
+
+int main(int argc, char** argv) {
+  struct Arguments {
+    int Count;
+    char** Values;
+  } Game {argc, argv};
+  pthread_attr_t Attributes;
+  pthread_attr_init(&Attributes);
+  pthread_attr_setstacksize(&Attributes, std::size_t {64} << 20);
+  MainThread::Serving.store(true, std::memory_order_release);
+  pthread_t Thread;
+  const int Started = pthread_create(&Thread, &Attributes, [](void* Argument) -> void* {
+    const auto& Game = *static_cast<const Arguments*>(Argument);
+    const int Status = RunGame(Game.Count, Game.Values);
+    std::fflush(stdout);
+    std::exit(Status);
+  }, &Game);
+  pthread_attr_destroy(&Attributes);
+  if (Started != 0) {
+    std::fprintf(stderr, "cannot start the game thread: %s\n", std::strerror(Started));
+    return 1;
+  }
+  CFRunLoopTimerRef Timer = CFRunLoopTimerCreate(nullptr, 1.0e10, 1.0e10, 0, 0, MainThread::KeepAlive, nullptr);
+  CFRunLoopAddTimer(CFRunLoopGetMain(), Timer, kCFRunLoopCommonModes);
+  for (;;) {
+    CFRunLoopRun();
+  }
 }

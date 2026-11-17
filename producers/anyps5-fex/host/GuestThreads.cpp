@@ -118,6 +118,7 @@ void RunKeyDestructors() {
 // Guest stacks are reused rather than unmapped: an unmapped range would stay in the host's owned guest ranges.
 std::mutex StackMutex;
 std::vector<std::pair<std::uint64_t, std::uint64_t>> FreeStacks; // base, size
+std::vector<std::pair<std::uint64_t, std::uint64_t>> AllStacks;  // every guest thread stack mapped so far
 std::pair<std::uint64_t, std::uint64_t> TakeStack(std::uint64_t Size) {
   Size = (Size + 0x3fff) & ~0x3fffULL;
   {
@@ -130,7 +131,10 @@ std::pair<std::uint64_t, std::uint64_t> TakeStack(std::uint64_t Size) {
       }
     }
   }
-  return {reinterpret_cast<std::uint64_t>(FexGuest::MapGuest(Size)), Size};
+  const std::pair<std::uint64_t, std::uint64_t> Stack {reinterpret_cast<std::uint64_t>(FexGuest::MapGuest(Size)), Size};
+  std::lock_guard Lock(StackMutex);
+  AllStacks.push_back(Stack);
+  return Stack;
 }
 void ReturnStack(std::pair<std::uint64_t, std::uint64_t> Stack) {
   std::lock_guard Lock(StackMutex);
@@ -995,3 +999,21 @@ void AdoptInitialThread(std::uint64_t ThreadPointer) {
 }
 
 } // namespace GuestThreads
+
+// libkernel's DirectMemory asks these before it changes a range's protection (prx/libkernel/Pthread/include/Pthread.hpp).
+// The guest thread stacks are this layer's, and guest code never runs on a host thread's stack here.
+bool GuestThreadStack(std::uintptr_t Address, std::uintptr_t* Start, std::uintptr_t* End) {
+  std::lock_guard Lock(StackMutex);
+  for (const auto& [Base, Size] : AllStacks) {
+    if (Address >= Base && Address < Base + Size) {
+      *Start = Base;
+      *End = Base + Size;
+      return true;
+    }
+  }
+  return false;
+}
+bool GuestThreadStackHostRangeOverlaps(std::uintptr_t, std::uintptr_t) {
+  return false;
+}
+void NoteGuestStackProtection(std::uintptr_t, std::size_t, bool) {}
