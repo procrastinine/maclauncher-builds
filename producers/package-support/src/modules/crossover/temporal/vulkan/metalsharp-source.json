@@ -106,7 +106,24 @@
     "wineRevision": "dd1f6c2f9801327d30fd82f2d55071177824fb99",
     "driverVersion": 48,
     "unixCallCount": 746,
-    "files": []
+    "files": [
+      {
+        "relative": "lib/wine/aarch64-windows/winevulkan.dll",
+        "sha256": "4231ea3757773c9479f2a44ddde5aca539aee1ac976b187b79da9a89f8071433"
+      },
+      {
+        "relative": "lib/wine/aarch64-unix/winevulkan.so",
+        "sha256": "7b68dfcaa0b7131c91c0ef168b60338a03802eb5de61f5ea45d080794b87ff25"
+      },
+      {
+        "relative": "lib/wine/aarch64-unix/ntdll.so",
+        "sha256": "617c3bec054783138b036f3f1b3d6aaf72abca14f33e976cf12d6844ca4d7c37"
+      },
+      {
+        "relative": "lib/wine/aarch64-unix/win32u.so",
+        "sha256": "7f3a141aeaae10286f9625163c75d0a64c288314c2daa24cdcc7f87d4f610580"
+      }
+    ]
   },
   "repository": "https://github.com/metalsharp/MetalSharp-Wine",
   "revision": "dd1f6c2f9801327d30fd82f2d55071177824fb99",
