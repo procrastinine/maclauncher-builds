@@ -31,6 +31,7 @@
       "core/libs/prx/libc/src/StandardStreamObjects.cpp",
       "core/libs/prx/libkernel/Time/SleepWake.cpp",
       "core/libs/prx/libkernel/System/src/Notification.cpp",
+      "core/libs/prx/libkernel/System/src/Coredump.cpp",
       "core/libs/prx/libkernel/File/src/Open.cpp",
       "core/libs/prx/libSceUserService/Export.cpp",
       "core/libs/prx/libc/src/General.cpp",
@@ -146,7 +147,7 @@
       ["arm64-sync-on-address", "applySyncOnAddressLoad"]
     ],
     "cmakeLibraries": ["libSceVideoOut", "libSceAgc", "libSceAgcDriver", "libSceAudioOut", "libSceLibcInternal", "libSceJson2", "libSceNet",
-      "libSceHttp2", "libSceAvPlayer", "libSceAjm", "libSceSsl", "libSceNpWebApi2", "libSceAppContent", "libSceSaveData", "libSceImeDialog",
+      "libSceHttp2", "libSceAvPlayer", "libSceAjm", "libSceAcm", "libSceSsl", "libSceNpWebApi2", "libSceAppContent", "libSceSaveData", "libSceImeDialog",
       "libSceAmpr", "libSceWebBrowserDialog", "libSceNpManager", "libSceMsgDialog.native", "libSceHttp", "libSceAudioIn", "libSceRazorCpu",
       "ulobjmgr", "libSceRtc", "libSceRemoteplay", "libSceFont", "libSceRandom", "libSceNetCtl", "libSceCommonDialog", "libSceErrorDialog", "libSceSigninDialog", "libSceVrSetupDialog", "libSceGameUpdate", "libSceNpAuth", "libSceNpCommerce", "libSceNpEntitlementAccess", "libSceNpGameIntent", "libSceNpSessionSignaling", "libSceNpTrophy2", "libSceNpUniversalDataSystem", "libSceNpUtility", "libScePlayerInvitationDialog", "libSceSaveDataDialog", "libSceShare"],
     "arm64Libraries": {
