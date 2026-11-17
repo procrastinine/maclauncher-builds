@@ -2,5 +2,46 @@
   "schemaVersion": 2,
   "projectId": "rlvm",
   "updatePolicy": "manual",
-  "packages": []
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "rlvm",
+      "version": "0.14-MCLv1",
+      "arch": "universal",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "13.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "b84c85dbee1976486bfff3e2793ca9f12430ea08eb961c722c3ad2947dd12775",
+      "sourceSha256": "5a46a24ee392a2af44d40c95adb2224f3ebb61072b97f8ce2bcd48534591a05e",
+      "updatePolicy": "manual",
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "bb111d320ef66ff5c4261fcc09ff6437bccf2d6a"
+      },
+      "asset": {
+        "filename": "rlvm-0.14-MCLv1-universal.tar.gz",
+        "sha256": "8b6acb581e1c5e0ce8b037f3b81b471d7bb85dd30112f5fd6cbe00683903a304",
+        "bytes": 6061049,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/rlvm%2Fv0.14-MCLv1%2Funiversal/rlvm-0.14-MCLv1-universal.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "bb111d320ef66ff5c4261fcc09ff6437bccf2d6a",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.2",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "44036726270",
+        "runAttempt": "1",
+        "definitionDigest": "2c9491321551f1a3030d74fc375e957ae1610538b193f7f8a3a9f58e5e60cb9d"
+      },
+      "tag": "rlvm/v0.14-MCLv1/universal"
+    }
+  ]
 }
