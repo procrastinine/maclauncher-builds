@@ -2,8 +2,13 @@
 // Builds the AnyPS5 under FEXCore proof host for arm64 macOS from pinned sources and owned overlays.
 //
 //   node producers/anyps5-fex/build-proof.mjs --out <directory> [--check <eboot.elf> <function> <slot> <bss> <main>]
-//     [--only proof,abi,start,syscall]
+//     [--only proof,abi,start,syscall] [--anyps5-arm64 <directory>]
 //
+// --anyps5-arm64 names the arm64 AnyPS5 tree that producers/anyps5's buildRuntime({libraryArchitecture:'arm64',
+// configureOnly:true}) prepares at the same AnyPS5 revision: <directory>/source is its projection (every runtime
+// overlay and the arm64 library overlay applied) and <directory>/build its configured CMake build. The per-source
+// objects then compile from that projection, and source.json's anyps5.cmakeLibraries (VideoOut, Agc, AgcDriver and
+// the PRX libraries they link) come from that build as objects and static libraries.
 // The FEX checkout (with the submodules source.json lists) and the AnyPS5 paths are projected into
 // <directory>, the overlays are applied there, AnyPS5's arm64 library objects are compiled, and the
 // proof executable is linked against static FEXCore. AnyPS5 internals that the selected exports
@@ -37,6 +42,7 @@ function argumentsOf(argv){
   if(argv[at]==='--out')options.out=path.resolve(argv[++at]);
   else if(argv[at]==='--check'){options.check=argv.slice(at+1,at+6);at+=5;}
   else if(argv[at]==='--only')options.only=new Set(argv[++at].split(','));
+  else if(argv[at]==='--anyps5-arm64')options.anyps5Arm64=path.resolve(argv[++at]);
   else throw Error('Unknown argument: '+argv[at]);
  }
  if(!options.out)throw Error('--out is required.');
@@ -70,6 +76,95 @@ function project(directory,destination,paths=[]){
  }
 }
 
+// The objects, static libraries and other link inputs of the PRX libraries named, and of the PRX libraries they link,
+// from the arm64 CMake build: libc and libkernel are left out, since their arm64 PRX libraries do not link yet and the
+// per-source objects provide what the host needs of them. CMake gives every object and custom command of a target
+// order-only dependencies on the shared libraries it links, so Ninja runs on a copy of build.ninja without libc.prx and
+// libkernel.prx among them. Objects of a source the per-source list compiles are left out too.
+function cmakeLibraries(arm64,names,compiled){
+ const build=path.join(arm64,'build'),manifest=fs.readFileSync(path.join(build,'build.ninja'),'utf8').split('\n');
+ const excluded=new Set(['core/libs/libs/unpatched/libc.prx','core/libs/libs/unpatched/libkernel.prx']);
+ fs.writeFileSync(path.join(build,'objects-only.ninja'),manifest.map(line=>{
+  if(!line.startsWith('build ')||!line.includes(' || '))return line;
+  const at=line.indexOf(' || '),kept=line.slice(at+4).split(' ').filter(target=>!excluded.has(target));
+  return line.slice(0,at)+(kept.some(Boolean)?' || '+kept.join(' '):'');
+ }).join('\n'));
+ const edges=new Map();
+ for(let at=0;at<manifest.length;at++){
+  const match=/^build (core\/libs\/libs\/unpatched\/\S+\.prx): \S+ (.*)$/.exec(manifest[at]);
+  if(!match)continue;
+  const variables={};
+  for(let next=at+1;next<manifest.length&&manifest[next].startsWith('  ');next++){
+   const separator=manifest[next].indexOf(' = ');
+   variables[manifest[next].slice(2,separator)]=manifest[next].slice(separator+3);
+  }
+  edges.set(match[1],{inputs:match[2].split(' || ')[0].split(' | ')[0].trim().split(/\s+/),variables});
+ }
+ const commands=JSON.parse(execFileSync('ninja',['-C',build,'-t','compdb'],{encoding:'utf8',maxBuffer:Infinity}));
+ const sourceOf=new Map(commands.map(entry=>[path.resolve(entry.directory,entry.output),path.resolve(entry.directory,entry.file)]));
+ const commandOf=new Map(commands.map(entry=>[path.resolve(entry.directory,entry.output),entry.command]));
+ const libraries=[],objects=[],archives=[],link=[],sources=[],includes=[],defines=new Map(),seen=new Set(),pending=names.map(name=>'core/libs/libs/unpatched/'+name+'.prx');
+ while(pending.length){
+  const target=pending.shift();
+  if(seen.has(target)||excluded.has(target))continue;
+  seen.add(target);
+  const edge=edges.get(target);
+  if(!edge)throw Error('The arm64 AnyPS5 build has no PRX library '+target);
+  libraries.push(path.basename(target,'.prx'));
+  for(const input of edge.inputs){
+   const object=path.join(build,input),source=sourceOf.get(object);
+   if(source&&compiled.has(path.relative(path.join(arm64,'source'),source)))continue;
+   objects.push(object);
+   if(source)sources.push(path.relative(path.join(arm64,'source'),source));
+   // The include directories outside the projected paths (SDL, the Vulkan headers, generated headers), which the
+   // thunk units that include these sources' headers need as well.
+   for(const [,directory] of (commandOf.get(object)||'').matchAll(/(?:^|\s)(?:-I|-isystem\s+)(\S+)/g))includes.push(path.resolve(build,directory));
+   // And their definitions (APS5_ENABLE_TIMING_LOG, VK_ENABLE_BETA_EXTENSIONS), apart from each library's <name>_EXPORTS.
+   for(const [,definition] of (commandOf.get(object)||'').matchAll(/(?:^|\s)-D(\S+)/g)){
+    if(/_EXPORTS$/.test(definition))continue;
+    const name=definition.split('=')[0];
+    if(defines.has(name)&&defines.get(name)!==definition)throw Error('The arm64 AnyPS5 libraries define '+name+' differently: '+defines.get(name)+', '+definition);
+    defines.set(name,definition);
+   }
+  }
+  const words=edge.variables.LINK_LIBRARIES.trim().split(/\s+/);
+  for(let at=0;at<words.length;at++){
+   const word=words[at];
+   if(word.endsWith('.prx'))pending.push(word);
+   else if(word.endsWith('.a'))archives.push(path.join(build,word));
+   else if(word==='-framework')link.push(word+' '+words[++at]);
+   else if(word.endsWith('.dylib'))link.push(path.join(build,word));
+   else if(word.startsWith('-l'))link.push(word);
+   else if(!word.startsWith('-Wl,-rpath,'))throw Error('Unknown link input of '+target+': '+word);
+  }
+  if(edge.variables.LINK_FLAGS.includes('-fexperimental-library'))link.push('-fexperimental-library');
+ }
+ const unique=list=>[...new Set(list)];
+ run('ninja',['-C',build,'-f','objects-only.ninja',...unique(objects).map(file=>path.relative(build,file)),...unique(archives).map(file=>path.relative(build,file))]);
+ return {libraries,objects:unique(objects),archives:unique(archives),link:unique(link),sources:unique(sources),includes:unique(includes),defines:[...defines.values()]};
+}
+
+// Makes destination hold exactly the files of source, copying a file only when its contents differ.
+function syncTree(source,destination){
+ const walk=(directory,prefix='')=>fs.readdirSync(directory,{withFileTypes:true}).flatMap(entry=>{
+  const relative=path.join(prefix,entry.name);
+  return entry.isDirectory()?walk(path.join(directory,entry.name),relative):[relative];
+ });
+ const wanted=new Set(walk(source));
+ if(fs.existsSync(destination))for(const relative of walk(destination))if(!wanted.has(relative))fs.rmSync(path.join(destination,relative),{force:true});
+ for(const relative of wanted){
+  const from=path.join(source,relative),to=path.join(destination,relative),link=fs.lstatSync(from).isSymbolicLink();
+  if(link){
+   if(fs.existsSync(to)||fs.lstatSync(to,{throwIfNoEntry:false}))if(fs.lstatSync(to).isSymbolicLink()&&fs.readlinkSync(to)===fs.readlinkSync(from))continue;
+   fs.rmSync(to,{force:true});fs.mkdirSync(path.dirname(to),{recursive:true});fs.symlinkSync(fs.readlinkSync(from),to);continue;
+  }
+  const existing=fs.lstatSync(to,{throwIfNoEntry:false});
+  if(existing?.isFile()&&existing.size===fs.statSync(from).size&&fs.readFileSync(to).equals(fs.readFileSync(from))&&existing.mode===fs.statSync(from).mode)continue;
+  fs.rmSync(to,{force:true,recursive:true});fs.mkdirSync(path.dirname(to),{recursive:true});
+  fs.copyFileSync(from,to,fs.constants.COPYFILE_FICLONE);fs.chmodSync(to,fs.statSync(from).mode);
+ }
+}
+
 function applyOverlay(target,overlay){
  // The ceiling keeps git apply from discovering an enclosing repository.
  git(target,['apply','--whitespace=nowarn',path.join(import.meta.dirname,overlay.file)],{env:{...process.env,GIT_CEILING_DIRECTORIES:path.dirname(target)}});
@@ -79,7 +174,9 @@ function link(out,objects,log){
  const build=path.join(out,'build');
  run('cmake',['-S',path.join(out,'fex'),'-B',build,'-G','Ninja','-DCMAKE_BUILD_TYPE=Release','-DBUILD_TESTING=OFF','-DBUILD_FEXCONFIG=OFF',
   '-DENABLE_JEMALLOC_GLIBC_ALLOC=OFF','-DENABLE_OFFLINE_TELEMETRY=OFF','-DENABLE_CCACHE=OFF','-DENABLE_LTO=OFF','-DTUNE_CPU=none','-DTUNE_ARCH=generic',
-  '-DCMAKE_PROJECT_FEX_INCLUDE='+path.join(out,'host',recipe.host.entry),'-DANYPS5_ARM64_OBJECTS='+objects.join(';'),'-DANYPS5_SOURCE_DIR='+path.join(out,'anyps5'),'-DANYPS5_GENERATED_THUNKS='+generatedFiles.join(';')],{stdio:['ignore','ignore','inherit']});
+  '-DCMAKE_PROJECT_FEX_INCLUDE='+path.join(out,'host',recipe.host.entry),'-DANYPS5_ARM64_OBJECTS='+objects.join(';'),'-DANYPS5_SOURCE_DIR='+path.join(out,'anyps5'),'-DANYPS5_GENERATED_THUNKS='+generatedFiles.join(';'),
+  '-DANYPS5_ARM64_LINK='+[...cmake.archives,...cmake.link].join(';'),'-DANYPS5_ARM64_INCLUDES='+cmake.includes.join(';'),
+  '-DANYPS5_ARM64_DEFINES='+cmake.defines.join(';')],{stdio:['ignore','ignore','inherit']});
  const result=spawnSync('ninja',['-C',build,...recipe.host.targets],{encoding:'utf8',maxBuffer:Infinity});
  fs.writeFileSync(log,result.stdout+result.stderr);
  return result.status===0;
@@ -127,26 +224,48 @@ lowestPriority();
 let niceness='unavailable';
 try{niceness=execFileSync('ps',['-o','ni=','-p',String(process.pid)],{encoding:'utf8'}).trim();}catch{}
 process.stdout.write('build priority (ps -o ni): '+niceness+'\n');
-const fex=verifyCheckout(recipe.source),anyps5=verifyCheckout(recipe.anyps5);
-fs.rmSync(path.join(options.out,'fex'),{recursive:true,force:true});fs.rmSync(path.join(options.out,'anyps5'),{recursive:true,force:true});
-project(fex,path.join(options.out,'fex'));project(anyps5,path.join(options.out,'anyps5'),recipe.anyps5.paths);
-for(const overlay of recipe.overlays)applyOverlay(path.join(options.out,overlay.target),overlay);
-// Darwin overlays from producers/anyps5 RUNTIME_OVERLAYS that the compiled objects need and that edit only core/libs,
-// applied in that list's order.
-for(const [directory,method] of recipe.anyps5.runtimeOverlays)
- (await import(new URL('../anyps5/overlays/'+directory+'/apply.mjs',import.meta.url)))[method](path.join(options.out,'anyps5'));
-// This producer's own overlays for the arm64 translation host (producers/anyps5-fex/overlays), after those.
-for(const [directory,method] of recipe.anyps5.hostOverlays)
- (await import(new URL('overlays/'+directory+'/apply.mjs',import.meta.url)))[method](path.join(options.out,'anyps5'));
-// The arm64 library overlay's steps that the per-source objects need (owned by the PS5 library lane): its shared sources
-// (GuestCpuArm64, the standard stream objects) and its raw x87 long double parsing and formatting, each a function of
-// a module in that overlay's directory, in the listed order.
-for(const [script,name] of recipe.anyps5.arm64Libraries.steps)
- (await import(new URL(recipe.anyps5.arm64Libraries.directory+'/'+script,import.meta.url)))[name](path.join(options.out,'anyps5'));
+const fex=verifyCheckout(recipe.source);
+// The sources are prepared in a staging directory and then copied into place only where they changed, so unchanged
+// files keep their timestamps and Ninja rebuilds only what changed.
+const stage=path.join(options.out,'staging');
+fs.rmSync(stage,{recursive:true,force:true});
+project(fex,path.join(stage,'fex'));
+for(const overlay of recipe.overlays.filter(overlay=>overlay.target==='fex'))applyOverlay(path.join(stage,'fex'),overlay);
+if(options.anyps5Arm64){
+ const exported=fs.readFileSync(path.join(options.anyps5Arm64,'source/AnyPS5ExportedSources.cmake'),'utf8');
+ if(!exported.includes('set(ANYPS5_EXPORTED_REVISION "'+gitlink(recipe.anyps5.gitlink)+'")'))throw Error('The arm64 AnyPS5 tree is not at the pinned AnyPS5 revision.');
+ for(const relative of recipe.anyps5.paths){
+  const destination=path.join(stage,'anyps5',relative);
+  fs.mkdirSync(path.dirname(destination),{recursive:true});
+  run('cp',['-cR',path.join(options.anyps5Arm64,'source',relative),path.dirname(destination)+'/']);
+ }
+ // That projection has every runtime overlay and the arm64 library overlay, which also gives GuestCpu.hpp its arm64
+ // branch (overlays/anyps5/guestcpu-arm64.patch); this producer's overlays come after them.
+ for(const [directory,method] of recipe.anyps5.arm64HostOverlays)
+  (await import(new URL('overlays/'+directory+'/apply.mjs',import.meta.url)))[method](path.join(stage,'anyps5'));
+}else{
+ const anyps5=verifyCheckout(recipe.anyps5);
+ project(anyps5,path.join(stage,'anyps5'),recipe.anyps5.paths);
+ for(const overlay of recipe.overlays.filter(overlay=>overlay.target==='anyps5'))applyOverlay(path.join(stage,'anyps5'),overlay);
+ // Darwin overlays from producers/anyps5 RUNTIME_OVERLAYS that the compiled objects need and that edit only core/libs,
+ // applied in that list's order.
+ for(const [directory,method] of recipe.anyps5.runtimeOverlays)
+  (await import(new URL('../anyps5/overlays/'+directory+'/apply.mjs',import.meta.url)))[method](path.join(stage,'anyps5'));
+ // This producer's own overlays for the arm64 translation host (producers/anyps5-fex/overlays), after those.
+ for(const [directory,method] of recipe.anyps5.hostOverlays)
+  (await import(new URL('overlays/'+directory+'/apply.mjs',import.meta.url)))[method](path.join(stage,'anyps5'));
+ // The arm64 library overlay's steps that the per-source objects need (owned by the PS5 library lane): its shared sources
+ // (GuestCpuArm64, the standard stream objects) and its raw x87 long double parsing and formatting, each a function of
+ // a module in that overlay's directory, in the listed order.
+ for(const [script,name] of recipe.anyps5.arm64Libraries.steps)
+  (await import(new URL(recipe.anyps5.arm64Libraries.directory+'/'+script,import.meta.url)))[name](path.join(stage,'anyps5'));
+}
 // The host sources sit outside the FEX projection; fex-entry.cmake adds them to FEX's build.
-const hostSource=path.join(options.out,'host');
-fs.rmSync(hostSource,{recursive:true,force:true});fs.mkdirSync(hostSource,{recursive:true});
+const hostSource=path.join(stage,'host');
+fs.mkdirSync(hostSource,{recursive:true});
 for(const file of recipe.host.sources)fs.copyFileSync(path.join(import.meta.dirname,recipe.host.directory,file),path.join(hostSource,file));
+for(const tree of ['fex','anyps5','host'])syncTree(path.join(stage,tree),path.join(options.out,tree));
+fs.rmSync(stage,{recursive:true,force:true});
 
 const guestObject=path.join(options.out,'guest-abi.x86_64.o'),guestText=path.join(options.out,'guest-abi.bin');
 run('clang',['-arch','x86_64','-O2','-ffreestanding','-fno-builtin','-fno-stack-protector','-fno-asynchronous-unwind-tables','-c',
@@ -161,8 +280,23 @@ const compile=(source,flags=[])=>{
   '-I',path.join(options.out,'anyps5/core/libs/nid/include'),...flags,path.join(options.out,'anyps5',source),'-o',object]);
  return object;
 };
-const objects=[...recipe.anyps5.objects.map(source=>compile(source)),
- ...recipe.anyps5.objectLibraries.flatMap(file=>objectLibrary(path.join(options.out,'anyps5',file)).map(([source,flags])=>compile(source,flags)))];
+const libraryObjects=recipe.anyps5.objectLibraries.flatMap(file=>objectLibrary(path.join(options.out,'anyps5',file)));
+const objects=[...recipe.anyps5.objects.map(source=>compile(source)),...libraryObjects.map(([source,flags])=>compile(source,flags))];
+// The PRX libraries from the arm64 CMake build, after the per-source objects, so a name both define binds to the
+// per-source definition.
+const cmake=options.anyps5Arm64?cmakeLibraries(options.anyps5Arm64,recipe.anyps5.cmakeLibraries,new Set([...recipe.anyps5.objects,...libraryObjects.map(([source])=>source)])):
+ {libraries:[],objects:[],archives:[],link:[],sources:[],includes:[],defines:[]};
+// The thunk units repeat their sources' includes, which the per-source compile resolves with these directories too.
+cmake.includes.unshift(path.join(options.out,'anyps5/3rdparty/ZArchive/include'));
+if(options.anyps5Arm64){
+ const projected=path.join(options.anyps5Arm64,'source');
+ cmake.includes=[...new Set(cmake.includes.map(directory=>{
+  const relative=path.relative(projected,directory);
+  return !relative.startsWith('..')&&recipe.anyps5.paths.some(prefix=>relative===prefix||relative.startsWith(prefix+'/'))?path.join(options.out,'anyps5',relative):directory;
+ }))].filter(directory=>directory!==path.join(options.out,'anyps5/core/libs'));
+ objects.push(...cmake.objects);
+ process.stdout.write('arm64 CMake libraries: '+cmake.libraries.join(', ')+' ('+cmake.objects.length+' objects, '+cmake.archives.length+' static libraries)\n');
+}
 // AnyPS5 builds each PRX as its own library, and two libraries can export the same name (libc's and libkernel's exit,
 // say). In this one image, a strong symbol that an earlier object already defines becomes local to the later object,
 // whose own calls keep using its definition; imports bind to the first.
@@ -182,17 +316,19 @@ const objects=[...recipe.anyps5.objects.map(source=>compile(source)),
 // One thunk translation unit per source, plus the part and data tables (generate-thunks.py prints the files).
 const generatedThunks=path.join(options.out,'generated-thunks.cpp');
 const generatedFiles=execFileSync('python3',['-I',path.join(import.meta.dirname,recipe.host.directory,recipe.host.generator.script),generatedThunks,
- path.join(options.out,'anyps5/core/libs'),...recipe.anyps5.objects.map(source=>path.join(options.out,'anyps5',source)),'--',...objects],{encoding:'utf8',stdio:['ignore','pipe','inherit']}).trim().split('\n');
+ [path.join(options.out,'anyps5/core/libs'),...cmake.includes].join(':'),...[...recipe.anyps5.objects,...cmake.sources.filter(source=>fs.existsSync(path.join(options.out,'anyps5',source)))].map(source=>path.join(options.out,'anyps5',source)),'--',...objects],{encoding:'utf8',stdio:['ignore','pipe','inherit']}).trim().split('\n');
 const firstLog=path.join(options.out,'link-exports.log');
 if(!link(options.out,objects,firstLog)){
  if(!/Undefined symbols/.test(fs.readFileSync(firstLog,'utf8')))throw Error('The proof build failed; see '+firstLog);
  const assembly=path.join(options.out,'anyps5-unreached-exports.s'),stubs=path.join(options.out,'anyps5-unreached-exports.o');
- execFileSync('python3',['-I',path.join(import.meta.dirname,recipe.host.directory,'unreached-exports.py'),firstLog,assembly,...objects],{stdio:'inherit'});
+ execFileSync('python3',['-I',path.join(import.meta.dirname,recipe.host.directory,'unreached-exports.py'),firstLog,assembly,...objects,...cmake.archives],{stdio:'inherit'});
  run('clang',['-c','-arch','arm64',assembly,'-o',stubs]);
  const secondLog=path.join(options.out,'link-proof.log');
  if(!link(options.out,[...objects,stubs],secondLog))throw Error('The proof build failed; see '+secondLog);
 }
 const [proof,abi,start,syscall]=recipe.host.targets.map(target=>path.join(options.out,'build/Bin',target));
+// The dynamic libraries the AnyPS5 libraries link (SDL) load from next to the executables (@executable_path).
+for(const library of cmake.link.filter(item=>item.endsWith('.dylib')))fs.copyFileSync(library,path.join(options.out,'build/Bin',path.basename(library)));
 process.stdout.write(proof+'\n'+abi+' '+guestText+' '+guestOffsets.join(' ')+'\n'+start+'\n'+syscall+'\n');
 // The start host's static initializers include the AnyPS5 objects' registrations. Run without arguments, it stops at
 // its usage message (exit 2) unless an initializer reaches one of the unreached-export stubs above (SIGTRAP).

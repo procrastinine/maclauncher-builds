@@ -24,7 +24,7 @@
     "submodules": [
       "3rdparty/ZArchive"
     ],
-    "paths": ["core/libs", "3rdparty/ZArchive/include"],
+    "paths": ["core/libs", "core/shader", "3rdparty/ZArchive/include"],
     "objects": [
       "core/libs/prx/libkernel/Time/Time.cpp",
       "core/libs/prx/libc/src/GuestCpuArm64.cpp",
@@ -89,7 +89,13 @@
       "core/libs/prx/libSceSysmodule/Export.cpp",
       "core/libs/prx/libc/src/GuestAllocations.cpp",
       "core/libs/prx/libkernel/DirectMemory/MemoryPool.cpp",
-      "core/libs/prx/libkernel/AppMetadata/src/ParamJsonParser.cpp"
+      "core/libs/prx/libkernel/AppMetadata/src/ParamJsonParser.cpp",
+      "core/libs/prx/libkernel/AppMetadata/src/AppMetadata.cpp",
+      "core/libs/prx/libkernel/AppMetadata/src/ParamSfoParser.cpp",
+      "core/libs/prx/libc/src/FailureReport.cpp",
+      "core/libs/prx/libkernel/System/src/HostCpu.cpp",
+      "core/libs/prx/libc/src/CreationMask.cpp",
+      "core/libs/prx/libc/src/Environment.cpp"
     ],
     "objectLibraries": [
       "core/libs/prx/libc/gdtoa/Build.cmake"
@@ -103,6 +109,11 @@
       ["arm64-standard-streams", "applyStandardStreamsOverlay"],
       ["guest-va-list", "applyGuestVaListOverlay"]
     ],
+    "arm64HostOverlays": [
+      ["arm64-standard-streams", "applyStandardStreamDeclarations"],
+      ["guest-va-list", "applyGuestVaListOverlay"]
+    ],
+    "cmakeLibraries": ["libSceVideoOut", "libSceAgc", "libSceAgcDriver", "libSceAudioOut"],
     "arm64Libraries": {
       "directory": "../anyps5/overlays/arm64-libs",
       "steps": [

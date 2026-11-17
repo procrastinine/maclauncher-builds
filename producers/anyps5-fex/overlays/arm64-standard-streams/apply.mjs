@@ -25,3 +25,16 @@ export function applyStandardStreamsOverlay(root) {
         ['FileStream* __stdinp_nid_postfix = &input;\nFileStream* __stdoutp_nid_postfix = &_Stdout_nid_postfix;\nFileStream* __stderrp_nid_postfix = &_Stderr_nid_postfix;\n',
          'extern FileStream* __stdinp_nid_postfix;\nextern FileStream* __stdoutp_nid_postfix;\nextern FileStream* __stderrp_nid_postfix;\n']]);
 }
+
+// On the arm64 projection that producers/anyps5's buildRuntime prepares, the arm64 library overlay has already removed
+// those definitions, so StandardStreams.cpp only needs the three pointers declared before they are used.
+export function applyStandardStreamDeclarations(root) {
+    const file = path.join(root, 'core/libs/prx/libc/src/StandardStreams.cpp');
+    const source = fs.readFileSync(file, 'utf8');
+    const before = 'extern "C" {\n\nint __isthreaded_nid_postfix = 1;\n';
+    if (source.indexOf(before) < 0 || source.indexOf(before) !== source.lastIndexOf(before) || /FileStream\* __stdoutp_nid_postfix\b/.test(source)) {
+        throw Error('Standard stream boundary changed: core/libs/prx/libc/src/StandardStreams.cpp');
+    }
+    fs.writeFileSync(file, source.replace(before, before +
+        'extern FileStream* __stdinp_nid_postfix;\nextern FileStream* __stdoutp_nid_postfix;\nextern FileStream* __stderrp_nid_postfix;\n'));
+}
