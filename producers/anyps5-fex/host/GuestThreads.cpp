@@ -95,9 +95,16 @@ struct ExitRequest {
   std::uint64_t Value;
 };
 
+// The host function libSceLibcInternal registers for C++ thread_local destructors (sceKernelSetThreadDtors). It runs at
+// a guest thread's exit, before the thread-specific data destructors, as FreeBSD's libthr calls its thread dtors first.
+std::atomic<void (*)()> ThreadDtors {nullptr};
+
 void RunKeyDestructors() {
   if (!Self) {
     return;
+  }
+  if (auto* Dtors = ThreadDtors.load(std::memory_order_acquire)) {
+    Dtors();
   }
   for (int Iteration = 0; Iteration < DestructorIterations; ++Iteration) {
     bool Called = false;
@@ -1298,6 +1305,19 @@ bool GuestThreadStack(std::uintptr_t Address, std::uintptr_t* Start, std::uintpt
   }
   return false;
 }
+// AnyPS5's own arm64 code calls some thread exports directly instead of through a guest import: libkernel's
+// sceKernelWaitSema orders a priority queue by scePthreadGetprio(scePthreadSelf()), and libSceLibcInternal registers
+// its thread_local destructor runner with sceKernelSetThreadDtors. These answer from this layer's records.
+extern "C" std::uint64_t scePthreadSelf() {
+  return SelfHandle();
+}
+extern "C" int scePthreadGetprio(std::uint64_t Handle, int* Priority) {
+  return SceOf<&Getprio, std::uint64_t, int*>(Handle, Priority);
+}
+extern "C" void sceKernelSetThreadDtors(void (*Dtors)()) {
+  ThreadDtors.store(Dtors, std::memory_order_release);
+}
+
 bool GuestThreadStackHostRangeOverlaps(std::uintptr_t, std::uintptr_t) {
   return false;
 }

@@ -878,7 +878,10 @@ inline std::uint64_t RunNewThread(std::uint64_t Entry, std::uint64_t Argument, s
   Loop(StubBase, 0);
   const std::uint64_t Result = Thread->CurrentFrame->State.gregs[X86::REG_RAX];
   if (Finish) {
+    // Host code that may call guest functions (key and thread_local destructors), directly or through CallGuest.
+    InHostCall = true;
     Finish();
+    InHostCall = false;
   }
   return Result;
 }
