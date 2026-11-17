@@ -28,7 +28,7 @@ export async function compile({work,prepared:{bisonArchive,moltenvkArchive,mingw
 /** Describe the compiled module libraries and package them. */
 export async function assemble({output,work,prepared:{source,arch,profile,mingw:compiler}}){
  const module=await producer(),staged=path.join(work,'staged');
- for(const [file] of module.modulePaths(arch,profile.architectures.pe,profile.clientModule)){fs.mkdirSync(path.dirname(path.join(staged,file)),{recursive:true});fs.copyFileSync(path.join(compiled(work),file),path.join(staged,file));}
+ for(const [file] of [...module.modulePaths(arch,profile.architectures.pe,profile.clientModule),...module.openGLPaths(profile).map(file=>[file])]){fs.mkdirSync(path.dirname(path.join(staged,file)),{recursive:true});fs.copyFileSync(path.join(compiled(work),file),path.join(staged,file));}
  module.describeModule({directory:source.directory,output:staged,arch,profile,readobj:path.join(compiler,'llvm-readobj')});
  return sceneAssemble({output,compiled:producerOutput(staged)});
 }
