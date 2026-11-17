@@ -1,0 +1,10 @@
+{
+  "repository": "https://github.com/dttdrv/mullion",
+  "revision": "d7d99957a8e93fab31ab331bb53f8087e30bf077",
+  "license": "LGPL-2.1-or-later",
+  "files": [
+    "src/winemetal/unix/winemetal_unix.c",
+    "src/mullion/mullion_window.hpp"
+  ],
+  "adaptation": "Wine Cocoa window presentation and client placement"
+}
