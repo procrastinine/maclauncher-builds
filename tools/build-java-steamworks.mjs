@@ -8,7 +8,7 @@ import {helperPackage,sha} from './helper-package.mjs';
 import {resolveProject} from '../lib/projects.mjs';
 import {recipeMain} from './build-source.mjs';
 import {buildInput} from './build-input.mjs';
-import {archiveInput} from '../lib/pins.mjs';
+import {archiveInput,sourceRevision} from '../lib/pins.mjs';
 import {compileNative} from './java-steamworks-native.mjs';
 const require=createRequire(import.meta.url),root=path.resolve(import.meta.dirname,'..'),base=path.join(root,'producers/package-support/src/modules/java/runtime/steamworks');
 const {build}=require(path.join(base,'build-agent.cjs')),catalog=require(path.join(base,'publisher-releases.json'));
@@ -16,7 +16,8 @@ const {build}=require(path.join(base,'build-agent.cjs')),catalog=require(path.jo
 export function javaSteamworksProfile(version){
  const upstream=/^(.+)-MCLv[1-9]\d*$/.exec(version||'')?.[1],matches=catalog.filter(row=>row.version===upstream);
  if(matches.length!==1)throw Error('The Steamworks4j catalog has no ABI release for '+version+'.');
- return matches[0];
+ const original=matches[0];
+ return original.source?{...original,sourceRevision:sourceRevision(original.source)}:original;
 }
 /** Read the reviewed JNI library from the publisher archive and compile the agent into the payload. */
 export async function compile({project:id,version,arch,output,work}){

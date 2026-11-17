@@ -807,7 +807,7 @@
         "repository": "code-disaster/steamworks4j",
         "pin": {
           "file": "producers/package-support/src/modules/java/runtime/steamworks/publisher-releases.json",
-          "pointer": "/0/sourceRevision"
+          "pointer": "/0/source"
         }
       },
       {

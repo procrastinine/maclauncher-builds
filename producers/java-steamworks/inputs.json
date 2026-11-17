@@ -1,9 +1,4 @@
 {
-  "source": {
-    "repository": "https://github.com/code-disaster/steamworks4j",
-    "revision": "33ae54e87657afe8464eb01845e62b79403f5bfa",
-    "sha256": "881fe7d0a602ec03811b99c6ff62ccde7b7a6bbc5f0ec48fe0e7894f1e6a8db6"
-  },
   "sdk": {
     "repository": "https://github.com/rlabrecque/SteamworksSDK",
     "revision": "0410352777823f25e59eb79d54caef07c831ce4b",
