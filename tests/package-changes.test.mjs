@@ -261,3 +261,17 @@ test('shared recipe helpers remain in scope while another producer-only request 
  const release=packageChanges({directory:f.directory}).projects[0].releases.at(-1);
  assert.deepEqual(release.commits.map(commit=>commit.revision),[second]);
 });
+
+test('a project with two ABI lines moves only the version bindings of the selected line',t=>{
+ const f=fixture(t);
+ Object.assign(f.project,{packageProfiles:[{version:'1.0.0-MCLv1',label:'Demo 1'},{version:'2.0.0-MCLv1',label:'Demo 2'}],
+  build:[{version:'1.0.0-MCLv1',command:'tools/build.mjs',architectures:['x64']},{version:'2.0.0-MCLv1',command:'tools/build.mjs',architectures:['arm64']}],
+  versionBindings:[{file:'one.json',pointer:'/version'},{file:'two.json',pointer:'/version'}]});
+ f.write('one.json',{version:'1.0.0-MCLv1'});f.write('two.json',{version:'2.0.0-MCLv1'});f.commit('Two lines');
+ const read=file=>JSON.parse(fs.readFileSync(path.join(f.directory,file),'utf8')).version;
+ registerSelection({directory:f.directory,selection:'demo=2.0.0-MCLv2'});
+ assert.deepEqual([read('one.json'),read('two.json')],['1.0.0-MCLv1','2.0.0-MCLv2']);
+ registerSelection({directory:f.directory,selection:'demo=1.0.0-MCLv2'});
+ assert.deepEqual([read('one.json'),read('two.json')],['1.0.0-MCLv2','2.0.0-MCLv2']);
+ assert.deepEqual(readProjects(f.directory,{resolvePins:false}).projects[0].build.map(row=>row.version).sort(),['1.0.0-MCLv2','2.0.0-MCLv2']);
+});
