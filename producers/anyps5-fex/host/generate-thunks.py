@@ -122,7 +122,7 @@ def top_lines(source):
                 headers.append(local)
             else:
                 lines.append(line)
-                if kind == '"' and name.startswith('prx/') and name.endswith('.hpp'):
+                if kind == '"' and name.startswith('prx/') and name.endswith(('.hpp', '.h')):
                     headers.append(name)
         elif directive in ('define', 'undef'):
             lines.append(line)
@@ -133,11 +133,16 @@ for source in sources:
     prelude, headers = top_lines(source)
     headers = list(dict.fromkeys(headers))
     names, prototypes, pending = [], {}, []
+    # The AnyPS5 headers those headers include declare exports too (libSceMsgDialog.native.hpp includes
+    # libSceMsgDialog's Api.hpp for everything but sceMsgDialogGetResult).
     for header in headers:
         found = header if os.path.isabs(header) else next((f'{root}/{header}' for root in includes if os.path.isfile(f'{root}/{header}')), None)
         if found is None:
             raise SystemExit(f'{source}: {header} is in no include directory')
         text = open(found, encoding='utf-8').read()
+        for nested in re.findall(r'^\s*#\s*include\s*"(prx/[^"]+\.(?:hpp|h))"', text, re.M):
+            if nested not in headers:
+                headers.append(nested)
         scope = namespaces(text)
         for match in declaration.finditer(text):
             prototypes.setdefault(match.group(1), (match.group(2), scope.get(match.start(), '')))
