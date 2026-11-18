@@ -180,11 +180,14 @@ export function finishModule(built,output){
     }
     return output;
 }
-/** Read all Mach-O slices and PE hybrid metadata for the shipped modules. */
+/** Read Mach-O slices or the PE machine used by the sealed file inventory. */
 export function moduleArchitectures(file){
     const facts=appRequire('src/core/binary-arch').inspectBinary(file);
     if(facts.format==='macho')return facts.architectures;
-    if(facts.format==='pe'&&facts.machine)return [facts.machine];
+    if(facts.format==='pe'){
+        const pe=appRequire('src/modules/shared/runtime/pe-exports').readPeExports(file,{headersOnly:true});
+        if(pe?.architecture)return [pe.architecture];
+    }
     throw Error('Unrecognized module binary format: '+file);
 }
 /** Describe staged module libraries from the projected Wine source: licenses, provider record, manifest, payload and declaration. */
@@ -199,7 +202,7 @@ export function describeModule({directory,output,arch='x64',profile=source,modul
         fs.chmodSync(target,binary?0o755:0o644);
         return {path:file,size:fs.statSync(target).size,mode:binary?0o755:0o644,sha256:digest(fs.readFileSync(target)),
             ...(binary?{format:native?'mach-o':'pe',architectures:architectures(target),
-                ...(native?{executionArchitecture:host.macho}:{})}:{})};
+                ...(native&&host.arch==='x64'?{executionArchitecture:host.macho}:{})}:{})};
     });
     const provider={schema:1,provider:source.id,version:profile.version,profile:profile.profile,
         sceneInteropAPI:1,sceneContextAPI:1,graphicsLibraryAPI:1,wineVulkanDriverVersion:profile.wineVulkanDriverVersion,originalUnixCallCount:profile.unixCallCount,runtimeProfile:profile.runtimeProfile,
@@ -213,7 +216,7 @@ export function describeModule({directory,output,arch='x64',profile=source,modul
     const payload=path.join(output,'payload');fs.mkdirSync(payload);
     for(const file of files){const target=path.join(payload,file.path);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(path.join(output,file.path),target);fs.chmodSync(target,file.mode);}
     const manifestFile=path.join(payload,'manifest.json');writeChanged(manifestFile,JSON.stringify(manifest,null,2)+'\n');
-    const declaration={id:source.id,version:profile.version,arch:host.arch,launcherArchitectures:['arm64','x64'],minimumMacOS:minimumMacOS,
+    const declaration={id:source.id,version:profile.version,arch:host.arch,launcherArchitectures:host.arch==='arm64'?['arm64']:['arm64','x64'],minimumMacOS:minimumMacOS,
         sourceRelative:null,sourceSha256:digest(fs.readFileSync(path.join(here,source.hostProfiles?.[host.arch]||'source.json'))),directoryRelative:[source.id,profile.version,host.arch].join('/'),
         manifestRelative:'manifest.json',manifestSha256:digest(fs.readFileSync(manifestFile)),files:[...files,{path:'manifest.json',
             size:fs.statSync(manifestFile).size,mode:0o644,sha256:digest(fs.readFileSync(manifestFile))}]};
