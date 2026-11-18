@@ -38,15 +38,29 @@ test('DXMT version metadata comes from the declared source revision',t=>{
  assert.throws(()=>configureVersion(root,revision),/source anchor changed/);
 });
 
-test('the declared DXMT project separates native arm64 delivery from its build-only Wine SDK',()=>{
+test('the declared DXMT builds keep separate arm64 SDK and x64 publisher inputs',()=>{
  const registry=JSON.parse(fs.readFileSync(new URL('../projects/downloadable.json',import.meta.url))),row=registry.find(row=>row.id==='dxmt');
- assert.deepEqual(row.build.architectures,['arm64']);
+ const arm=row.build.find(build=>build.version==='0.80-244-g7c8dee1-MCLv1');
+ const intel=row.build.find(build=>build.version==='0.80.244');
+ assert.deepEqual(arm?.architectures,['arm64']);
+ assert.deepEqual(intel?.architectures,['x64']);
+ assert.equal(arm.command,intel.command);
  const inputs=JSON.parse(fs.readFileSync(new URL('../producers/dxmt/inputs.json',import.meta.url)));
  for(const name of ['llvm','llvmCmake','wineSdk']){
   assert.match(inputs[name].sha256,/^[a-f0-9]{64}$/);assert.ok(inputs[name].bytes>0);
-  assert.ok(row.build.archives.some(item=>item.pointer==='/'+name));
+  assert.ok(arm.archives.some(item=>item.pointer==='/'+name));
+  assert.ok(!intel.archives.some(item=>item.pointer==='/'+name));
  }
  assert.match(inputs.wineSdk.usage,/no Wine runtime is packaged/);
+ const template=JSON.parse(fs.readFileSync(new URL('../producers/dxmt/x64-template.json',import.meta.url)));
+ assert.deepEqual(intel.archives.find(item=>item.pointer==='/archive'),
+  {file:'producers/dxmt/x64-template.json',pointer:'/archive'});
+ assert.match(template.archive.url,/github[.]com\/Sikarugir-App\/Template\/releases\/download\//);
+ assert.match(template.archive.sha256,/^[a-f0-9]{64}$/);
+ assert.ok(template.archive.bytes>0);
+ for(const name of ['x86_64-windows/d3d10core.dll','x86_64-windows/d3d11.dll',
+  'x86_64-windows/winemetal.dll','x86_64-unix/winemetal.so'])
+  assert.match(template.files[name],/^[a-f0-9]{64}$/);
 });
 
 test('the Wine window adapter retains both original call tables and appends one matching operation',t=>{
