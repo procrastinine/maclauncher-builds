@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "version": "0.80-244-g7c8dee1-MCLv1",
+  "minimumMacOS": "14.0",
+  "llvm": {
+    "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-15.0.7/llvm-15.0.7.src.tar.xz",
+    "sha256": "4ad8b2cc8003c86d0078d15d987d84e3a739f24aae9033865c027abae93ee7a4",
+    "bytes": 52935892,
+    "directory": "llvm-15.0.7.src"
+  },
+  "llvmCmake": {
+    "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-15.0.7/cmake-15.0.7.src.tar.xz",
+    "sha256": "8986f29b634fdaa9862eedda78513969fe9788301c9f2d938f4c10a3e7a3e7ea",
+    "bytes": 6972,
+    "directory": "cmake-15.0.7.src"
+  },
+  "wineSdk": {
+    "url": "https://github.com/3Shain/wine/releases/download/wine-11.2/wine-11.2.tar.gz",
+    "sha256": "834ec0d4f1dff94de187f29891dc9938306ea2602d0fff603b407225c916d881",
+    "bytes": 470873339,
+    "directory": "wine-11.2",
+    "usage": "Build tools, Windows import libraries and native link inputs only; no Wine runtime is packaged."
+  }
+}

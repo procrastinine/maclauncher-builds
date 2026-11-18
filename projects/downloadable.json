@@ -4609,5 +4609,94 @@
         "pointer": "/version"
       }
     ]
+  },
+  {
+    "id": "dxmt",
+    "name": "DXMT",
+    "purpose": "Direct3D to Metal translation with a native arm64 renderer.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "sourceDirectory": "producers/dxmt",
+      "entries": [
+        "producers/dxmt",
+        "producers/dependencies/llvmMingw.json",
+        "producers/package-support/app-source.json",
+        "producers/package-support/src/modules/crossover/temporal/dxmt",
+        "tools/python-build-tools.json"
+      ],
+      "appEntries": [
+        "src/modules/crossover/temporal/dxmt",
+        "src/modules/shared/reshade/temporal/camera.h",
+        "src/modules/shared/reshade/temporal/frame.h",
+        "src/modules/shared/reshade/temporal/scene-aovs.h",
+        "src/modules/shared/reshade/native/image-color.h",
+        "src/core/binary-arch.js",
+        "src/modules/shared/runtime/pe-exports.js",
+        "src/modules/shared/runtime/macho-load-commands.js",
+        "src/modules/shared/runtime/macho-exports.js",
+        "src/modules/shared/runtime/guards.js"
+      ]
+    },
+    "upstreams": [
+      {
+        "id": "dxmt",
+        "provider": "github",
+        "url": "https://github.com/3Shain/dxmt",
+        "repository": "3Shain/dxmt",
+        "pin": {
+          "gitlink": "producers/package-support/src/external/dxmt-camera"
+        }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "0.80-244-g7c8dee1-MCLv1",
+        "label": "DXMT native arm64"
+      }
+    ],
+    "build": {
+      "version": "0.80-244-g7c8dee1-MCLv1",
+      "command": "tools/build-dxmt.mjs",
+      "architectures": [
+        "arm64"
+      ],
+      "submodules": [
+        "sources/maclauncher",
+        "producers/package-support/src/external/dxmt-camera",
+        "producers/package-support/src/external/dxmt-camera/external/nvapi",
+        "producers/package-support/src/external/dxmt-camera/include/native/directx"
+      ],
+      "tools": [
+        "cmake",
+        "uv"
+      ],
+      "archives": [
+        {
+          "file": "producers/dxmt/inputs.json",
+          "pointer": "/llvm"
+        },
+        {
+          "file": "producers/dxmt/inputs.json",
+          "pointer": "/llvmCmake"
+        },
+        {
+          "file": "producers/dxmt/inputs.json",
+          "pointer": "/wineSdk"
+        },
+        {
+          "file": "producers/dependencies/llvmMingw.json",
+          "pointer": ""
+        },
+        {
+          "file": "tools/python-build-tools.json",
+          "pointer": "/wheels"
+        },
+        {
+          "file": "tools/python-build-tools.json",
+          "pointer": "/interpreters"
+        }
+      ]
+    }
   }
 ]
