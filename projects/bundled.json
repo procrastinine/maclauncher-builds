@@ -488,10 +488,14 @@
       {
         "version": "0.3.14-local-60578fe9",
         "label": "MacLauncher graphics 0.3.14-local-60578fe9"
+      },
+      {
+        "version": "0.3.14",
+        "label": "MacLauncher graphics 0.3.14"
       }
     ],
     "build": {
-      "version": "0.3.13",
+      "version": "0.3.14",
       "command": "tools/build-graphics.mjs",
       "architectures": [
         "universal",
