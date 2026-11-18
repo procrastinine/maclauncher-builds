@@ -113,6 +113,7 @@ struct GraphicsAPI {
  decltype(&rsDestroyFramePresenter) destroy = nullptr;
  decltype(&rsSetFramePresenterSource) source = nullptr;
  decltype(&rsObserveFramePresenterPreparation) observe = nullptr;
+ int (*beginEpoch)(void *,uint64_t) = nullptr;
  decltype(&rsSubmitFramePresenterContentAtTime) submit = nullptr;
  bool load() {
   create = reinterpret_cast<decltype(create)>(dlsym(RTLD_DEFAULT,"rsCreateColorFramePresenter"));
@@ -121,6 +122,7 @@ struct GraphicsAPI {
   source = reinterpret_cast<decltype(source)>(dlsym(RTLD_DEFAULT,"rsSetFramePresenterSource"));
   observe = reinterpret_cast<decltype(observe)>(dlsym(RTLD_DEFAULT,"rsObserveFramePresenterPreparation"));
   submit = reinterpret_cast<decltype(submit)>(dlsym(RTLD_DEFAULT,"rsSubmitFramePresenterContentAtTime"));
+  beginEpoch = reinterpret_cast<decltype(beginEpoch)>(dlsym(RTLD_DEFAULT,"rsBeginFramePresenterContentEpoch"));
   return create && headroom && destroy && source && observe && submit;
  }
 };
@@ -151,12 +153,13 @@ static float contentPeak(const mpv_node *params) {
  if(!std::isfinite(peak)||peak<=0)peak=transfer&&std::strcmp(transfer,"pq")==0?10000:transfer&&std::strcmp(transfer,"hlg")==0?1000:203;
  return float(std::clamp(peak,203.0,10000.0));
 }
-struct VideoSourceState {uint64_t epoch=1,osdEpoch=1;unsigned width=0,height=0,renderWidth=0,renderHeight=0;float peak=10000;};
-static bool publishSource(std::shared_ptr<const VideoSourceState>&destination,VideoSourceState next,bool reset=false) {
+struct VideoSourceState {uint64_t epoch=1,osdEpoch=1,preparationEpoch=1;unsigned width=0,height=0,renderWidth=0,renderHeight=0;float peak=10000;};
+static bool publishSource(std::shared_ptr<const VideoSourceState>&destination,VideoSourceState next,bool reset=false,bool seek=false) {
  const auto previous=std::atomic_load(&destination);
  const bool media=reset||previous->width!=next.width||previous->height!=next.height||previous->peak!=next.peak;
  const bool viewport=previous->renderWidth!=next.renderWidth||previous->renderHeight!=next.renderHeight;
  if(!media&&!viewport)return false;
+ next.preparationEpoch=previous->preparationEpoch+(media&&!seek);
  next.epoch=previous->epoch+media;next.osdEpoch=previous->osdEpoch+1;std::atomic_store(&destination,std::make_shared<const VideoSourceState>(next));return true;
 }
 @class MLVideoPlayer;
@@ -186,7 +189,7 @@ struct PreparationWake {__weak MLVideoPlayer *player;uint64_t epoch;std::atomic<
  std::atomic<bool> _closing,_scheduled,_eventScheduled,_failed;
  std::shared_ptr<const VideoSourceState> _sourceState;
  std::atomic<float> _displayHeadroom;
- uint64_t _presenterEpoch,_delivery,_content,_revision,_retainedVideoEpoch,_retainedOSDEpoch;
+ uint64_t _presenterEpoch,_presenterPreparationEpoch,_delivery,_content,_revision,_retainedVideoEpoch,_retainedOSDEpoch;
  double _clockOffset,_lastDeliveryTime,_osdTarget;
  RSPresentationContent _lastContent,_producedContent;
  bool _timerArmed,_framePending,_osdPending,_videoDirty,_osdDisplayRequested;
@@ -200,7 +203,7 @@ struct PreparationWake {__weak MLVideoPlayer *player;uint64_t epoch;std::atomic<
 - (void)resize:(CGSize)size;
 - (void)command:(NSArray<NSString*>*)arguments;
 - (void)mouseAt:(NSPoint)point;
-- (void)reportSwap;
+- (void)reportSwapForEpoch:(uint64_t)epoch;
 - (void)refreshDisplayHeadroom;
 - (void)requestLayout;
 - (void)preparationReadyForEpoch:(uint64_t)epoch;
@@ -217,10 +220,10 @@ static void *glAddress(void *,const char *name) {return dlsym(RTLD_DEFAULT,name)
 static std::atomic<uintptr_t> nextPresenterOwner{UINT64_C(0x4d50000000000000)};
 struct SurfaceLease {std::shared_ptr<maclauncher::video::GPUSurface> surface;dispatch_queue_t queue;};
 static void releaseSurface(void *value) {auto *token=static_cast<SurfaceLease*>(value);dispatch_async(token->queue,^{delete token;});}
-struct SwapReceipt {__weak MLVideoPlayer *player;};
+struct SwapReceipt {__weak MLVideoPlayer *player;uint64_t epoch;};
 static void presented(void *token,uint64_t,double time,double,uint32_t outcome) {
  auto *receipt = static_cast<SwapReceipt*>(token);
- if (time > 0 && outcome == RS_PRESENTED) [receipt->player reportSwap];
+ if (time > 0 && outcome == RS_PRESENTED) [receipt->player reportSwapForEpoch:receipt->epoch];
  delete receipt;
 }
 @implementation MLVideoView
@@ -400,9 +403,9 @@ static void presented(void *token,uint64_t,double time,double,uint32_t outcome) 
  const double y=(CGRectGetMaxY(frame)-point.y)*source->renderHeight/frame.size.height;
  [self command:@[@"mouse",[NSString stringWithFormat:@"%d",int(std::floor(x))],[NSString stringWithFormat:@"%d",int(std::floor(y))]]];
 }
-- (void)reportSwap {
+- (void)reportSwapForEpoch:(uint64_t)epoch {
  if(_closing)return;
- dispatch_async(_renderQueue,^{if(self->_render&&!self->_closing)self->_api.mpv_render_context_report_swap(self->_render);});
+ dispatch_async(_renderQueue,^{if(self->_render&&!self->_closing&&std::atomic_load(&self->_sourceState)->epoch==epoch)self->_api.mpv_render_context_report_swap(self->_render);});
 }
 - (void)requestEvents {
  if(_closing||_eventScheduled.exchange(true))return;
@@ -413,7 +416,7 @@ static void presented(void *token,uint64_t,double time,double,uint32_t outcome) 
     if(message&&message->num_args>0&&std::strcmp(message->args[0],"maclauncher-video-redraw")==0)[self markVideoDirty];
    }
    if(event->event_id==MPV_EVENT_START_FILE){const auto previous=std::atomic_load(&self->_sourceState);VideoSourceState next;next.renderWidth=previous->renderWidth;next.renderHeight=previous->renderHeight;publishSource(self->_sourceState,next,true);}
-   if(event->event_id==MPV_EVENT_SEEK)publishSource(self->_sourceState,*std::atomic_load(&self->_sourceState),true);
+   if(event->event_id==MPV_EVENT_SEEK)publishSource(self->_sourceState,*std::atomic_load(&self->_sourceState),true,true);
    if(event->event_id==MPV_EVENT_PROPERTY_CHANGE){auto *property=static_cast<mpv_event_property*>(event->data);
     if(event->reply_userdata>=20&&event->reply_userdata<35)[self markVideoDirty];
     if(property&&property->name&&std::strcmp(property->name,"fullscreen")==0&&property->format==MPV_FORMAT_FLAG&&property->data){
@@ -464,17 +467,24 @@ static void presented(void *token,uint64_t,double time,double,uint32_t outcome) 
 }
 - (BOOL)createPresenter:(const VideoSourceState*)source {
  if(_presenter&&_presenterEpoch==source->epoch){_graphics.headroom(_presenter,_displayHeadroom.load());return YES;}
+ if(_presenter&&_presenterPreparationEpoch==source->preparationEpoch&&_graphics.beginEpoch){
+  const int result=_graphics.beginEpoch(_presenter,source->epoch);
+  if(result==RS_FRAME_BUSY){[self again];return NO;}
+  if(result!=RS_FRAME_OK){[self fail:@"The graphics runtime could not retire the previous video presentation."];return NO;}
+  _presenterEpoch=source->epoch;_lastContent={};_producedContent={};_content=0;_videoDirty=true;
+  _graphics.headroom(_presenter,_displayHeadroom.load());return YES;
+ }
  if(_presenter){_graphics.observe(_presenter,nullptr);_graphics.destroy(_presenter);}
  if(_preparationWake){releasePreparation(_preparationWake);_preparationWake=nullptr;}
- _presenter=nullptr;_presenterEpoch=source->epoch;_lastContent={};_producedContent={};_content=0;_videoDirty=true;
- // Owners are opaque registry keys. Never reuse one across a seek; old GPU
- // callbacks retain their own storage while their presentation epoch retires.
+ _presenter=nullptr;_presenterPreparationEpoch=source->preparationEpoch;_presenterEpoch=source->epoch;_lastContent={};_producedContent={};_content=0;_videoDirty=true;
+ // A new preparation contract gets a new owner. A seek retires presentation
+ // through beginEpoch while retaining the prepared graph and its observer.
  void *owner=reinterpret_cast<void*>(nextPresenterOwner.fetch_add(1));
  RSPresenterOptions options={sizeof(options),1,RS_FRAME_BOTTOM_LEFT,0,0};RSPresenterError error={sizeof(error),1,{}};
  RSImageColorDescription color={sizeof(color),1,RS_COLOR_BT2020,RS_COLOR_PQ,RS_COLOR_FULL,RS_COLOR_OPAQUE,203,source->peak,0,1.2f,0,0};
  _presenter=_graphics.create((__bridge void*)_layer,owner,&options,&color,_displayHeadroom.load(),&error);
  if(!_presenter){[self fail:[NSString stringWithUTF8String:error.reason]];return NO;}
- _preparationWake=new PreparationWake{self,_presenterEpoch};
+ _preparationWake=new PreparationWake{self,_presenterPreparationEpoch};
  RSFramePreparationObserver observer={sizeof(observer),1,_preparationWake,preparationReady,retainPreparation,releasePreparation};
  if(_graphics.observe(_presenter,&observer)!=RS_FRAME_OK){[self fail:@"The graphics runtime cannot coordinate video resource preparation."];return NO;}
  _graphics.source(_presenter,RS_FRAME_SOURCE_DECODED_VIDEO);return YES;
@@ -482,7 +492,7 @@ static void presented(void *token,uint64_t,double time,double,uint32_t outcome) 
 - (void)preparationReadyForEpoch:(uint64_t)epoch {
  if(_closing)return;
  dispatch_async(_renderQueue,^{
-  if(self->_closing||self->_failed||self->_presenterEpoch!=epoch)return;
+  if(self->_closing||self->_failed||self->_presenterPreparationEpoch!=epoch)return;
   self->_videoDirty=true;
   if(!self->_jobs.empty()||self->_framePending)[self pump];
   else [self command:@[@"osd-overlay",@"0",@"ass-events",@""]];
@@ -568,7 +578,7 @@ static void presented(void *token,uint64_t,double time,double,uint32_t outcome) 
   if(job.content.epoch!=_presenterEpoch){slot.busy=false;_jobs.pop_front();continue;}
   id<MTLCommandBuffer> commands=[_commands commandBuffer];
   auto *lease=new SurfaceLease{slot.surface,_renderQueue};
-  auto *receipt=new SwapReceipt{self};
+  auto *receipt=new SwapReceipt{self,job.content.epoch};
   RSPresenterSubmission submission={sizeof(submission),1,(__bridge void*)commands,(__bridge void*)slot.surface->texture(),job.delivery,
     std::max(CACurrentMediaTime(),_lastDeliveryTime+1e-6),lease,releaseSurface};
   RSPresentationTarget target={sizeof(target),1,job.target};

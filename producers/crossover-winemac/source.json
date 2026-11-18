@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "id": "maclauncher-crossover-winemac",
+  "version": "26.3.0-MCLv1",
+  "minimumMacOS": "10.15",
+  "archiveDependency": "crossoverWine",
+  "original": {
+    "file": "dlls/winemac.drv/vulkan.c",
+    "sha256": "80e8ef619ef5d3335f120c635560750e09284ff4fc3950968be811adaf35705c"
+  },
+  "precedent": {
+    "file": "dlls/winex11.drv/vulkan.c",
+    "lines": "89-94"
+  },
+  "runtimeProfile": {
+    "product": "CrossOver",
+    "version": "26.3",
+    "build": "26.3.0.39832",
+    "wineVersion": "11.0",
+    "wineVulkanDriverVersion": 47
+  },
+  "role": "crossover-vulkan-driver",
+  "optional": true,
+  "architectures": {
+    "unix": [
+      "x86_64"
+    ],
+    "pe": []
+  },
+  "bison": {
+    "version": "3.8.2",
+    "url": "https://ftp.gnu.org/gnu/bison/bison-3.8.2.tar.xz",
+    "sha256": "9bba0214ccf7f1079c5d59210045227bcf619519840ebfa80cd3849cff5a5bf2",
+    "bytes": 2817324,
+    "directory": "bison-3.8.2"
+  },
+  "license": "LGPL-2.1-or-later",
+  "vulkanLinkInput": {
+    "version": "1.4.2",
+    "library": "libMoltenVK.dylib",
+    "file": "MoltenVK/MoltenVK/dynamic/dylib/macOS/libMoltenVK.dylib",
+    "sha256": "aef00b13bcc808adf15b85bef9ae67393d92be7ed5dfe41cad16fa809e4a4c5f",
+    "architecture": "x86_64",
+    "source": "https://github.com/KhronosGroup/MoltenVK/releases/tag/v1.4.2",
+    "archive": {
+      "url": "https://github.com/KhronosGroup/MoltenVK/releases/download/v1.4.2/MoltenVK-macos.tar",
+      "sha256": "f95765a6229cb7b915990a2890ce12ebe36a730b021545d3d52ae69ce4c4024e",
+      "format": "tar"
+    },
+    "usage": "Normal Wine configure link probe; the library is not copied into the paired module package."
+  },
+  "sceneWindow": {
+    "abi": 1,
+    "entryPoint": "MacLauncherWineMacWithWindow1",
+    "originals": {
+      "dlls/winemac.drv/Makefile.in": "8ccca0e204038a5e208681069952617fcfb23cb976b92d43c05fd1cbe84a077d",
+      "dlls/winemac.drv/window.c": "2c65ad24569082366075b08fa7ea95705232edaa14623b5e0fcb21de00bedb2f",
+      "dlls/winemac.drv/macdrv.h": "b54bb9ee52afcc8684d6761471ce075c9cb2470a216a958b11027e3e76e86e0f",
+      "dlls/winemac.drv/cocoa_window.m": "b7799976aa6446051cc0e10b55fff6474943af873b61c25df7856b28b7e1eb0f",
+      "dlls/winemac.drv/cocoa_event.m": "9367d74d7a4eceadba149cbf39fa9cc57239378edef6ff00b723697fa4c2c28e",
+      "dlls/winemac.drv/cocoa_event.h": "a55f0e8c6aa5c80ab2713b9c74b6ca5ed526582d10e380caea2168d99f9a8bc2",
+      "dlls/winemac.drv/cocoa_app.m": "b9d0434dc8ecaf0379f8300e94f2e8c70b3b320c45b4cb9f7d6877acd2e94c30",
+      "dlls/winemac.drv/cocoa_window.h": "8c68789694202a79eed8ce6b16993dedcdfb82eb0c3b36a9d68b3cbd2ce720e1"
+    }
+  }
+}

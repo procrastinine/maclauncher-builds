@@ -1,4 +1,5 @@
-import {appPath,appRequire} from '../../../../../../../tools/app-source.mjs';
+import {wineHost} from '../../../../../../../tools/wine-host.mjs';
+import {appPath,appRequire,moduleFile} from '../../../../../../../tools/app-source.mjs';
 import {addLicense,addLicenses} from '../../../../../../../lib/licenses.mjs';
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from 'node:fs';
@@ -6,13 +7,20 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
-import {source,applyProfile} from './overlay.mjs';
+import {source,applyProfile,sharedHeaderInputs} from './overlay.mjs';
 import {prepareSourceTree,writeChanged} from '../../../shared/vulkan/native/source-files.mjs';
 const here=import.meta.dirname,app=appPath('src/modules/crossover/temporal/vulkan');
 const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const quote=value=>"'"+String(value).replaceAll("'","'\\''")+"'";
 const run=(command,args,options={})=>execFileSync(command,args,{stdio:'inherit',...options});
 const read=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8',maxBuffer: Infinity,...options}).trim();
+// A nice19 parent must not receive a second relative priority adjustment.
+function runMake(args,options={}){
+    const priority=read('ps',['-o','nice=','-p',String(process.pid)]);
+    if(priority==='19')return run('make',args,options);
+    if(priority==='0')return run('/usr/bin/nice',['-n','19','make',...args],options);
+    throw Error('Wine make parent priority '+priority+', expected 0 or 19.');
+}
 async function verifyArchive(file,description){
     file=fs.realpathSync(file);const hash=crypto.createHash('sha256');
     for await(const bytes of fs.createReadStream(file))hash.update(bytes);
@@ -20,27 +28,31 @@ async function verifyArchive(file,description){
         throw Error('The source archive differs from its public digest: '+description.url);
     return file;
 }
-export function checkSources(){
-    const owned=Object.fromEntries(source.ownedFiles.map(file=>[file,digest(fs.readFileSync(path.join(['source.json','overlay.mjs','build.mjs'].includes(file)?here:app,file)))]));
-    const shared=Object.fromEntries(source.sharedHeaders.map(file=>[file,digest(fs.readFileSync(path.resolve(app,'../../../shared',file)))]));
-    return {profile:source.profile,version:source.version,source:source.archive,owned,shared};
+export function sourceProfile(arch='x64'){
+    const selected=source.hostProfiles?.[wineHost(arch).arch];
+    return selected?JSON.parse(fs.readFileSync(path.join(here,selected),'utf8')):source;
 }
-export async function prepareSource({archive,work}){
-    archive=await verifyArchive(archive,source.archive);work=path.resolve(work);
-    const identity=checkSources(),key=digest(Buffer.from(JSON.stringify(identity))),receipt=path.join(work,'source-inputs.json'),directory=path.join(work,'source');
+export function checkSources(profile=source){
+    const owned=Object.fromEntries(profile.ownedFiles.map(file=>[file,digest(fs.readFileSync(moduleFile('src/modules/crossover/temporal/vulkan/'+file)))]));
+    const shared=Object.fromEntries([...sharedHeaderInputs(profile)].map(([file,bytes])=>[file,digest(bytes)]));
+    return {profile:profile.profile,version:profile.version,source:profile.archive,owned,shared};
+}
+export async function prepareSource({archive,work,profile=source}){
+    archive=await verifyArchive(archive,profile.archive);work=path.resolve(work);
+    const identity={...checkSources(profile),profile},key=digest(Buffer.from(JSON.stringify(identity))),receipt=path.join(work,'source-inputs.json'),directory=path.join(work,'source');
     if(fs.existsSync(receipt)&&fs.existsSync(directory)){
         const previous=JSON.parse(fs.readFileSync(receipt));
         if(previous.key===key&&previous.files.every(row=>fs.existsSync(path.join(directory,row.path))&&digest(fs.readFileSync(path.join(directory,row.path)))===row.sha256))
-            return {directory,key,identity,reused:true};
+            return {directory,key,identity,profile,reused:true};
     }
     fs.mkdirSync(work,{recursive:true});let adaptation;
     prepareSourceTree(directory,temporary=>{
-        run('/usr/bin/tar',['-xzf',archive,'--no-same-owner','--strip-components=2','-C',temporary,source.archive.directory]);
-        adaptation=applyProfile(temporary);
+        run('/usr/bin/tar',['-xzf',archive,'--no-same-owner','--strip-components='+String(profile.archive.stripComponents??2),'-C',temporary,profile.archive.directory]);
+        adaptation=applyProfile(temporary,profile);
     });
     const files=adaptation.files.map(file=>({path:file,sha256:digest(fs.readFileSync(path.join(directory,file)))}));
     writeChanged(receipt,JSON.stringify({key,identity,files},null,2)+'\n');
-    return {directory,key,identity,reused:false};
+    return {directory,key,identity,profile,reused:false};
 }
 async function buildBison({archive,work,jobs}){
     const tool=source.buildTools.bison;archive=await verifyArchive(archive,tool);
@@ -49,12 +61,12 @@ async function buildBison({archive,work,jobs}){
     if(!fs.existsSync(sourceDir)){fs.mkdirSync(sourceDir,{recursive:true});run('/usr/bin/tar',['-xf',archive,'--no-same-owner','--strip-components=1','-C',sourceDir,tool.directory]);}
     fs.mkdirSync(build,{recursive:true});
     if(!fs.existsSync(path.join(build,'Makefile')))run('/bin/sh',[path.join(sourceDir,'configure'),'--prefix='+prefix,'--disable-nls'],{cwd:build});
-    run('/usr/bin/nice',['-n','10','make','-j'+jobs],{cwd:build});
-    run('/usr/bin/nice',['-n','10','make','install'],{cwd:build});
+    runMake(['-j'+jobs],{cwd:build});
+    runMake(['install'],{cwd:build});
     if(!read(executable,['--version']).startsWith('bison (GNU Bison) '+tool.version))throw Error('The declared Bison tool did not build.');
     return executable;
 }
-async function prepareVulkanLink({moltenvkArchive,vulkanLibrary,work}){
+async function prepareVulkanLink({moltenvkArchive,vulkanLibrary,work,arch}){
     const input=source.vulkanLinkInput;
     if(moltenvkArchive){
         const archive=await verifyArchive(moltenvkArchive,input.archive);
@@ -68,39 +80,53 @@ async function prepareVulkanLink({moltenvkArchive,vulkanLibrary,work}){
     const sha256=digest(fs.readFileSync(vulkanLibrary));
     // A library from the verified archive is fixed by the archive digest; a supplied library is checked once here.
     if(!moltenvkArchive&&sha256!==input.sha256)throw Error('The Vulkan link input differs from the declared MoltenVK release.');
-    run('/usr/bin/lipo',[vulkanLibrary,'-verify_arch',input.architecture]);
+    run('/usr/bin/lipo',[vulkanLibrary,'-verify_arch',wineHost(arch).macho]);
     return {library:vulkanLibrary,sha256};
 }
 export async function buildModule(options){
+    const host=wineHost(options.arch);
     const work=path.resolve(options.work),jobs=Number(options.jobs||2);
     if(!Number.isInteger(jobs)||jobs<1||jobs>2)throw Error('Use one or two compiler jobs.');
     if(/\s/.test(work))throw Error('The Wine Makefile requires a build directory without whitespace.');
-    const prepared=options.prepared||await prepareSource({archive:options.archive,work});
+    const prepared=options.prepared||await prepareSource({archive:options.archive,work,profile:options.profile});
     if(options.prepareOnly)return prepared;
-    const mingw=fs.realpathSync(options.mingw),build=path.join(work,'build'),vulkan=await prepareVulkanLink({...options,work});
-    for(const name of ['x86_64-w64-mingw32-clang','i686-w64-mingw32-clang'])fs.accessSync(path.join(mingw,name),fs.constants.X_OK);
+    const profile=prepared.profile||source,minimumMacOS=profile.minimumMacOS;
+    if (options.hostOnly && options.peOnly) throw Error('Select Unix-only or PE-only output.');
+    const peArchitectures=options.hostOnly?[]:(options.peArchitectures||profile.architectures.pe);
+    if (!peArchitectures.every(cpu=>profile.architectures.pe.includes(cpu))) throw Error('Unknown Wine PE architecture.');
+    const clientModule=profile.clientModule||'winevulkan';
+    const mingw=fs.realpathSync(options.mingw),build=path.join(work,'build-'+host.arch),vulkan=await prepareVulkanLink({...options,work});
+    for(const name of peArchitectures.map(arch=>({i386:'i686',aarch64:'aarch64',arm64ec:'arm64ec',x86_64:'x86_64'}[arch]||arch)+'-w64-mingw32-clang'))fs.accessSync(path.join(mingw,name),fs.constants.X_OK);
     const bison=options.bison?fs.realpathSync(options.bison):options.bisonArchive?await buildBison({archive:options.bisonArchive,work,jobs}):'bison';
     const cc=read('xcrun',['--find','clang']),sdk=process.env.SDKROOT||read('xcrun',['--sdk','macosx','--show-sdk-path']);
-    const wrapper=path.join(work,'clang-x86_64'),linkDirectory=path.join(work,'vulkan-link');
-    writeChanged(wrapper,'#!/bin/sh\nexec '+[cc,'-arch','x86_64','-isysroot',sdk,'-mmacosx-version-min='+source.minimumMacOS].map(quote).join(' ')+' "$@"\n',0o755);
+    const wrapper=path.join(work,'clang-'+host.arch),linkDirectory=path.join(work,'vulkan-link');
+    writeChanged(wrapper,`#!/bin/sh
+current=$(ps -o nice= -p $$ | tr -d " ")
+if [ "$current" = 0 ]; then
+    exec /usr/bin/nice -n 19 "$0" "$@"
+fi
+[ "$current" = 19 ] || { echo "Wine compiler priority $current, expected 19" >&2; exit 76; }
+exec ${[cc,'-arch',host.macho,'-isysroot',sdk,'-mmacosx-version-min='+minimumMacOS].map(quote).join(' ')} "$@"
+`,0o755);
     writeChanged(path.join(linkDirectory,'libMoltenVK.dylib'),fs.readFileSync(vulkan.library));
     const environment={...process.env,PATH:mingw+path.delimiter+path.dirname(bison)+path.delimiter+process.env.PATH,
         CC:wrapper,
-        SDKROOT:sdk,MACOSX_DEPLOYMENT_TARGET:source.minimumMacOS,
+        SDKROOT:sdk,MACOSX_DEPLOYMENT_TARGET:minimumMacOS,
         CFLAGS:'-O2',CPPFLAGS:'',LDFLAGS:'-L'+linkDirectory,BISON:bison};
     fs.mkdirSync(build,{recursive:true});
-    const configured=path.join(build,'configuration.json'),environmentKey=digest(Buffer.from(JSON.stringify({CC:environment.CC,LDFLAGS:environment.LDFLAGS,bison,mingw,sdk,vulkan: vulkan.sha256}))),configureKey=digest(Buffer.from(JSON.stringify({source:prepared.key,environmentKey})));
+    const configured=path.join(build,'configuration.json'),environmentKey=digest(Buffer.from(JSON.stringify({CC:environment.CC,LDFLAGS:environment.LDFLAGS,bison,mingw,sdk,vulkan: vulkan.sha256}))),configureKey=digest(Buffer.from(JSON.stringify({source:prepared.key,environmentKey,peArchitectures})));
     if(!fs.existsSync(configured)||JSON.parse(fs.readFileSync(configured)).key!==configureKey){
         if(fs.existsSync(path.join(build,'config.cache'))&&(!fs.existsSync(configured)||JSON.parse(fs.readFileSync(configured)).environmentKey!==environmentKey))fs.unlinkSync(path.join(build,'config.cache'));
-        run('/usr/bin/arch',['-x86_64','/bin/sh',path.join(prepared.directory,'configure'),'--host=x86_64-apple-darwin','--enable-archs=i386,x86_64','--disable-tests','--without-x','--without-freetype','--cache-file=config.cache'],{cwd:build,env:environment});
+        const configureArgs=[path.join(prepared.directory,'configure'),'--host='+(host.arch==='arm64'?'aarch64':'x86_64')+'-apple-darwin','--enable-archs='+(peArchitectures.length?peArchitectures.join(','):'none'),'--disable-tests','--without-x','--without-freetype','--cache-file=config.cache'];
+        run(host.arch==='x64'?'/usr/bin/arch':'/bin/sh',host.arch==='x64'?['-x86_64','/bin/sh',...configureArgs]:configureArgs,{cwd:build,env:environment});
         writeChanged(configured,JSON.stringify({key:configureKey,source:prepared.key,environmentKey,vulkan:{name:source.vulkanLinkInput.library,sha256:vulkan.sha256,archive:source.vulkanLinkInput.archive}},null,2)+'\n');
     }
     if(options.configureOnly)return {...prepared,build};
     const flags='-g -O2 '+[work,fs.realpathSync(work),prepared.directory,fs.realpathSync(prepared.directory)].map(root=>'-ffile-prefix-map='+root+'=WineSource').join(' '),flagFile=path.join(build,'module-compiler-flags.txt');
     if(!fs.existsSync(flagFile)||fs.readFileSync(flagFile,'utf8')!==flags+'\n')
-        run('/usr/bin/nice',['-n','10','make','dlls/winevulkan/clean'],{cwd:build,env:environment});
+        runMake(['dlls/winevulkan/clean'],{cwd:build,env:environment});
     const makefile=fs.readFileSync(path.join(build,'Makefile'),'utf8');
-    const peLinkerFlags=Object.fromEntries(['i386','x86_64'].map(architecture=>{
+    const peLinkerFlags=Object.fromEntries(peArchitectures.map(architecture=>{
         const match=makefile.match(new RegExp('^'+architecture+'_LDFLAGS = (.*)$','m'));
         if(!match)throw Error('The generated PE linker flags are unavailable: '+architecture);
         return [architecture,match[1]+' '+source.peLinkerFlags.join(' ')];
@@ -108,29 +134,35 @@ export async function buildModule(options){
     const linkerFile=path.join(build,'module-pe-linker-flags.json'),linkerIdentity=JSON.stringify(peLinkerFlags)+'\n';
     if(!fs.existsSync(linkerFile)||fs.readFileSync(linkerFile,'utf8')!==linkerIdentity)
         for(const architecture of Object.keys(peLinkerFlags))
-            fs.rmSync(path.join(build,'dlls/winevulkan',architecture+'-windows/winevulkan.dll'),{force:true});
-    run('/usr/bin/nice',['-n','10','make','-j'+jobs,'i386_CFLAGS='+flags,'x86_64_CFLAGS='+flags,
-        ...Object.entries(peLinkerFlags).map(([architecture,value])=>architecture+'_LDFLAGS='+value),'dlls/winevulkan/all'],{cwd:build,env:environment});
+            fs.rmSync(path.join(build,'dlls/winevulkan',architecture+'-windows/'+clientModule+'.dll'),{force:true});
+    runMake(['-j'+jobs,...peArchitectures.map(architecture=>architecture+'_CFLAGS='+flags),
+        ...Object.entries(peLinkerFlags).map(([architecture,value])=>architecture+'_LDFLAGS='+value),...(options.peOnly?modulePaths(host.arch,peArchitectures,clientModule).filter(([name])=>name.endsWith('.dll')).map(([,target])=>target):[options.hostOnly?'dlls/winevulkan/winevulkan.so':'dlls/winevulkan/all'])],{cwd:build,env:environment});
     writeChanged(flagFile,flags+'\n');
     writeChanged(linkerFile,linkerIdentity);
-    const files=MODULES.map(([,file])=>file);
+    const modules=modulePaths(host.arch,peArchitectures,clientModule).filter(([name],index)=>options.peOnly?name.endsWith('.dll'):!options.hostOnly||index===0);
+    const files=modules.map(([,file])=>file);
     for(const file of files)if(!fs.statSync(path.join(build,file),{throwIfNoEntry:false})?.isFile())throw Error('The paired module output is missing: '+file);
-    const result={...prepared,build,files,readobj:path.join(mingw,'llvm-readobj'),strip:path.join(mingw,'llvm-strip')};
+    const result={...prepared,build,files,modules,arch:host.arch,readobj:path.join(mingw,'llvm-readobj'),strip:path.join(mingw,'llvm-strip')};
     if(options.output)result.provider=publishModule(result,path.resolve(options.output));
     return result;
 }
 // The shipped module libraries, each with its place in the Wine build.
-const MODULES=[['x86_64-unix/winevulkan.so','dlls/winevulkan/winevulkan.so'],['x86_64-windows/winevulkan.dll','dlls/winevulkan/x86_64-windows/winevulkan.dll'],['i386-windows/winevulkan.dll','dlls/winevulkan/i386-windows/winevulkan.dll']];
+// With both architectures enabled, Wine links ARM64EC into the AArch64 ARM64X DLL.
+export const modulePaths=(arch='x64',peArchitectures=['x86_64','i386'],clientModule='winevulkan')=>[[wineHost(arch).unix+'/winevulkan.so','dlls/winevulkan/winevulkan.so'],...peArchitectures.filter(cpu=>cpu!=='arm64ec'||!peArchitectures.includes('aarch64')).map(cpu=>[cpu+'-windows/winevulkan.dll','dlls/winevulkan/'+cpu+'-windows/'+clientModule+'.dll'])];
+const MODULES=modulePaths();
 /** The shipped module library paths. */
 export const MODULE_FILES=MODULES.map(([name])=>name);
 /** Check the complete PE export set of the built modules and stage them as shipped:
  * the PE libraries without debug sections, the Unix library ad hoc signed. */
 export function finishModule(built,output){
+    const MODULES=built.modules||modulePaths(built.arch,built.profile?.architectures.pe,built.profile?.clientModule);
     if(fs.existsSync(output))throw Error('The immutable module output already exists.');
     const originalSpec=fs.readFileSync(path.join(built.directory,'dlls/winevulkan/winevulkan.spec'),'utf8');
     const expected=[...originalSpec.matchAll(/^@\s+\S+\s+(?:-\S+\s+)*([A-Za-z0-9_]+)(?:\(|\s*$)/gm)].map(row=>row[1]).sort();
-    for(const [,file]of MODULES.slice(1)){
-        const actual=[...read(built.readobj,['--coff-exports',path.join(built.build,file)]).matchAll(/^\s+Name: ([A-Za-z0-9_]+)$/gm)].map(row=>row[1]).sort();
+    for(const [,file]of MODULES.filter(([name])=>name.endsWith('.dll'))){
+        const pe=appRequire('src/modules/shared/runtime/pe-exports').readPeExports(path.join(built.build,file));
+        if(!pe)throw Error('The complete PE Vulkan export directory is unavailable: '+file);
+        const actual=[...pe.exports.keys()].sort();
         if(JSON.stringify(actual)!==JSON.stringify(expected))throw Error('The complete PE Vulkan export set differs: '+file);
     }
     fs.mkdirSync(output,{recursive:true});
@@ -141,8 +173,17 @@ export function finishModule(built,output){
     }
     return output;
 }
+/** Read all Mach-O slices and PE hybrid metadata for the shipped modules. */
+export function moduleArchitectures(file){
+    const facts=appRequire('src/core/binary-arch').inspectBinary(file);
+    if(facts.format==='macho')return facts.architectures;
+    if(facts.format==='pe'&&facts.machine)return [facts.machine];
+    throw Error('Unrecognized module binary format: '+file);
+}
 /** Describe staged module libraries from the projected Wine source: licenses, provider record, manifest, payload and declaration. */
-export function describeModule({directory,output}){
+export function describeModule({directory,output,arch='x64',profile=source,modules=modulePaths(arch,profile.architectures.pe,profile.clientModule),readobj}){
+    const host=wineHost(arch),minimumMacOS=profile.minimumMacOS,MODULES=modules;
+    const architectures=moduleArchitectures;
     addLicenses(output,'Wine',directory);
     addLicense(output,'Wine authors',path.join(directory,'AUTHORS'));
     addLicenses(output,'Khronos Vulkan',here);
@@ -150,35 +191,35 @@ export function describeModule({directory,output}){
         const binary=MODULES.some(([name])=>name===file),native=file.endsWith('.so'),target=path.join(output,file);
         fs.chmodSync(target,binary?0o755:0o644);
         return {path:file,size:fs.statSync(target).size,mode:binary?0o755:0o644,sha256:digest(fs.readFileSync(target)),
-            ...(binary?{format:native?'mach-o':'pe',architectures:[file.startsWith('i386-windows/')?'x86':'x86_64'],
-                ...(native?{executionArchitecture:'x86_64'}:{})}:{})};
+            ...(binary?{format:native?'mach-o':'pe',architectures:architectures(target),
+                ...(native?{executionArchitecture:host.macho}:{})}:{})};
     });
-    const provider={schema:1,provider:source.id,version:source.version,profile:source.profile,
-        sceneInteropAPI:1,sceneContextAPI:1,wineVulkanDriverVersion:source.wineVulkanDriverVersion,originalUnixCallCount:source.unixCallCount,runtimeProfile:source.runtimeProfile,
-        minimumMacOS:source.minimumMacOS,architectures:source.architectures,originalGpuWorkRetained:true,
+    const provider={schema:1,provider:source.id,version:profile.version,profile:profile.profile,
+        sceneInteropAPI:1,sceneContextAPI:1,wineVulkanDriverVersion:profile.wineVulkanDriverVersion,originalUnixCallCount:profile.unixCallCount,runtimeProfile:profile.runtimeProfile,
+        minimumMacOS:minimumMacOS,architectures:{unix:[...new Set(files.filter(file=>file.format==='mach-o').flatMap(file=>file.architectures))],pe:[...new Set(files.filter(file=>file.format==='pe').flatMap(file=>file.architectures))]},originalGpuWorkRetained:true,
         libraries:Object.fromEntries(MODULES.map(([file])=>[file.split('/')[0],file])),files};
     writeChanged(path.join(output,'provider.json'),JSON.stringify(provider,null,2)+'\n');
-    const manifest={schemaVersion:1,managerId:source.id,version:source.version,platform:'darwin',arch:'x64',minimumMacOS:source.minimumMacOS,
-        executableRelative:provider.libraries['x86_64-unix'],provider,files,dependencies:[]};
+    const manifest={schemaVersion:1,managerId:source.id,version:profile.version,platform:'darwin',arch:host.arch,minimumMacOS:minimumMacOS,
+        executableRelative:provider.libraries[host.unix],provider,files,dependencies:[]};
     const payload=path.join(output,'payload');fs.mkdirSync(payload);
     for(const file of files){const target=path.join(payload,file.path);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(path.join(output,file.path),target);fs.chmodSync(target,file.mode);}
     const manifestFile=path.join(payload,'manifest.json');writeChanged(manifestFile,JSON.stringify(manifest,null,2)+'\n');
-    const declaration={id:source.id,version:source.version,arch:'x64',launcherArchitectures:['arm64','x64'],minimumMacOS:source.minimumMacOS,
-        sourceRelative:null,sourceSha256:digest(fs.readFileSync(path.join(here,'source.json'))),directoryRelative:[source.id,source.version,'x64'].join('/'),
+    const declaration={id:source.id,version:profile.version,arch:host.arch,launcherArchitectures:['arm64','x64'],minimumMacOS:minimumMacOS,
+        sourceRelative:null,sourceSha256:digest(fs.readFileSync(path.join(here,source.hostProfiles?.[host.arch]||'source.json'))),directoryRelative:[source.id,profile.version,host.arch].join('/'),
         manifestRelative:'manifest.json',manifestSha256:digest(fs.readFileSync(manifestFile)),files:[...files,{path:'manifest.json',
             size:fs.statSync(manifestFile).size,mode:0o644,sha256:digest(fs.readFileSync(manifestFile))}]};
     writeChanged(path.join(output,'runtime-package.json'),JSON.stringify(declaration,null,2)+'\n');return provider;
 }
-export function publishModule(built,output){return describeModule({directory:built.directory,output:finishModule(built,output)});}
+export function publishModule(built,output){return describeModule({directory:built.directory,output:finishModule(built,output),arch:built.arch,profile:built.profile,modules:built.modules,readobj:built.readobj});}
 if(process.argv[1]&&fs.existsSync(process.argv[1])&&pathToFileURL(fs.realpathSync(process.argv[1])).href===import.meta.url){
     try{
         const options={};for(let i=2;i<process.argv.length;i++){
-            const key=process.argv[i];if(['--check','--prepare-only','--configure-only'].includes(key)){options[key.slice(2).replace(/-([a-z])/g,(_,x)=>x.toUpperCase())]=true;continue;}
-            if(!['--archive','--work','--mingw','--moltenvk-archive','--vulkan-library','--bison','--bison-archive','--jobs','--output'].includes(key)||!process.argv[i+1])throw Error('Use --check or --archive SOURCE --work DIRECTORY --mingw BIN [--moltenvk-archive ARCHIVE | --vulkan-library EXACT_LIBRARY] [--bison EXECUTABLE | --bison-archive SOURCE] [--jobs 1|2] [--output NEW_DIRECTORY].');
+            const key=process.argv[i];if(['--check','--prepare-only','--configure-only','--host-only'].includes(key)){options[key.slice(2).replace(/-([a-z])/g,(_,x)=>x.toUpperCase())]=true;continue;}
+            if(!['--archive','--work','--mingw','--moltenvk-archive','--vulkan-library','--bison','--bison-archive','--jobs','--output','--arch'].includes(key)||!process.argv[i+1])throw Error('Use --check or --archive SOURCE --work DIRECTORY --mingw BIN [--moltenvk-archive ARCHIVE | --vulkan-library EXACT_LIBRARY] [--bison EXECUTABLE | --bison-archive SOURCE] [--jobs 1|2] [--output NEW_DIRECTORY].');
             options[key.slice(2).replace(/-([a-z])/g,(_,x)=>x.toUpperCase())]=process.argv[++i];
         }
         if(options.check)console.log(JSON.stringify(checkSources(),null,2));
         else if(!options.archive||!options.work||!options.prepareOnly&&(!options.mingw||!options.moltenvkArchive&&!options.vulkanLibrary))throw Error('An exact source archive, owned work directory, compiler directory and declared Vulkan link input are required.');
-        else console.log(JSON.stringify(await buildModule(options),null,2));
+        else console.log(JSON.stringify(await buildModule({...options,profile:sourceProfile(options.arch)}),null,2));
     }catch(error){console.error(error.stack||error);process.exitCode=1;}
 }

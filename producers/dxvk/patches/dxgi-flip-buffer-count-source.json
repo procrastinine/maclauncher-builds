@@ -1,0 +1,9 @@
+{
+  "repository": "https://github.com/metalsharp/DXVK-MacOS",
+  "revision": "93d57c744ab563084b4fe0ac52ba831c94000e21",
+  "reviewSnapshot": "a7ed93c450a215fbd96f59d9f6129ef46b92de65",
+  "author": "Avery Felts <averyfelts@aol.com>",
+  "license": "Zlib",
+  "base": "b1a1c99ab52b687cf950d62c88bc2fa316b41663",
+  "changes": "Only the five-line CreateSwapChainBase flip-model BufferCount validation hunk; context adjusted for the existing composition parameter."
+}

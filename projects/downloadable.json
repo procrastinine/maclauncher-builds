@@ -3144,7 +3144,8 @@
       "entries": [
         "producers/dependencies/crossoverWine.json",
         "producers/package-support/app-source.json",
-        "producers/package-support/src/modules/crossover/temporal/vulkan"
+        "producers/package-support/src/modules/crossover/temporal/vulkan",
+        "tools/wine-host.mjs"
       ],
       "sourceDirectory": "producers/package-support",
       "sourceRepository": "https://github.com/wine-mirror/wine",
@@ -3156,7 +3157,8 @@
         "src/modules/shared/reshade/temporal/frame.h",
         "src/modules/shared/reshade/temporal/scene-aovs.h",
         "src/modules/shared/reshade/temporal/scene-matrices.h",
-        "src/modules/shared/vulkan/native/scene-interop.h"
+        "src/modules/shared/vulkan/native/scene-interop.h",
+        "src/modules/shared/reshade/native/generation-provider.h"
       ]
     },
     "upstreams": [],
@@ -3176,42 +3178,83 @@
       {
         "version": "26.3.0-MCLv6",
         "label": "WineVulkan scene adapter 26.3.0-MCLv6"
+      },
+      {
+        "version": "11.20-MCLv1",
+        "label": "Wine 11.20 Vulkan scene adapter"
       }
     ],
-    "build": {
-      "version": "26.3.0-MCLv6",
-      "command": "tools/build-winevulkan-scene.mjs",
-      "architectures": [
-        "x64"
-      ],
-      "tools": [
-        "pkgconf"
-      ],
-      "submodules": [
-        "sources/maclauncher"
-      ],
-      "archives": [
-        {
-          "file": "producers/dependencies/crossoverWine.json",
-          "pointer": ""
-        },
-        {
-          "file": "producers/package-support/src/modules/crossover/temporal/vulkan/source.json",
-          "pointer": "/buildTools/bison"
-        },
-        {
-          "file": "producers/dependencies/moltenvk.json",
-          "pointer": "/archive"
-        },
-        {
-          "file": "producers/dependencies/llvmMingw.json",
-          "pointer": ""
-        }
-      ]
-    },
+    "build": [
+      {
+        "version": "26.3.0-MCLv6",
+        "command": "tools/build-winevulkan-scene.mjs",
+        "architectures": [
+          "x64"
+        ],
+        "tools": [
+          "pkgconf"
+        ],
+        "submodules": [
+          "sources/maclauncher"
+        ],
+        "archives": [
+          {
+            "file": "producers/dependencies/crossoverWine.json",
+            "pointer": ""
+          },
+          {
+            "file": "producers/package-support/src/modules/crossover/temporal/vulkan/source.json",
+            "pointer": "/buildTools/bison"
+          },
+          {
+            "file": "producers/dependencies/moltenvk.json",
+            "pointer": "/archive"
+          },
+          {
+            "file": "producers/dependencies/llvmMingw.json",
+            "pointer": ""
+          }
+        ]
+      },
+      {
+        "version": "11.20-MCLv1",
+        "command": "tools/build-winevulkan-scene.mjs",
+        "architectures": [
+          "arm64"
+        ],
+        "tools": [
+          "pkgconf"
+        ],
+        "submodules": [
+          "sources/maclauncher"
+        ],
+        "archives": [
+          {
+            "file": "producers/package-support/src/modules/crossover/temporal/vulkan/metalsharp-source.json",
+            "pointer": "/archive"
+          },
+          {
+            "file": "producers/package-support/src/modules/crossover/temporal/vulkan/source.json",
+            "pointer": "/buildTools/bison"
+          },
+          {
+            "file": "producers/dependencies/moltenvk.json",
+            "pointer": "/archive"
+          },
+          {
+            "file": "producers/dependencies/llvmMingw.json",
+            "pointer": ""
+          }
+        ]
+      }
+    ],
     "versionBindings": [
       {
         "file": "producers/package-support/src/modules/crossover/temporal/vulkan/source.json",
+        "pointer": "/version"
+      },
+      {
+        "file": "producers/package-support/src/modules/crossover/temporal/vulkan/metalsharp-source.json",
         "pointer": "/version"
       }
     ]
@@ -3316,7 +3359,9 @@
         "src/modules/shared/copy-file.js",
         "src/modules/shared/effects/operation-contracts.mjs",
         "src/modules/shared/file-time.js",
+        "src/modules/shared/reshade/native/generation-provider.h",
         "src/modules/shared/reshade/native/image-color.h",
+        "src/modules/shared/reshade/native/recorded-scene.h",
         "src/modules/shared/reshade/native/vulkan-scene.h",
         "src/modules/shared/reshade/neural/source.json",
         "src/modules/shared/reshade/temporal/frame.h",
@@ -3973,6 +4018,8 @@
       "entries": [
         "producers/dependencies/llvmMingw.json",
         "producers/vkd3d-proton/metalfx.c",
+        "producers/vkd3d-proton/decompression-count.patch",
+        "producers/vkd3d-proton/raw-companion-range.patch",
         "producers/vkd3d-proton/metalfx.patch",
         "producers/vkd3d-proton/ngx.patch",
         "producers/vkd3d-proton/vk_temporal_frame.h",
@@ -3982,7 +4029,11 @@
         "producers/vkd3d-proton/ngx-trust.c",
         "producers/vkd3d-proton/ngx_camera.h",
         "producers/vkd3d-proton/ngx_streamline.cpp",
-        "producers/vkd3d-proton/streamline_camera.hpp"
+        "producers/vkd3d-proton/streamline_camera.hpp",
+        "producers/vkd3d-proton/ngx_scene_packet.h",
+        "producers/vkd3d-proton/streamline_scene.hpp",
+        "producers/vkd3d-proton/streamline_inputs.hpp",
+        "producers/vkd3d-proton/streamline_demand.hpp"
       ],
       "buildEntry": "producers/vkd3d-proton/build.mjs"
     },
@@ -4253,155 +4304,6 @@
     }
   },
   {
-    "id": "love",
-    "name": "LÖVE",
-    "purpose": "LÖVE 0.10.2 with its Lua VM and native framework libraries.",
-    "producer": {
-      "kind": "maclauncher",
-      "repository": "https://github.com/procrastinine/maclauncher-builds",
-      "sourceDirectory": "producers/love-0102",
-      "entries": [
-        "producers/love-0102",
-        "producers/dependencies/libpng.json",
-        "tools/build-love0102.mjs"
-      ]
-    },
-    "upstreams": [
-      {
-        "id": "love",
-        "provider": "github",
-        "url": "https://github.com/love2d/love",
-        "repository": "love2d/love",
-        "pin": {
-          "file": "producers/love-0102/sources.json",
-          "pointer": "/0"
-        }
-      },
-      {
-        "id": "megasource",
-        "provider": "github",
-        "url": "https://github.com/love2d/megasource",
-        "repository": "love2d/megasource",
-        "pin": {
-          "file": "producers/love-0102/sources.json",
-          "pointer": "/1"
-        }
-      },
-      {
-        "id": "luajit",
-        "provider": "github",
-        "url": "https://github.com/LuaJIT/LuaJIT",
-        "repository": "LuaJIT/LuaJIT",
-        "pin": {
-          "file": "producers/love-0102/sources.json",
-          "pointer": "/2"
-        }
-      },
-      {
-        "id": "libpng",
-        "provider": "github",
-        "url": "https://github.com/pnggroup/libpng",
-        "repository": "pnggroup/libpng",
-        "pin": {
-          "file": "producers/dependencies/libpng.json",
-          "pointer": ""
-        }
-      }
-    ],
-    "packageProfiles": [
-      {
-        "version": "0.10.2-MCLv1",
-        "label": "LÖVE 0.10.2"
-      }
-    ],
-    "build": {
-      "version": "0.10.2-MCLv1",
-      "command": "tools/build-love0102.mjs",
-      "architectures": [
-        "universal"
-      ],
-      "tools": [
-        "cmake",
-        "ninja"
-      ],
-      "archives": [
-        {
-          "file": "producers/love-0102/sources.json",
-          "pointer": "/0"
-        },
-        {
-          "file": "producers/love-0102/sources.json",
-          "pointer": "/1"
-        },
-        {
-          "file": "producers/love-0102/sources.json",
-          "pointer": "/2"
-        },
-        {
-          "file": "producers/dependencies/libpng.json",
-          "pointer": ""
-        }
-      ]
-    }
-  },
-  {
-    "id": "freearc",
-    "name": "FreeArc decoders",
-    "purpose": "Native FreeArc decoding with a Windows CLS plugin host",
-    "producer": {
-      "kind": "maclauncher",
-      "repository": "https://github.com/procrastinine/maclauncher-builds",
-      "entries": [
-        "tools/build-freearc.mjs",
-        "producers/freearc/notices/NOTICE.txt",
-        "producers/freearc/notices/GPL-2.0.txt",
-        "producers/freearc/notices/LGPL-2.1.txt"
-      ],
-      "sourceDirectory": "producers/package-support"
-    },
-    "upstreams": [
-      {
-        "id": "freearc",
-        "provider": "github",
-        "url": "https://github.com/M-Gonzalo/FreeArc",
-        "repository": "M-Gonzalo/FreeArc",
-        "pin": {
-          "gitlink": "producers/package-support/src/external/freearc"
-        }
-      },
-      {
-        "id": "porter-helpers",
-        "provider": "github",
-        "url": "https://github.com/KarmSakha/mac-game-porter",
-        "repository": "KarmSakha/mac-game-porter",
-        "pin": {
-          "gitlink": "producers/package-support/src/external/mac-game-porter"
-        }
-      }
-    ],
-    "packageProfiles": [
-      {
-        "version": "0.67-MCLv1",
-        "label": "FreeArc 0.67 decoders"
-      }
-    ],
-    "build": {
-      "version": "0.67-MCLv1",
-      "command": "tools/build-freearc.mjs",
-      "architectures": [
-        "arm64",
-        "x64"
-      ],
-      "submodules": [
-        "producers/package-support/src/external/freearc",
-        "producers/package-support/src/external/mac-game-porter"
-      ],
-      "tools": [
-        "mingw-w64"
-      ]
-    }
-  },
-  {
     "id": "rlvm",
     "name": "RLVM",
     "purpose": "RealLive engine with native macOS application integration.",
@@ -4496,5 +4398,212 @@
         }
       ]
     }
+  },
+  {
+    "id": "freearc",
+    "name": "FreeArc decoders",
+    "purpose": "Native FreeArc decoding with a Windows CLS plugin host",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "entries": [
+        "tools/build-freearc.mjs",
+        "producers/freearc/notices/NOTICE.txt",
+        "producers/freearc/notices/GPL-2.0.txt",
+        "producers/freearc/notices/LGPL-2.1.txt"
+      ],
+      "sourceDirectory": "producers/package-support"
+    },
+    "upstreams": [
+      {
+        "id": "freearc",
+        "provider": "github",
+        "url": "https://github.com/M-Gonzalo/FreeArc",
+        "repository": "M-Gonzalo/FreeArc",
+        "pin": {
+          "gitlink": "producers/package-support/src/external/freearc"
+        }
+      },
+      {
+        "id": "porter-helpers",
+        "provider": "github",
+        "url": "https://github.com/KarmSakha/mac-game-porter",
+        "repository": "KarmSakha/mac-game-porter",
+        "pin": {
+          "gitlink": "producers/package-support/src/external/mac-game-porter"
+        }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "0.67-MCLv1",
+        "label": "FreeArc 0.67 decoders"
+      }
+    ],
+    "build": {
+      "version": "0.67-MCLv1",
+      "command": "tools/build-freearc.mjs",
+      "architectures": [
+        "arm64",
+        "x64"
+      ],
+      "submodules": [
+        "producers/package-support/src/external/freearc",
+        "producers/package-support/src/external/mac-game-porter"
+      ],
+      "tools": [
+        "mingw-w64"
+      ]
+    }
+  },
+  {
+    "id": "love",
+    "name": "LÖVE",
+    "purpose": "LÖVE 0.10.2 with its Lua VM and native framework libraries.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "sourceDirectory": "producers/love-0102",
+      "entries": [
+        "producers/love-0102",
+        "producers/dependencies/libpng.json",
+        "tools/build-love0102.mjs"
+      ]
+    },
+    "upstreams": [
+      {
+        "id": "love",
+        "provider": "github",
+        "url": "https://github.com/love2d/love",
+        "repository": "love2d/love",
+        "pin": {
+          "file": "producers/love-0102/sources.json",
+          "pointer": "/0"
+        }
+      },
+      {
+        "id": "megasource",
+        "provider": "github",
+        "url": "https://github.com/love2d/megasource",
+        "repository": "love2d/megasource",
+        "pin": {
+          "file": "producers/love-0102/sources.json",
+          "pointer": "/1"
+        }
+      },
+      {
+        "id": "luajit",
+        "provider": "github",
+        "url": "https://github.com/LuaJIT/LuaJIT",
+        "repository": "LuaJIT/LuaJIT",
+        "pin": {
+          "file": "producers/love-0102/sources.json",
+          "pointer": "/2"
+        }
+      },
+      {
+        "id": "libpng",
+        "provider": "github",
+        "url": "https://github.com/pnggroup/libpng",
+        "repository": "pnggroup/libpng",
+        "pin": {
+          "file": "producers/dependencies/libpng.json",
+          "pointer": ""
+        }
+      }
+    ],
+    "packageProfiles": [
+      {
+        "version": "0.10.2-MCLv1",
+        "label": "LÖVE 0.10.2"
+      }
+    ],
+    "build": {
+      "version": "0.10.2-MCLv1",
+      "command": "tools/build-love0102.mjs",
+      "architectures": [
+        "universal"
+      ],
+      "tools": [
+        "cmake",
+        "ninja"
+      ],
+      "archives": [
+        {
+          "file": "producers/love-0102/sources.json",
+          "pointer": "/0"
+        },
+        {
+          "file": "producers/love-0102/sources.json",
+          "pointer": "/1"
+        },
+        {
+          "file": "producers/love-0102/sources.json",
+          "pointer": "/2"
+        },
+        {
+          "file": "producers/dependencies/libpng.json",
+          "pointer": ""
+        }
+      ]
+    }
+  },
+  {
+    "id": "maclauncher-crossover-winemac",
+    "name": "CrossOver Vulkan macOS driver",
+    "purpose": "Optional matched macOS driver for CrossOver Vulkan launches.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "entries": [
+        "producers/crossover-winemac",
+        "producers/dependencies/crossoverWine.json",
+        "producers/dependencies/llvmMingw.json"
+      ],
+      "sourceDirectory": "producers/crossover-winemac",
+      "sourceRepository": "https://github.com/wine-mirror/wine"
+    },
+    "upstreams": [],
+    "packageProfiles": [
+      {
+        "version": "26.3.0-MCLv1",
+        "label": "CrossOver 26.3 macOS Vulkan driver"
+      }
+    ],
+    "build": {
+      "version": "26.3.0-MCLv1",
+      "command": "producers/crossover-winemac/build.mjs",
+      "architectures": [
+        "x64"
+      ],
+      "tools": [
+        "bison",
+        "pkgconf"
+      ],
+      "archives": [
+        {
+          "file": "producers/dependencies/crossoverWine.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/dependencies/llvmMingw.json",
+          "pointer": ""
+        },
+        {
+          "file": "producers/crossover-winemac/source.json",
+          "pointer": "/bison"
+        },
+        {
+          "file": "producers/crossover-winemac/source.json",
+          "pointer": "/vulkanLinkInput/archive"
+        }
+      ]
+    },
+    "versionBindings": [
+      {
+        "file": "producers/crossover-winemac/source.json",
+        "pointer": "/version"
+      }
+    ]
   }
 ]

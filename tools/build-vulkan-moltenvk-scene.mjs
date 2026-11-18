@@ -33,7 +33,7 @@ export async function assemble({project:id,arch,output,work,prepared:{dependenci
  const build=await producer(),record=buildRecord(resolveProject(id,root,{resolvePins:false})),buildInputs=read(path.join(prepared,'scene-source.json')),providers=[];
  for(const architecture of cpus(arch)){const directory=path.join(work,'raw-'+architecture);build.publishSceneProvider({library:compiledLibrary(work,architecture),projected,output:directory,architecture,dependencies,buildInputs});providers.push(directory);}
  const directory=path.join(work,'package'),manifest=build.publishScenePackage({providerDirectory:providers[0],peerDirectory:providers[1],output:directory});
- const manifestFile=path.join(directory,'manifest.json'),files=[...manifest.files,{path:'manifest.json',size:fs.statSync(manifestFile).size,mode:0o644,sha256:hash(manifestFile)}];
+ const manifestFile=path.join(directory,'manifest.json'),files=[...manifest.files.map(file=>({...file,...(arch==='x64'&&file.architectures?{executionArchitecture:'x86_64'}:{})})),{path:'manifest.json',size:fs.statSync(manifestFile).size,mode:0o644,sha256:hash(manifestFile)}];
  const declaration={id,version:record.version,arch,launcherArchitectures:arch==='arm64'?['arm64']:['arm64','x64'],minimumMacOS:manifest.minimumMacOS,
   sourceRelative:null,sourceSha256:hash(path.join(native,'moltenvk-scene-source.json')),directoryRelative:[id,record.version,arch].join('/'),manifestRelative:'manifest.json',manifestSha256:hash(manifestFile),files};
  return sceneAssemble({output,compiled:{directory,declaration}});

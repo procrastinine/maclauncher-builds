@@ -1,0 +1,125 @@
+diff --git a/FEXCore/include/FEXCore/Darwin/ContextState.h b/FEXCore/include/FEXCore/Darwin/ContextState.h
+new file mode 100644
+index 0000000..a614d95
+--- /dev/null
++++ b/FEXCore/include/FEXCore/Darwin/ContextState.h
+@@ -0,0 +1,119 @@
++// SPDX-License-Identifier: MIT
++#pragma once
++
++#include <FEXCore/Darwin/GuestState.h>
++
++#include <array>
++#include <cstdint>
++#include <cstring>
++
++namespace FEXCore::Darwin::GuestState {
++template<typename Frame, typename Visitor>
++inline void VisitContextGPRs(Frame& Registers, const Visitor& Visit) {
++  Visit(Registers.rax, X86State::REG_RAX);
++  Visit(Registers.rbx, X86State::REG_RBX);
++  Visit(Registers.rcx, X86State::REG_RCX);
++  Visit(Registers.rdx, X86State::REG_RDX);
++  Visit(Registers.rsi, X86State::REG_RSI);
++  Visit(Registers.rdi, X86State::REG_RDI);
++  Visit(Registers.rbp, X86State::REG_RBP);
++  Visit(Registers.rsp, X86State::REG_RSP);
++  Visit(Registers.r8, X86State::REG_R8);
++  Visit(Registers.r9, X86State::REG_R9);
++  Visit(Registers.r10, X86State::REG_R10);
++  Visit(Registers.r11, X86State::REG_R11);
++  Visit(Registers.r12, X86State::REG_R12);
++  Visit(Registers.r13, X86State::REG_R13);
++  Visit(Registers.r14, X86State::REG_R14);
++  Visit(Registers.r15, X86State::REG_R15);
++}
++
++template<typename Value> inline void WriteFXField(uint8_t* Bytes, size_t Offset, Value Data) {
++  std::memcpy(Bytes + Offset, &Data, sizeof(Data));
++}
++template<typename Value> inline Value ReadFXField(const uint8_t* Bytes, size_t Offset) {
++  Value Data;
++  std::memcpy(&Data, Bytes + Offset, sizeof(Data));
++  return Data;
++}
++
++// FXSAVE64 is the native register-frame representation. FEX records FIP, but not FOP or FDP.
++inline void CaptureFXState(uint8_t* Bytes) {
++  auto& T = Thread();
++  auto& CPU = State();
++  std::memset(Bytes, 0, 512);
++  WriteFXField<uint16_t>(Bytes, 0, CPU.FCW);
++  WriteFXField<uint16_t>(Bytes, 2, X87Status());
++  Bytes[4] = CPU.AbridgedFTW;
++  WriteFXField<uint64_t>(Bytes, 8, CPU.FIP);
++  WriteFXField<uint32_t>(Bytes, 24, Mxcsr());
++  WriteFXField<uint32_t>(Bytes, 28, MxcsrMask());
++  const size_t Top = (X87Status() >> 11) & 7;
++  for (size_t Index = 0; Index != 8; ++Index) {
++    // FXSAVE stores logical ST0..ST7; the core's register slots are physical.
++    std::memcpy(Bytes + 32 + Index * 16, CPU.mm[(Top + Index) & 7], 10);
++  }
++  std::array<__uint128_t, 16> Low {}, High {};
++  T.CTX->ReconstructXMMRegisters(&T, Low.data(), High.data());
++  std::memcpy(Bytes + 160, Low.data(), sizeof(Low));
++}
++
++inline void RestoreFXState(const uint8_t* Bytes) {
++  auto& T = Thread();
++  auto& CPU = State();
++  CPU.FCW = ReadFXField<uint16_t>(Bytes, 0);
++  SetX87Status(ReadFXField<uint16_t>(Bytes, 2));
++  CPU.AbridgedFTW = Bytes[4];
++  CPU.FIP = ReadFXField<uint64_t>(Bytes, 8);
++  const uint32_t MXCSR = ReadFXField<uint32_t>(Bytes, 24);
++  SetMxcsr(MXCSR);
++  // Retain status present in a raw captured frame. The selected core's generated SSE status remains separate.
++  CPU.mxcsr = MXCSR & 0xffff;
++  const size_t Top = (X87Status() >> 11) & 7;
++  for (size_t Index = 0; Index != 8; ++Index) {
++    auto& Physical = CPU.mm[(Top + Index) & 7];
++    std::memset(Physical, 0, sizeof(Physical));
++    std::memcpy(Physical, Bytes + 32 + Index * 16, 10);
++  }
++  std::array<__uint128_t, 16> Low {}, High {};
++  // A legacy FX restore changes the low XMM halves and leaves the current upper YMM halves intact.
++  T.CTX->ReconstructXMMRegisters(&T, Low.data(), High.data());
++  std::memcpy(Low.data(), Bytes + 160, sizeof(Low));
++  T.CTX->SetXMMRegistersFromState(&T, Low.data(), High.data());
++}
++
++template<typename Frame> inline void CaptureContext(Frame* Registers) {
++  auto& T = Thread();
++  auto& CPU = State();
++  VisitContextGPRs(*Registers, [&CPU](auto& Value, auto Index) { Value = CPU.gregs[Index]; });
++  Registers->rip = CPU.rip;
++  Registers->rflags = T.CTX->ReconstructCompactedEFLAGS(&T, false, nullptr, 0);
++  Registers->cs = CPU.cs_idx;
++  Registers->ss = CPU.ss_idx;
++  CaptureFXState(Registers->fxsave);
++}
++
++template<typename Frame> inline void RestoreContext(const Frame* Registers) {
++  auto& T = Thread();
++  auto& CPU = State();
++  VisitContextGPRs(*Registers, [&CPU](const auto& Value, auto Index) { CPU.gregs[Index] = Value; });
++  CPU.rip = Registers->rip;
++  const uint32_t Previous = T.CTX->ReconstructCompactedEFLAGS(&T, false, nullptr, 0);
++  constexpr uint32_t UserFlags = 0x254dd5;
++  T.CTX->SetFlagsFromCompactedEFLAGS(&T, (Previous & ~UserFlags) | (static_cast<uint32_t>(Registers->rflags) & UserFlags));
++  // Native context restore retains the current CS/SS. The register frame's selector fields are observational.
++  RestoreFXState(Registers->fxsave);
++  if (T.CallRetStackBase) {
++    auto* Top = static_cast<uint8_t*>(T.CallRetStackBase) + Core::InternalThreadState::CALLRET_STACK_SIZE / 4;
++    std::memset(Top, 0, 16);
++    CPU.callret_sp = reinterpret_cast<uintptr_t>(Top);
++  }
++  T.CurrentFrame->SynchronousFaultData.FaultToTopAndGeneratedException = false;
++}
++
++// The embedding guest library owns its frame type and the native control-transfer exception.
++template<typename Frame, typename Accessors> inline void InstallContextAccessors(Accessors& Host) {
++  Host.Capture = CaptureContext<Frame>;
++  Host.Restore = RestoreContext<Frame>;
++}
++} // namespace FEXCore::Darwin::GuestState

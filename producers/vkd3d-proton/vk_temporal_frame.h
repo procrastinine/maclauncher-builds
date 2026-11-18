@@ -16,7 +16,9 @@
 
 #define VK_STRUCTURE_TYPE_TEMPORAL_FRAME_INFO_MVK ((VkStructureType)1000999101)
 
-enum { TEMPORAL_SUPER_RESOLUTION = 1, TEMPORAL_RAY_RECONSTRUCTION = 2 };
+/* TEMPORAL_LATE_SCENE: an earlier evaluation's frame (featureId, frameId) gains TEMPORAL_HUDLESS and TEMPORAL_UI and,
+ * with TEMPORAL_CAMERA_VALID, its camera (VKD3D_METALFX_LATE_SCENE_DESC); every other member is 0. */
+enum { TEMPORAL_SUPER_RESOLUTION = 1, TEMPORAL_RAY_RECONSTRUCTION = 2, TEMPORAL_LATE_SCENE = 3 };
 enum { TEMPORAL_COLOR, TEMPORAL_DEPTH, TEMPORAL_MOTION, TEMPORAL_OUTPUT, TEMPORAL_EXPOSURE, TEMPORAL_DIFFUSE_ALBEDO,
         TEMPORAL_SPECULAR_ALBEDO, TEMPORAL_NORMALS, TEMPORAL_ROUGHNESS, TEMPORAL_SPECULAR_HIT_DISTANCE,
         TEMPORAL_HUDLESS, TEMPORAL_UI, TEMPORAL_IMAGES };
@@ -108,6 +110,23 @@ static inline void vk_temporal_super_resolution(VkTemporalFrameInfoMVK *info, co
     info->preExposure = desc->PreExposure;
     info->sharpness = desc->Sharpness;
     info->frameTimeMs = desc->FrameTimeMs;
+    if (desc->CameraValid)
+    {
+        info->nearPlane = desc->NearPlane;
+        info->farPlane = desc->FarPlane;
+        info->verticalFov = desc->VerticalFov;
+    }
+}
+
+/* A late scene's values (vkd3d_metalfx.h): the earlier evaluation's frame; its feature, images and formats are the
+ * caller's. */
+static inline void vk_temporal_late_scene(VkTemporalFrameInfoMVK *info, const VKD3D_METALFX_LATE_SCENE_DESC *desc)
+{
+    info->sType = VK_STRUCTURE_TYPE_TEMPORAL_FRAME_INFO_MVK;
+    info->featureType = TEMPORAL_LATE_SCENE;
+    info->frameId = desc->FrameId;
+    info->flags = (desc->DepthReversed ? TEMPORAL_DEPTH_REVERSED : 0)
+            | (desc->CameraValid ? TEMPORAL_CAMERA_VALID | (desc->DepthInfinite ? TEMPORAL_DEPTH_INFINITE : 0) : 0);
     if (desc->CameraValid)
     {
         info->nearPlane = desc->NearPlane;

@@ -13,14 +13,64 @@ export const commonHeaders={
  'scene-aovs.h':'../../reshade/temporal/scene-aovs.h',
  'scene-matrices.h':'../../reshade/temporal/scene-matrices.h',
  'image-color.h':'../../reshade/native/image-color.h',
- 'vulkan-scene.h':'../../reshade/native/vulkan-scene.h'
+ 'vulkan-scene.h':'../../reshade/native/vulkan-scene.h',
+ 'recorded-scene.h':'../../reshade/native/recorded-scene.h',
+ 'generation-provider.h':'../../reshade/native/generation-provider.h'
 };
 function original(repository,file){return execFileSync('git',['-C',repository,'show',sourceRevision(source)+':'+file],{encoding:'utf8',env:{...process.env,GIT_NO_LAZY_FETCH:'1'},maxBuffer: Infinity});}
 function replace(text,from,to,file){if(text.split(from).length!==2)throw Error('MoltenVK source anchor changed: '+file);return text.replace(from,to);}
+// Apache-2.0 adaptation of Highball 53741235af002eac43a214c347864ad83dbceb8d.
+// Author: Gauthier Piarrette <gauthierpiarrette@gmail.com>, 2026-10-12.
+// Source: https://github.com/gauthierpiarrette/highball-engine
+// moltenvk-arm64/moltenvk/0001-Bind-a-descriptor-set-again-after-MoltenVK-s-own-hel.patch
+// at 161d7a8495d041d2901d07ff3b4fffeed9be1a4b. Upstream MoltenVK notices are retained.
+export function descriptorBindingSource(text){
+ const file='MoltenVK/MoltenVK/Commands/MVKCommandEncoderState.mm';
+ const invalidate='\tif (index < kMVKMaxDescriptorSetCount) { exists.descriptorSetData.clear(index); }\n';
+ // Helpers replace the argument buffer at a descriptor set's Metal buffer index.
+ const assertion='\tassert(index < kMVKMaxBufferCount);\n';
+ for(const name of ['bindBuffer','bindBytes']){
+  const start=text.indexOf('static void '+name+'('),end=text.indexOf('\n}',start);
+  if(start<0||end<0)throw Error('MoltenVK source anchor changed: '+file+' '+name);
+  const body=text.slice(start,end);
+  text=text.slice(0,start)+replace(body,assertion,assertion+invalidate,file)+text.slice(end);
+ }
+ const restore='\texists.descriptorSetData |= resources.resources.descriptorSetData;\n';
+ text=replace(text,restore,'',file);
+ const loopEnd='\t\tbindBuffer(encoder, set->gpuBufferObject, set->gpuBufferOffset, idx, exists, bindings, binder);\n\t}\n';
+ // Restore the set bits after bindBuffer invalidates each index in the loop.
+ return replace(text,loopEnd,loopEnd+restore,file);
+}
+// Apache-2.0 adaptation by Gauthier Piarrette, 2026-10-16.
+// https://github.com/gauthierpiarrette/highball-engine at 161d7a8495d041d2901d07ff3b4fffeed9be1a4b,
+// moltenvk-arm64/moltenvk/0014-Copy-every-partial-edge-block-of-a-compressed-image.patch.
+export function compressedCopySource(text){
+ return replace(text,
+  '                dstExtent.width /= srcBlockExtent.width;\n                dstExtent.height /= srcBlockExtent.height;',
+  '                // Partial edge blocks still occupy a complete destination texel.\n'+
+  '                dstExtent.width = mvkCeilingDivide(dstExtent.width, srcBlockExtent.width);\n'+
+  '                dstExtent.height = mvkCeilingDivide(dstExtent.height, srcBlockExtent.height);',
+  'MoltenVK/MoltenVK/Commands/MVKCmdTransfer.mm');
+}
+// Apache-2.0 adaptation by Gauthier Piarrette (Highball 6d12171c6edf531c1c62f82f4cdca5e1773bd4ec).
+// https://github.com/gauthierpiarrette/highball at 4ebe4fe0e4df4090b52e3f638d799a2a801ce927,
+// spike/patches/moltenvk-cache-drawid-present.patch, direct draw-ID initialization hunks only.
+// Highball credits alexdremov / MoltenVK-Detroit; upstream correspondence: bc0d5bf7333c26ac4838146144514531eb298937 (utzcoz).
+export function drawIdSource(text){
+ const from='memset([tempDrawIDBuff->_mtlBuffer contents], 0, sizeof(uint32_t));';
+ if(text.split(from).length!==3)throw Error('MoltenVK direct draw-ID source anchors changed');
+ return text.replaceAll(from,'*(uint32_t*)tempDrawIDBuff->getContents() = 0;');
+}
 export function sceneSources(repository,readSource=file=>original(repository,file)){
  const files=new Map();
  const edit=(file,changes)=>{let text=readSource(file);for(const[from,to]of changes)text=replace(text,from,to,file);files.set(file,text);};
  const commands='MoltenVK/MoltenVK/Commands/';
+ const bindings=commands+'MVKCommandEncoderState.mm';
+ files.set(bindings,descriptorBindingSource(readSource(bindings)));
+ const transfer=commands+'MVKCmdTransfer.mm';
+ files.set(transfer,compressedCopySource(readSource(transfer)));
+ const draw=commands+'MVKCmdDraw.mm';
+ files.set(draw,drawIdSource(readSource(draw)));
  edit(commands+'MVKCommandPool.h',[
   ['#include "MVKCmdDebug.h"','#include "MVKCmdDebug.h"\n#include "scene-command.hpp"'],
   ['#pragma mark Command resources','MVKCommandTypePool<MVKCmdMacfxScene> _cmdMacfxScenePool;\n\n#pragma mark Command resources']

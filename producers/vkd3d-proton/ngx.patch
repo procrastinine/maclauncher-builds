@@ -1,5 +1,5 @@
 diff --git a/ngx/nvngx/nvngx.cpp b/ngx/nvngx/nvngx.cpp
-index 4563930..0ecebc3 100644
+index 4563930..76e9b9c 100644
 --- a/ngx/nvngx/nvngx.cpp
 +++ b/ngx/nvngx/nvngx.cpp
 @@ -1,7 +1,10 @@
@@ -25,7 +25,7 @@ index 4563930..0ecebc3 100644
  #include <cmath>
  #include <cstring>
  #include <memory>
-@@ -24,10 +28,13 @@
+@@ -24,10 +28,14 @@
  #include "parameters.hpp"
  #include "../common/lane.hpp"
  
@@ -37,10 +37,11 @@ index 4563930..0ecebc3 100644
  }
 -#include "d3d11_metalfx_interface.h"
 +#include "ngx_camera.h"
++#include "streamline_scene.hpp"
  
  namespace ngx {
  
-@@ -58,12 +65,13 @@ struct DLSSFeature : CommonFeature {
+@@ -58,12 +66,13 @@ struct DLSSFeature : CommonFeature {
    int quality;
    int flag;
    int enable_output_subrects;
@@ -57,7 +58,7 @@ index 4563930..0ecebc3 100644
  struct DLSSDFeature : DLSSFeature {
    unsigned int roughness_mode; // 1: roughness in the normals' alpha
    unsigned int hw_depth;       // 0: linear depth, which MetalFX does not take
-@@ -152,6 +160,32 @@ struct MetalFXRef {
+@@ -152,6 +161,32 @@ struct MetalFXRef {
    }
  };
  
@@ -90,7 +91,7 @@ index 4563930..0ecebc3 100644
  static ID3D12Resource *GetResource(const ParametersImpl *params, const char *name, const char *alternative = nullptr) {
    ID3D12Resource *resource = nullptr;
    if (NVNGX_FAILED(params->Get(name, &resource)) && alternative)
-@@ -176,6 +210,32 @@ static NVNGX_RESULT ReadCreate(const ParametersImpl *params, DLSSFeature &dlss)
+@@ -176,6 +211,32 @@ static NVNGX_RESULT ReadCreate(const ParametersImpl *params, DLSSFeature &dlss)
    return NVNGX_RESULT_OK;
  }
  
@@ -123,7 +124,7 @@ index 4563930..0ecebc3 100644
  static void ReadCommon(const ParametersImpl *params, float &mv_x, float &mv_y, float &jitter_x, float &jitter_y,
                         float &pre_exposure, BOOL &reset) {
    mv_x = GetOr(params, NVNGX_Parameter_MV_Scale_X, 1.0f);
-@@ -189,6 +249,45 @@ static void ReadCommon(const ParametersImpl *params, float &mv_x, float &mv_y, f
+@@ -189,6 +250,51 @@ static void ReadCommon(const ParametersImpl *params, float &mv_x, float &mv_y, f
    reset = GetOr(params, NVNGX_Parameter_Reset, 0) != 0;
  }
  
@@ -154,14 +155,20 @@ index 4563930..0ecebc3 100644
 +  desc.MotionVectorJittered = bool(dlss.flag & NVNGX_DLSS_FLAG_MV_JITTERED);
 +  desc.Sharpness = GetOr(parameters, NVNGX_Parameter_Sharpness, 0.0f);
 +  float frame_time = GetOr(parameters, "FrameTimeDeltaInMsec", 0.0f);
-+  if (temporal_camera.size) {
++  // A game that evaluates through NGX itself, outside Streamline's slEvaluateFeature, has the camera of the same
++  // frame's Streamline constants (ngx_streamline.cpp), when its depth direction is the evaluation's.
++  RSTemporalCamera direct;
++  const bool own = !temporal_camera.size && DirectEvaluationCamera(desc.JitterOffsetX, desc.JitterOffsetY, direct) &&
++                   ValidCamera(&direct) && bool(direct.flags & RS_TEMPORAL_DEPTH_REVERSED) == bool(desc.DepthReversed);
++  const RSTemporalCamera &camera = own ? direct : temporal_camera;
++  if (camera.size) {
 +    desc.CameraValid = TRUE;
-+    desc.DepthInfinite = bool(temporal_camera.flags & RS_TEMPORAL_DEPTH_INFINITE);
-+    desc.NearPlane = temporal_camera.nearPlane;
-+    desc.FarPlane = temporal_camera.farPlane;
-+    desc.VerticalFov = temporal_camera.verticalFov;
++    desc.DepthInfinite = bool(camera.flags & RS_TEMPORAL_DEPTH_INFINITE);
++    desc.NearPlane = camera.nearPlane;
++    desc.FarPlane = camera.farPlane;
++    desc.VerticalFov = camera.verticalFov;
 +    if (!(frame_time > 0.0f))
-+      frame_time = temporal_camera.frameTimeMs;
++      frame_time = camera.frameTimeMs;
 +  }
 +  desc.FrameTimeMs = std::isfinite(frame_time) && frame_time > 0.0f ? frame_time : 0.0f;
 +}
@@ -169,7 +176,7 @@ index 4563930..0ecebc3 100644
  static NVNGX_RESULT GetOptimalSettingsCallback(NVNGXParameter *params) {
    unsigned int width, height, out_width, out_height;
    float scale;
-@@ -269,13 +368,13 @@ static NVNGX_RESULT DLSSG_EstimateVRAM(unsigned int width, unsigned int height,
+@@ -269,13 +375,13 @@ static NVNGX_RESULT DLSSG_EstimateVRAM(unsigned int width, unsigned int height,
  // application ships its library, and, in D3D12, Frame Generation where it ships its library
  static ParametersImpl *CapabilityParameters(bool d3d12) {
    auto params = new ParametersImpl();
@@ -186,7 +193,7 @@ index 4563930..0ecebc3 100644
    params->Set("SuperSamplingDenoising.NeedsUpdatedDriver", 0);
    params->Set("SuperSamplingDenoising.MinDriverVersionMajor", 0);
    params->Set("SuperSamplingDenoising.MinDriverVersionMinor", 0);
-@@ -298,7 +397,7 @@ static ParametersImpl *CapabilityParameters(bool d3d12) {
+@@ -298,7 +404,7 @@ static ParametersImpl *CapabilityParameters(bool d3d12) {
    params->Set("DLSS.Enable.Output.Subrects", 1);
    params->Set("RTXValue", 0);
    // Frame Generation, as the game's Streamline (sl.dlss_g) reads it: one frame between two, no Reflex frame warp
@@ -195,7 +202,7 @@ index 4563930..0ecebc3 100644
    params->Set("FrameGeneration.Available", frame_generation);
    params->Set("FrameInterpolation.Available", frame_generation);
    params->Set("FrameGeneration.NeedsUpdatedDriver", 0);
-@@ -320,7 +419,7 @@ static NVNGX_RESULT FeatureRequirements(const NVNGX_FeatureDiscoveryInfo *discov
+@@ -320,7 +426,7 @@ static NVNGX_RESULT FeatureRequirements(const NVNGX_FeatureDiscoveryInfo *discov
        (d3d12 && discovery->FeatureID == NVNGX_FEATURE_RAYRECONSTRUCTION &&
         HasFeatureLibrary(L"nvngx_dlssd.dll", discovery->FeatureInfo)) ||
        (d3d12 && discovery->FeatureID == NVNGX_FEATURE_FRAMEGENERATION &&
@@ -204,7 +211,7 @@ index 4563930..0ecebc3 100644
      requirement->FeatureSupported = NVNGX_FEATURE_SUPPORT_RESULT_SUPPORTED;
      requirement->MinHWArchitecture = 0;
      strcpy(requirement->MinOSVersion, "10.0.16299.0");
-@@ -345,11 +444,15 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_UpdateFeature(const void *app_id, const unsi
+@@ -345,11 +451,15 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_UpdateFeature(const void *app_id, const unsi
  NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_Init(unsigned long long id, const wchar_t *path, ID3D12Device *device,
                                                 const void *feature_info, unsigned int sdk_version) {
    RememberLibraryPaths(feature_info);
@@ -220,7 +227,7 @@ index 4563930..0ecebc3 100644
    return NVNGX_RESULT_OK;
  }
  
-@@ -358,6 +461,8 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_Init_ProjectID(const char *project, un
+@@ -358,6 +468,8 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_Init_ProjectID(const char *project, un
                                                           ID3D12Device *device, unsigned int sdk_version,
                                                           const void *feature_info) {
    RememberLibraryPaths(feature_info);
@@ -229,7 +236,7 @@ index 4563930..0ecebc3 100644
    return NVNGX_RESULT_OK;
  }
  
-@@ -366,6 +471,8 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_Init_with_ProjectID(const char *projec
+@@ -366,6 +478,8 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_Init_with_ProjectID(const char *projec
                                                                ID3D12Device *device, const void *feature_info,
                                                                unsigned int sdk_version) {
    RememberLibraryPaths(feature_info);
@@ -238,7 +245,7 @@ index 4563930..0ecebc3 100644
    return NVNGX_RESULT_OK;
  }
  
-@@ -422,7 +529,7 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_CreateFeature(ID3D12GraphicsCommandLis
+@@ -422,7 +536,7 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_CreateFeature(ID3D12GraphicsCommandLis
      dlss->feature = NVNGX_FEATURE_SUPERSAMPLING;
      if (NVNGX_FAILED(ReadCreate(parameters, *dlss)))
        return NVNGX_RESULT_INVALID_PARAMETER;
@@ -247,7 +254,7 @@ index 4563930..0ecebc3 100644
                dlss->target_width, dlss->target_height);
      *out_handle = &dlss.release()->handle;
      return NVNGX_RESULT_OK;
-@@ -438,7 +545,7 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_CreateFeature(ID3D12GraphicsCommandLis
+@@ -438,7 +552,7 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_CreateFeature(ID3D12GraphicsCommandLis
      dlssd->hw_depth = GetOr(parameters, NVNGX_Parameter_Use_HW_Depth, 1u);
      if (!dlssd->hw_depth)
        lane::log("warn", "Ray Reconstruction with linear depth, which MetalFX reads as device depth");
@@ -256,7 +263,7 @@ index 4563930..0ecebc3 100644
                dlssd->target_width, dlssd->target_height);
      *out_handle = &dlssd.release()->handle;
      return NVNGX_RESULT_OK;
-@@ -563,17 +670,12 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_EvaluateFeature(ID3D12GraphicsCommandL
+@@ -563,19 +677,19 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_EvaluateFeature(ID3D12GraphicsCommandL
      desc.Depth = GetResource(parameters, NVNGX_Parameter_Depth);
      desc.MotionVector = GetResource(parameters, NVNGX_Parameter_MotionVectors);
      desc.ExposureTexture = GetResource(parameters, NVNGX_Parameter_ExposureTexture);
@@ -272,11 +279,32 @@ index 4563930..0ecebc3 100644
 -    desc.MotionVectorInDisplayRes = !bool(dlss->flag & NVNGX_DLSS_FLAG_MV_LOWRES);
 -    ReadCommon(parameters, desc.MotionVectorScaleX, desc.MotionVectorScaleY, desc.JitterOffsetX, desc.JitterOffsetY,
 -               desc.PreExposure, desc.InReset);
+-    return FAILED(metalfx.iface->lpVtbl->TemporalUpscale(metalfx.iface, &desc, &dlss->scaler)) ? NVNGX_RESULT_FAIL
+-                                                                                                 : NVNGX_RESULT_OK;
 +    ReadSuperResolution(parameters, *dlss, desc);
-     return FAILED(metalfx.iface->lpVtbl->TemporalUpscale(metalfx.iface, &desc, &dlss->scaler)) ? NVNGX_RESULT_FAIL
-                                                                                                  : NVNGX_RESULT_OK;
++    ScenePacketScope scene_packet(list, desc);
++    DirectEvaluationLateCamera(list, dlss->scaler);
++    if (FAILED(metalfx.iface->lpVtbl->TemporalUpscale(metalfx.iface, &desc, &dlss->scaler)))
++      return NVNGX_RESULT_FAIL;
++    // the frame that the scene images a game tags after its direct evaluation name (ngx_streamline.cpp)
++    DirectEvaluationFrame(list, dlss->scaler);
++    return NVNGX_RESULT_OK;
    }
-@@ -647,22 +749,249 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_ReleaseFeature(unsigned int *handle) {
+   case NVNGX_FEATURE_RAYRECONSTRUCTION: {
+     auto dlssd = static_cast<DLSSDFeature *>(common);
+@@ -632,8 +746,10 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_ReleaseFeature(unsigned int *handle) {
+   auto common = static_cast<CommonFeature *>((void *)handle);
+   if (common->feature == NVNGX_FEATURE_SUPERSAMPLING || common->feature == NVNGX_FEATURE_RAYRECONSTRUCTION) {
+     auto dlss = static_cast<DLSSFeature *>(common);
+-    if (dlss->scaler)
++    if (dlss->scaler) {
++      ForgetEvaluationFrames(dlss->scaler);
+       dlss->scaler->lpVtbl->Destroy(dlss->scaler);
++    }
+     if (common->feature == NVNGX_FEATURE_RAYRECONSTRUCTION)
+       delete static_cast<DLSSDFeature *>(common);
+     else
+@@ -647,22 +763,253 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D12_ReleaseFeature(unsigned int *handle) {
    return NVNGX_RESULT_OK;
  }
  
@@ -323,6 +351,8 @@ index 4563930..0ecebc3 100644
 +  VkCommandBuffer commands[SLOTS] = {};
 +  VkFence fences[SLOTS] = {};
 +  bool pending[SLOTS] = {};
++  SceneAttachmentLeases11 attachments;
++  static_assert(SLOTS == SceneAttachmentLeases11::slots);
 +  unsigned next = 0;
 +  PFN_vkDestroyCommandPool DestroyCommandPool = nullptr;
 +  PFN_vkResetCommandBuffer ResetCommandBuffer = nullptr;
@@ -345,10 +375,7 @@ index 4563930..0ecebc3 100644
 +      DestroyCommandPool(device, pool, nullptr); // and its command buffers
 +  }
 +};
- 
--static ID3D11VkMetalFXContext *GetMetalFX11(ID3D11DeviceContext *context) {
--  ID3D11VkMetalFXContext *metalfx = nullptr;
--  if (!context || FAILED(context->QueryInterface(__uuidof(ID3D11VkMetalFXContext), (void **)&metalfx)))
++
 +static std::mutex queues11_mutex;
 +static std::vector<std::unique_ptr<Queue11>> queues11;
 +// D3D11 features' identities, and those released since the last frame, which the next frame passes on
@@ -358,11 +385,10 @@ index 4563930..0ecebc3 100644
 +static IDXGIVkInteropDevice *Interop11(ID3D11Device *device) {
 +  IDXGIVkInteropDevice *interop = nullptr;
 +  if (!device || FAILED(device->QueryInterface(__uuidof(IDXGIVkInteropDevice), (void **)&interop)))
-     return nullptr;
--  return metalfx;
++    return nullptr;
 +  return interop;
- }
- 
++}
++
 +// whether the word is one of the driverInfo's
 +static bool NamesWord(const char *info, const char *word) {
 +  size_t length = strlen(word);
@@ -410,12 +436,16 @@ index 4563930..0ecebc3 100644
 +    }
 +  return true;
 +}
-+
+ 
+-static ID3D11VkMetalFXContext *GetMetalFX11(ID3D11DeviceContext *context) {
+-  ID3D11VkMetalFXContext *metalfx = nullptr;
+-  if (!context || FAILED(context->QueryInterface(__uuidof(ID3D11VkMetalFXContext), (void **)&metalfx)))
 +// the device's queue, found or made; nullptr without DXVK's interop
 +static Queue11 *GetQueue11(ID3D11Device *device) {
 +  IDXGIVkInteropDevice *interop = Interop11(device);
 +  if (!interop)
-+    return nullptr;
+     return nullptr;
+-  return metalfx;
 +  VkInstance instance;
 +  VkPhysicalDevice physical;
 +  VkDevice handle;
@@ -450,8 +480,8 @@ index 4563930..0ecebc3 100644
 +  }
 +  queues11.push_back(std::move(q));
 +  return queues11.back().get();
-+}
-+
+ }
+ 
 +static void RememberFeatures(ID3D11Device *device) {
 +  Queue11 *queue = GetQueue11(device);
 +  super_resolution = queue && queue->temporal_sr;
@@ -471,12 +501,13 @@ index 4563930..0ecebc3 100644
 +
 +// records the frame, with the identities released since the last one, in the queue's next command buffer, and
 +// submits it after the context's commands
-+static bool Submit11(Queue11 &q, IDXGIVkInteropDevice *interop, VkTemporalFrameInfoMVK &info) {
++static bool Submit11(Queue11 &q, IDXGIVkInteropDevice *interop, VkTemporalFrameInfoMVK &info, SceneAttachments11 &attachments) {
 +  std::lock_guard<std::mutex> lock(q.mutex);
 +  unsigned slot = q.next;
 +  q.next = (slot + 1) % Queue11::SLOTS;
 +  if (q.pending[slot]) {
-+    q.WaitForFences(q.device, 1, &q.fences[slot], VK_TRUE, UINT64_MAX);
++    const VkResult waited = q.WaitForFences(q.device, 1, &q.fences[slot], VK_TRUE, UINT64_MAX);
++    if (!q.attachments.completed(slot, waited == VK_SUCCESS)) return false;
 +    q.ResetFences(q.device, 1, &q.fences[slot]);
 +    q.pending[slot] = false;
 +  }
@@ -512,6 +543,7 @@ index 4563930..0ecebc3 100644
 +  VkResult result = q.QueueSubmit(q.queue, 1, &submit, q.fences[slot]);
 +  interop->ReleaseSubmissionQueue();
 +  q.pending[slot] = result == VK_SUCCESS;
++  if (result == VK_SUCCESS) q.attachments.submitted(slot, std::move(attachments));
 +  return result == VK_SUCCESS;
 +}
 +
@@ -531,7 +563,7 @@ index 4563930..0ecebc3 100644
    return NVNGX_RESULT_OK;
  }
  
-@@ -670,6 +999,8 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D11_Init_ProjectID(const char *project, un
+@@ -670,6 +1017,8 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D11_Init_ProjectID(const char *project, un
                                                           const char *engine_version, const wchar_t *path,
                                                           ID3D11Device *device, unsigned int sdk_version,
                                                           const void *feature_info) {
@@ -540,7 +572,7 @@ index 4563930..0ecebc3 100644
    return NVNGX_RESULT_OK;
  }
  
-@@ -677,14 +1008,27 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D11_Init_with_ProjectID(const char *projec
+@@ -677,14 +1026,27 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D11_Init_with_ProjectID(const char *projec
                                                                const char *engine_version, const wchar_t *path,
                                                                ID3D11Device *device, const void *feature_info,
                                                                unsigned int sdk_version) {
@@ -568,7 +600,7 @@ index 4563930..0ecebc3 100644
    return NVNGX_RESULT_OK;
  }
  
-@@ -723,15 +1067,14 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D11_GetFeatureRequirements(IDXGIAdapter *a
+@@ -723,15 +1085,14 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D11_GetFeatureRequirements(IDXGIAdapter *a
  NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D11_CreateFeature(ID3D11DeviceContext *context, unsigned int feature,
                                                          NVNGXParameter *params, unsigned int **out_handle) {
    auto parameters = static_cast<ParametersImpl *>(params);
@@ -591,7 +623,7 @@ index 4563930..0ecebc3 100644
      lane::log("err", "D3D11 CreateFeature: feature %u is not supported", feature);
      return NVNGX_RESULT_FEATURE_NOT_SUPPORTED;
    }
-@@ -739,7 +1082,12 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D11_CreateFeature(ID3D11DeviceContext *con
+@@ -739,7 +1100,12 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D11_CreateFeature(ID3D11DeviceContext *con
    dlss->feature = NVNGX_FEATURE_SUPERSAMPLING;
    if (NVNGX_FAILED(ReadCreate(parameters, *dlss)))
      return NVNGX_RESULT_INVALID_PARAMETER;
@@ -605,7 +637,7 @@ index 4563930..0ecebc3 100644
              dlss->target_width, dlss->target_height);
    *out_handle = &dlss.release()->handle;
    return NVNGX_RESULT_OK;
-@@ -749,45 +1097,57 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D11_EvaluateFeature(ID3D11DeviceContext *c
+@@ -749,45 +1115,71 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D11_EvaluateFeature(ID3D11DeviceContext *c
                                                            NVNGXParameter *params, void *callback) {
    auto parameters = static_cast<ParametersImpl *>(params);
    auto common = static_cast<CommonFeature *>((void *)handle);
@@ -681,6 +713,20 @@ index 4563930..0ecebc3 100644
 +    masks.reactiveY = desc.ReactiveY;
 +    info.pNext = &masks;
 +  }
++  std::array<Microsoft::WRL::ComPtr<ID3D11Texture2D>,2> scene_images;
++  if (const auto scene = CurrentTemporalScene(); scene && scene->commands == context) {
++    if (scene->packet.flags & NGX_SCENE_MATRICES) {
++      std::memcpy(info.worldToViewMatrix, scene->packet.worldToView, sizeof(info.worldToViewMatrix));
++      std::memcpy(info.viewToClipMatrix, scene->packet.viewToClip, sizeof(info.viewToClipMatrix));
++    }
++    for (unsigned i = 0; i < 2; ++i) if ((scene_images[i] = SceneResource(context, scene->images[i]))) {
++      const unsigned slot = i ? TEMPORAL_UI : TEMPORAL_HUDLESS;
++      // A rejected optional attachment preserves the existing SR dispatch.
++      if (!Image11(scene_images[i].Get(), info.images[slot], info.formats[slot])) {
++        info.images[slot] = VK_NULL_HANDLE; info.formats[slot] = VK_FORMAT_UNDEFINED;
++      }
++    }
++  }
 +  info.featureId = dlss->id11;
 +  info.frameId = ++dlss->frames11;
 +  ID3D11Device *device = nullptr;
@@ -688,14 +734,14 @@ index 4563930..0ecebc3 100644
 +  IDXGIVkInteropDevice *interop = Interop11(device);
 +  if (device)
 +    device->Release();
-+  bool submitted = interop && Submit11(*dlss->queue11, interop, info);
++  bool submitted = interop && Submit11(*dlss->queue11, interop, info, scene_images);
 +  if (interop)
 +    interop->Release();
 +  return submitted ? NVNGX_RESULT_OK : NVNGX_RESULT_FAIL;
  }
  
  NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D11_ReleaseFeature(unsigned int *handle) {
-@@ -796,8 +1156,10 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D11_ReleaseFeature(unsigned int *handle) {
+@@ -796,8 +1188,10 @@ NVNGX_EXPORT NVNGX_RESULT NVSDK_NGX_D3D11_ReleaseFeature(unsigned int *handle) {
    auto common = static_cast<CommonFeature *>((void *)handle);
    if (common->feature == NVNGX_FEATURE_SUPERSAMPLING) {
      auto dlss = static_cast<DLSSFeature *>(common);

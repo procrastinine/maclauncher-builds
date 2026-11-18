@@ -56,7 +56,8 @@
     "reshade/temporal/frame.h",
     "reshade/temporal/scene-aovs.h",
     "reshade/temporal/scene-matrices.h",
-    "reshade/native/image-color.h"
+    "reshade/native/image-color.h",
+    "reshade/native/generation-provider.h"
   ],
   "ownedFiles": [
     "source.json",
@@ -64,7 +65,11 @@
     "build.mjs",
     "scene-request.h",
     "scene-pe.c",
-    "scene-unix.c"
+    "scene-unix.c",
+    "scene-metadata.h",
+    "scene-metadata-native.h",
+    "scene-admission.h",
+    "shared-headers.mjs"
   ],
   "peExports": [
     "MacLauncherWineVulkanSceneAPI1",
@@ -136,5 +141,8 @@
       }
     ]
   },
-  "archiveDependency": "crossoverWine"
+  "archiveDependency": "crossoverWine",
+  "hostProfiles": {
+    "arm64": "metalsharp-source.json"
+  }
 }

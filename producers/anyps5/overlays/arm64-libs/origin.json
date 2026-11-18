@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "license": "GPL-2.0-only",
+  "source": {
+    "repository": "https://github.com/boykopovar/AnyPS5.git",
+    "gitlink": "sources/anyps5"
+  },
+  "adaptedFrom": {
+    "name": "AnyPS5-ARM",
+    "repository": "https://github.com/AnyTogether/AnyPS5-ARM.git",
+    "revision": "116bf5e0b9ac2dd1b375d3eff9970804353870b8",
+    "license": "GPL-2.0-only",
+    "commits": [
+      "fd4c30ab6af224fde979739a6c1d0261ba32b781",
+      "da88c224436a710a5d0d217ffd994787d0ffdcd9"
+    ]
+  }
+}

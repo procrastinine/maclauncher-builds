@@ -8,6 +8,7 @@ import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {source,sceneSources} from './moltenvk-scene-overlay.mjs';
 import {sourceRevision} from '../../../../../../../lib/pins.mjs';
+import {prepareSpirvCrossSource} from './spirv-cross-overlay.mjs';
 import {applyTemporalSource,temporalSources} from '../../../../../../../producers/moltenvk/build.mjs';
 import {writeChanged,prepareSourceTree} from './source-files.mjs';
 const revision=sourceRevision(source);
@@ -31,7 +32,7 @@ export function prepareSceneSource({repository,work}){
  const temporalRoot=path.resolve(root,'../../../../../../../producers/moltenvk');
  const temporalCarrier=[['producers/moltenvk/build.mjs',path.join(temporalRoot,'build.mjs')],...temporalSources.map(file=>[file,recipePath(temporalRoot,file)])].map(([file,location])=>({file,sha256:digest(fs.readFileSync(location))}));
  const inputs={profile:source,appRevision:app.revision,temporalCarrier,files:[...adapted.keys()].map(file=>({file,sha256:digest(fs.readFileSync(path.join(projected,file)))})),
-  producer:['moltenvk-scene-build.mjs','moltenvk-scene-overlay.mjs','moltenvk-scene-project.cmake','source-files.mjs'].map(file=>({file,sha256:digest(fs.readFileSync(path.join(root,file)))}))};
+  producer:['moltenvk-scene-build.mjs','moltenvk-scene-overlay.mjs','spirv-cross-overlay.mjs','moltenvk-scene-project.cmake','source-files.mjs'].map(file=>({file,sha256:digest(fs.readFileSync(path.join(root,file)))}))};
  writeChanged(path.join(work,'scene-source.json'),JSON.stringify(inputs,null,2)+'\n');
  return projected;
 }
@@ -50,10 +51,13 @@ export function buildSceneProvider({projected,work,dependencies,architecture='ar
  const actual={};for(const item of source.dependencies){const input=dependencies?.[item.id];if(!input||!fs.statSync(input).isDirectory())throw Error('Missing original offline source: '+item.id+' '+sourceRevision(item));actual[item.id]=fs.realpathSync(input);}
  const buildInputs=JSON.parse(fs.readFileSync(path.join(work,'scene-source.json')));
  if(JSON.stringify(buildInputs.profile)!==JSON.stringify(source)||buildInputs.files.some(row=>digest(fs.readFileSync(path.join(projected,row.file)))!==row.sha256))throw Error('Prepared scene source inputs changed');
+ const compiler=prepareSpirvCrossSource({repository:actual['SPIRV-Cross'],work});
+ buildInputs.compiler=compiler.inputs;
+ writeChanged(path.join(work,'scene-source.json'),JSON.stringify(buildInputs,null,2)+'\n');
  const wrapper=path.resolve(work,'project'),build=path.resolve(work,'build-'+architecture);fs.mkdirSync(wrapper,{recursive:true});writeChanged(path.join(wrapper,'CMakeLists.txt'),fs.readFileSync(path.join(root,'moltenvk-scene-project.cmake')));
  run('cmake',['-S',wrapper,'-B',build,'-DCMAKE_BUILD_TYPE=Release','-DCMAKE_OSX_ARCHITECTURES='+architecture,
   '-DCMAKE_OSX_DEPLOYMENT_TARGET='+source.minimumMacOS,'-DMACFX_MOLTENVK_SOURCE='+path.resolve(projected),
-  '-DMACFX_SPIRV_CROSS_SOURCE='+actual['SPIRV-Cross'],'-DMACFX_VULKAN_HEADERS_SOURCE='+actual['Vulkan-Headers'],'-DMACFX_CEREAL_SOURCE='+actual.cereal]);
+  '-DMACFX_SPIRV_CROSS_SOURCE='+compiler.directory,'-DMACFX_VULKAN_HEADERS_SOURCE='+actual['Vulkan-Headers'],'-DMACFX_CEREAL_SOURCE='+actual.cereal]);
  run('/usr/bin/nice',['-n','19','cmake','--build',build,'--target','MoltenVK','--parallel',String(jobs)]);
  const library=path.join(build,'upstream/MoltenVK/libMoltenVK.dylib');if(!fs.existsSync(library))throw Error('The original MoltenVK target did not produce its library');return {library,dependencies:actual,buildInputs};
 }
