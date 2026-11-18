@@ -12,8 +12,6 @@ const source=appPath('src/modules/shared/reshade/generation/anr'),pin=JSON.parse
 const headers=path.resolve(headersArg),output=path.resolve(outputArg),build=path.join(output,'build'),payload=path.join(output,'payload');
 const run=(file,args)=>execFileSync(file,args,{stdio:'inherit'});
 for(const [relative,expected]of Object.entries(pin.converterHeaders.files))if(crypto.createHash('sha256').update(fs.readFileSync(path.join(headers,relative))).digest('hex')!==expected)throw Error('ANR converter headers differ from the declared exact source: '+relative);
-// Build orchestration supplies the shared CPU slot and low priority.
-const priority=Number(execFileSync('ps',['-o','nice=','-p',String(process.pid)],{encoding:'utf8'}).trim());if(priority!==19)throw Error('ANR native builds require nice 19.');
 run('cmake',['-S',path.join(source,'native'),'-B',build,'-DCMAKE_BUILD_TYPE=Release','-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64','-DCMAKE_INSTALL_PREFIX='+payload,'-DANR_SHARED_INCLUDE='+appPath('src/modules/shared/reshade/native'),'-DANR_TEMPORAL_INCLUDE='+appPath('src/modules/shared/reshade/temporal'),'-DANR_CONVERTER_INCLUDE='+headers]);
 run('cmake',['--build',build,'-j6']);run('cmake',['--install',build]);
 for(const name of ['libmaclauncher-anr-generation.dylib','anr-convert-dxil','anr-verify'])run('codesign',['--force','--sign','-',path.join(payload,name)]);

@@ -20,7 +20,6 @@
 // them (must reach main and print PASS), and the SYSCALL entry check once (must print PASS).
 import {gitlink} from '../../lib/pins.mjs';
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 import {execFileSync,spawnSync} from 'node:child_process';
 
@@ -28,13 +27,6 @@ const root=path.resolve(import.meta.dirname,'../..');
 const recipe=JSON.parse(fs.readFileSync(path.join(import.meta.dirname,'source.json'),'utf8'));
 const git=(directory,args,options={})=>execFileSync('git',['-C',directory,...args],{encoding:'utf8',maxBuffer:Infinity,stdio:['ignore','pipe','pipe'],...options});
 const run=(command,args,options={})=>execFileSync(command,args,{stdio:'inherit',...options});
-
-// Native builds run at the lowest priority. The process lowers its own priority first, so every compiler, CMake and
-// Ninja child inherits it, and nothing builds when that is not permitted.
-function lowestPriority(){
- try{os.setPriority(19);}catch(error){throw Error('Cannot lower the build priority to 19 ('+(error.info?.code||error.code)+'); nothing was built.');}
- if(os.getPriority()!==19)throw Error('The build priority is '+os.getPriority()+', not 19; nothing was built.');
-}
 
 function argumentsOf(argv){
  const options={};
@@ -257,10 +249,6 @@ function objectLibrary(file){
 
 const options=argumentsOf(process.argv.slice(2));
 if(process.platform!=='darwin'||process.arch!=='arm64')throw Error('The proof builds on arm64 macOS.');
-lowestPriority();
-let niceness='unavailable';
-try{niceness=execFileSync('ps',['-o','ni=','-p',String(process.pid)],{encoding:'utf8'}).trim();}catch{}
-process.stdout.write('build priority (ps -o ni): '+niceness+'\n');
 const fex=verifyCheckout(recipe.source);
 // The sources are prepared in a staging directory and then copied into place only where they changed, so unchanged
 // files keep their timestamps and Ninja rebuilds only what changed.

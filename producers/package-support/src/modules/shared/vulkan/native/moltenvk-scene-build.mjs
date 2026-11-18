@@ -58,7 +58,7 @@ export function buildSceneProvider({projected,work,dependencies,architecture='ar
  run('cmake',['-S',wrapper,'-B',build,'-DCMAKE_BUILD_TYPE=Release','-DCMAKE_OSX_ARCHITECTURES='+architecture,
   '-DCMAKE_OSX_DEPLOYMENT_TARGET='+source.minimumMacOS,'-DMACFX_MOLTENVK_SOURCE='+path.resolve(projected),
   '-DMACFX_SPIRV_CROSS_SOURCE='+compiler.directory,'-DMACFX_VULKAN_HEADERS_SOURCE='+actual['Vulkan-Headers'],'-DMACFX_CEREAL_SOURCE='+actual.cereal]);
- run('/usr/bin/nice',['-n','19','cmake','--build',build,'--target','MoltenVK','--parallel',String(jobs)]);
+ run('cmake',['--build',build,'--target','MoltenVK','--parallel',String(jobs)]);
  const library=path.join(build,'upstream/MoltenVK/libMoltenVK.dylib');if(!fs.existsSync(library))throw Error('The original MoltenVK target did not produce its library');return {library,dependencies:actual,buildInputs};
 }
 const SCENE_LIBRARY='libMoltenVK-scene.dylib';

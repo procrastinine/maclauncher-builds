@@ -15,12 +15,8 @@ const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const quote=value=>"'"+String(value).replaceAll("'","'\\''")+"'";
 const run=(command,args,options={})=>execFileSync(command,args,{stdio:'inherit',...options});
 const read=(command,args,options={})=>execFileSync(command,args,{encoding:'utf8',maxBuffer: Infinity,...options}).trim();
-// A nice19 parent must not receive a second relative priority adjustment.
 function runMake(args,options={}){
-    const priority=read('ps',['-o','nice=','-p',String(process.pid)]);
-    if(priority==='19')return run('make',args,options);
-    if(priority==='0')return run('/usr/bin/nice',['-n','19','make',...args],options);
-    throw Error('Wine make parent priority '+priority+', expected 0 or 19.');
+    return run('make',args,options);
 }
 async function verifyArchive(file,description){
     file=fs.realpathSync(file);const hash=crypto.createHash('sha256');
@@ -103,11 +99,6 @@ export async function buildModule(options){
     const cc=read('xcrun',['--find','clang']),sdk=process.env.SDKROOT||read('xcrun',['--sdk','macosx','--show-sdk-path']);
     const wrapper=path.join(work,'clang-'+host.arch),linkDirectory=path.join(work,'vulkan-link');
     writeChanged(wrapper,`#!/bin/sh
-current=$(ps -o nice= -p $$ | tr -d " ")
-if [ "$current" = 0 ]; then
-    exec /usr/bin/nice -n 19 "$0" "$@"
-fi
-[ "$current" = 19 ] || { echo "Wine compiler priority $current, expected 19" >&2; exit 76; }
 exec ${[cc,'-arch',host.macho,'-isysroot',sdk,'-mmacosx-version-min='+minimumMacOS].map(quote).join(' ')} "$@"
 `,0o755);
     writeChanged(path.join(linkDirectory,'libMoltenVK.dylib'),fs.readFileSync(vulkan.library));

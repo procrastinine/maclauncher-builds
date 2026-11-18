@@ -1,7 +1,6 @@
 // Copyright (c) MacLauncher contributors. MIT license.
 import fs from 'node:fs';
 import path from 'node:path';
-import os from 'node:os';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {source, applyProfile} from './overlay.mjs';
@@ -17,11 +16,6 @@ const sourceArchive = crossoverWine, toolchain = llvmMingwInput();
 const sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 const run = (command, args, options = {}) => execFileSync(command, args, {stdio:'inherit', ...options});
 const read = (command, args, options = {}) => execFileSync(command, args, {encoding:'utf8', ...options}).trim();
-// Inherit an existing compiler priority; raise niceness only as far as 19.
-const runBuild = (command, args, options = {}) => {
- const increment = Math.max(0, 19 - os.getPriority());
- return increment ? run('/usr/bin/nice', ['-n', String(increment), command, ...args], options) : run(command, args, options);
-};
 const quote = text => "'" + String(text).replaceAll("'", "'\\''") + "'";
 const write = (file, value) => fs.writeFileSync(file, JSON.stringify(value, null, 2) + '\n');
 async function extract(input, cache, destination, members) {
@@ -35,8 +29,8 @@ async function bison(work, cache, environment) {
  if (!fs.existsSync(executable)) {
   await extract(source.bison, cache, root);
   const build = path.join(root, 'build'); fs.mkdirSync(build, {recursive:true});
-  runBuild('/bin/sh', [path.join(root, source.bison.directory, 'configure'), '--prefix=' + output, '--disable-nls'], {cwd:build, env:environment});
-  runBuild('make', ['-j2', 'install'], {cwd:build, env:environment});
+  run('/bin/sh', [path.join(root, source.bison.directory, 'configure'), '--prefix=' + output, '--disable-nls'], {cwd:build, env:environment});
+  run('make', ['-j2', 'install'], {cwd:build, env:environment});
  }
  if (!read(executable, ['--version']).startsWith('bison (GNU Bison) ' + source.bison.version))
   throw Error('The declared Bison version differs.');
@@ -87,9 +81,9 @@ export async function buildWinemac({output, work, arch = 'x64', prepareOnly = fa
   CFLAGS:flags, CPPFLAGS:'', LDFLAGS:'-L' + path.dirname(library), BISON:bisonExecutable});
  fs.mkdirSync(build, {recursive:true});
  if (!fs.existsSync(path.join(build, 'Makefile')))
-  runBuild('/usr/bin/arch', ['-x86_64', '/bin/sh', path.join(directory, 'configure'), '--host=x86_64-apple-darwin', '--enable-archs=x86_64',
+  run('/usr/bin/arch', ['-x86_64', '/bin/sh', path.join(directory, 'configure'), '--host=x86_64-apple-darwin', '--enable-archs=x86_64',
    '--disable-tests', '--without-x', '--without-freetype', '--cache-file=config.cache'], {cwd:build, env:environment});
- runBuild('make', ['-j2', 'dlls/winemac.drv/winemac.so'], {cwd:build, env:environment});
+ run('make', ['-j2', 'dlls/winemac.drv/winemac.so'], {cwd:build, env:environment});
  const native = path.join(build, 'dlls/winemac.drv/winemac.so');
  run('/usr/bin/lipo', [native, '-verify_arch', 'x86_64']);
  const nativeInterfaces = {sceneWindow:{abi:source.sceneWindow.abi, entryPoint:source.sceneWindow.entryPoint}};
