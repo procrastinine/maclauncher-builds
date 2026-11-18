@@ -2712,7 +2712,9 @@
         "src/modules/shared/reshade/temporal/scene-aovs.h",
         "src/modules/shared/reshade/temporal/scene-matrices.h",
         "src/modules/shared/vulkan/native/scene-interop.h",
-        "src/modules/shared/reshade/native/generation-provider.h"
+        "src/modules/shared/reshade/native/generation-provider.h",
+        "src/modules/crossover/temporal/opengl",
+        "src/modules/shared/reshade/native/graphics-library-attach.h"
       ]
     },
     "upstreams": [],
@@ -2728,6 +2730,10 @@
       {
         "version": "11.20-MCLv2",
         "label": "Wine 11.20 Vulkan scene adapter"
+      },
+      {
+        "version": "11.20-MCLv3",
+        "label": "Wine 11.20 graphics attachment helpers"
       }
     ],
     "build": [
@@ -2763,7 +2769,7 @@
         ]
       },
       {
-        "version": "11.20-MCLv2",
+        "version": "11.20-MCLv3",
         "command": "tools/build-winevulkan-scene.mjs",
         "architectures": [
           "arm64"

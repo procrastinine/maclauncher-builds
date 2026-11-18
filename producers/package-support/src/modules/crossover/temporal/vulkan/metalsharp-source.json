@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "winevulkan-scene",
-  "version": "11.20-MCLv2",
+  "version": "11.20-MCLv3",
   "profile": "metalsharp-wine11.20-scene-v1",
   "sourcePage": "https://github.com/metalsharp/MetalSharp-Wine",
   "wineVersion": "Wine version 11.20",
@@ -114,5 +114,6 @@
     "directory": "MetalSharp-Wine-dd1f6c2f9801327d30fd82f2d55071177824fb99",
     "stripComponents": 1
   },
-  "clientModule": "maclauncher-winevulkan-scene"
+  "clientModule": "maclauncher-winevulkan-scene",
+  "openglAttach": true
 }

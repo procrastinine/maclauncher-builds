@@ -10,6 +10,7 @@ import {pathToFileURL} from 'node:url';
 import {source,applyProfile,sharedHeaderInputs} from './overlay.mjs';
 import {prepareSourceTree,writeChanged} from '../../../shared/vulkan/native/source-files.mjs';
 const here=import.meta.dirname,app=appPath('src/modules/crossover/temporal/vulkan');
+export const openGLPaths=profile=>profile.openglAttach?['aarch64-unix/maclauncher-opengl32.so','aarch64-windows/maclauncher-opengl32.dll','i386-windows/maclauncher-opengl32.dll']:[];
 const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const quote=value=>"'"+String(value).replaceAll("'","'\\''")+"'";
 const run=(command,args,options={})=>execFileSync(command,args,{stdio:'inherit',...options});
@@ -35,7 +36,8 @@ export function sourceProfile(arch='x64'){
 export function checkSources(profile=source){
     const owned=Object.fromEntries(profile.ownedFiles.map(file=>[file,digest(fs.readFileSync(moduleFile('src/modules/crossover/temporal/vulkan/'+file)))]));
     const shared=Object.fromEntries([...sharedHeaderInputs(profile)].map(([file,bytes])=>[file,digest(bytes)]));
-    return {profile:profile.profile,version:profile.version,source:profile.archive,owned,shared};
+    const opengl=profile.openglAttach?Object.fromEntries(['attach.c','loader.c','maclauncher-opengl32.spec','build.mjs'].map(file=>[file,digest(fs.readFileSync(appPath('src/modules/crossover/temporal/opengl/'+file)))])):{};
+    return {profile:profile.profile,version:profile.version,source:profile.archive,owned,shared,opengl};
 }
 export async function prepareSource({archive,work,profile=source}){
     archive=await verifyArchive(archive,profile.archive);work=path.resolve(work);
@@ -142,7 +144,14 @@ exec ${[cc,'-arch',host.macho,'-isysroot',sdk,'-mmacosx-version-min='+minimumMac
     const modules=modulePaths(host.arch,peArchitectures,clientModule).filter(([name],index)=>options.peOnly?name.endsWith('.dll'):!options.hostOnly||index===0);
     const files=modules.map(([,file])=>file);
     for(const file of files)if(!fs.statSync(path.join(build,file),{throwIfNoEntry:false})?.isFile())throw Error('The paired module output is missing: '+file);
-    const result={...prepared,build,files,modules,arch:host.arch,readobj:path.join(mingw,'llvm-readobj'),strip:path.join(mingw,'llvm-strip')};
+    let opengl;
+    if(profile.openglAttach&&!options.hostOnly&&!options.peOnly){
+        opengl=path.join(build,'maclauncher-opengl');
+        fs.mkdirSync(opengl,{recursive:true});
+        const {buildOpenGL}=await import(pathToFileURL(appPath('src/modules/crossover/temporal/opengl/build.mjs')));
+        buildOpenGL({winebuild:path.join(build,'tools/winebuild/winebuild'),output:opengl,compilers:mingw,clang:wrapper});
+    }
+    const result={...prepared,build,files,modules,opengl,arch:host.arch,readobj:path.join(mingw,'llvm-readobj'),strip:path.join(mingw,'llvm-strip')};
     if(options.output)result.provider=publishModule(result,path.resolve(options.output));
     return result;
 }
@@ -171,6 +180,13 @@ export function finishModule(built,output){
         if(name.endsWith('.dll'))run(built.strip,['--strip-debug',target]);
         else run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',target]);
     }
+    for(const name of openGLPaths(built.profile||{})){
+        if(!built.opengl)throw Error('The OpenGL attach build is absent.');
+        const target=path.join(output,name);fs.mkdirSync(path.dirname(target),{recursive:true});
+        fs.copyFileSync(path.join(built.opengl,name),target);fs.chmodSync(target,0o755);
+        if(name.endsWith('.dll'))run(built.strip,['--strip-debug',target]);
+        else run('/usr/bin/codesign',['--force','--sign','-','--timestamp=none',target]);
+    }
     return output;
 }
 /** Read all Mach-O slices and PE hybrid metadata for the shipped modules. */
@@ -188,7 +204,7 @@ export function describeModule({directory,output,arch='x64',profile=source,modul
     addLicense(output,'Wine authors',path.join(directory,'AUTHORS'));
     addLicenses(output,'Khronos Vulkan',here);
     const files=fs.readdirSync(output,{recursive:true}).filter(name=>name!=='provider.json'&&fs.statSync(path.join(output,name)).isFile()).map(file=>{
-        const binary=MODULES.some(([name])=>name===file),native=file.endsWith('.so'),target=path.join(output,file);
+        const binary=MODULES.some(([name])=>name===file)||openGLPaths(profile).includes(file),native=file.endsWith('.so'),target=path.join(output,file);
         fs.chmodSync(target,binary?0o755:0o644);
         return {path:file,size:fs.statSync(target).size,mode:binary?0o755:0o644,sha256:digest(fs.readFileSync(target)),
             ...(binary?{format:native?'mach-o':'pe',architectures:architectures(target),
@@ -198,10 +214,11 @@ export function describeModule({directory,output,arch='x64',profile=source,modul
         sceneInteropAPI:1,sceneContextAPI:1,graphicsLibraryAPI:1,wineVulkanDriverVersion:profile.wineVulkanDriverVersion,originalUnixCallCount:profile.unixCallCount,runtimeProfile:profile.runtimeProfile,
         minimumMacOS:minimumMacOS,architectures:{unix:[...new Set(files.filter(file=>file.format==='mach-o').flatMap(file=>file.architectures))],pe:[...new Set(files.filter(file=>file.format==='pe').flatMap(file=>file.architectures))]},originalGpuWorkRetained:true,
         libraries:Object.fromEntries(MODULES.map(([file])=>[file.split('/')[0],file])),files};
+    if(profile.openglAttach)provider.opengl32={graphicsLibraryAPI:1,unix:openGLPaths(profile)[0],windows:openGLPaths(profile).slice(1)};
     writeChanged(path.join(output,'provider.json'),JSON.stringify(provider,null,2)+'\n');
     // Catalog capabilities: the Wine files the module pairs with, and its Unix side's graphics library loader.
     const manifest={schemaVersion:1,managerId:source.id,version:profile.version,platform:'darwin',arch:host.arch,minimumMacOS:minimumMacOS,
-        executableRelative:provider.libraries[host.unix],capabilities:{runtimeProfile:profile.runtimeProfile,graphicsLibraryAPI:1},provider,files,dependencies:[]};
+        executableRelative:provider.libraries[host.unix],capabilities:{runtimeProfile:profile.runtimeProfile,graphicsLibraryAPI:1,...(profile.openglAttach?{openglLibraryAPI:1}:{})},provider,files,dependencies:[]};
     const payload=path.join(output,'payload');fs.mkdirSync(payload);
     for(const file of files){const target=path.join(payload,file.path);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(path.join(output,file.path),target);fs.chmodSync(target,file.mode);}
     const manifestFile=path.join(payload,'manifest.json');writeChanged(manifestFile,JSON.stringify(manifest,null,2)+'\n');
