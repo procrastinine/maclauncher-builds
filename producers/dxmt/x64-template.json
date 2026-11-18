@@ -1,0 +1,14 @@
+{
+  "archive": {
+    "url": "https://github.com/Sikarugir-App/Template/releases/download/v1.0/Template-1.0.24.tar.xz",
+    "sha256": "4b5f89eeb9ef139936bdfad33d9b420b05ea4597cb7d63376674f7a8e171321c",
+    "bytes": 96198448
+  },
+  "directory": "Template-1.0.24.app/Contents/SharedSupport/renderer/dxmt",
+  "files": {
+    "x86_64-windows/d3d11.dll": "90bf11b791af80da3936fd02870331d397a9efd70f2c0b2172eb83e7c5a81185",
+    "x86_64-windows/d3d10core.dll": "83f567b966cf9d03085a8ddb3fef3c75b20bc11ffee943ca10486558226b8ea8",
+    "x86_64-windows/winemetal.dll": "e176504a3ee9d79d0f1b455141d79ed5f0355ce8ecf99317001ffd5d8e620367",
+    "x86_64-unix/winemetal.so": "62dbce6c66f23308fcdf58fba7371271b0412a71074ad7add87a801516ce473a"
+  }
+}
