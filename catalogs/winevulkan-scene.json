@@ -6,6 +6,54 @@
     {
       "schemaVersion": 2,
       "id": "winevulkan-scene",
+      "version": "26.3.0-MCLv7",
+      "arch": "x64",
+      "launcherArchitectures": [
+        "arm64",
+        "x64"
+      ],
+      "minimumMacOS": "10.15",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "c67365ac5f3869bb64e72932ba233a9f83e4a2c73d50bdca3f387818d4571cfe",
+      "sourceSha256": "36c3314b4f2044c65638539a09f334e677a6af4943e3d287de15cad1cf864e98",
+      "updatePolicy": "manual",
+      "capabilities": {
+        "runtimeProfile": {
+          "id": "crossover-26.3.0-winevulkan-scene-v1",
+          "product": "CrossOver",
+          "wineVersion": "11.0"
+        },
+        "graphicsLibraryAPI": 1
+      },
+      "asset": {
+        "filename": "winevulkan-scene-26.3.0-MCLv7-x64.tar.gz",
+        "sha256": "ba215cbd2e87c5d003cdcd1a16f0a9837e1df7ccb6f38edd8060f8aacdea7e13",
+        "bytes": 438528,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/winevulkan-scene%2Fv26.3.0-MCLv7%2Fx64/winevulkan-scene-26.3.0-MCLv7-x64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "653482e1b46f03da65c83b1c4c0ccdc3a61d2626",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.19.0",
+          "zlib": "1.3.2.1-motley-3246f1b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+          "xcode": "Xcode 26.6\nBuild version 17F113",
+          "macosSDK": "26.5"
+        },
+        "runId": "44224966657",
+        "runAttempt": "1",
+        "definitionDigest": "31f920c0d81cd52319f1f4c761dbf7d016e4ce869da23922cdf81d30e70b69e9"
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "653482e1b46f03da65c83b1c4c0ccdc3a61d2626"
+      },
+      "tag": "winevulkan-scene/v26.3.0-MCLv7/x64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "winevulkan-scene",
       "version": "26.3.0-MCLv6",
       "arch": "x64",
       "launcherArchitectures": [

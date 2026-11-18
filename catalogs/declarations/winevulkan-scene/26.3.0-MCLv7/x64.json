@@ -1,0 +1,96 @@
+{
+  "id": "winevulkan-scene",
+  "version": "26.3.0-MCLv7",
+  "arch": "x64",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "minimumMacOS": "10.15",
+  "sourceRelative": null,
+  "sourceSha256": "36c3314b4f2044c65638539a09f334e677a6af4943e3d287de15cad1cf864e98",
+  "directoryRelative": "winevulkan-scene/26.3.0-MCLv7/x64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "c67365ac5f3869bb64e72932ba233a9f83e4a2c73d50bdca3f387818d4571cfe",
+  "files": [
+    {
+      "path": "i386-windows/winevulkan.dll",
+      "size": 376832,
+      "mode": 493,
+      "sha256": "ebd10562e19ecfb9b7a951b6ff1e38de514de9388b18843090948d5eff520016",
+      "format": "pe",
+      "architectures": [
+        "x86"
+      ]
+    },
+    {
+      "path": "licenses/components.txt",
+      "size": 152,
+      "mode": 420,
+      "sha256": "e54cde9c329ef737992272aeec71f20dc2d83e4a3274724a52ff2fc35664d253"
+    },
+    {
+      "path": "licenses/Khronos-Vulkan-2.txt",
+      "size": 485,
+      "mode": 420,
+      "sha256": "7067771bb5f4df137e487409f1d9241619aa819ad47ad30f7ce75188d01ad9de"
+    },
+    {
+      "path": "licenses/Khronos-Vulkan.txt",
+      "size": 1084,
+      "mode": 420,
+      "sha256": "1ca3502222d967f3be5751c55f6b7ee735b5383909c3b501495f54b216dbf227"
+    },
+    {
+      "path": "licenses/Wine-2.txt",
+      "size": 824,
+      "mode": 420,
+      "sha256": "ae025f125a5d639f0f7abe5146efa1e3d7453cc10b744b2910806fa3f46626ef"
+    },
+    {
+      "path": "licenses/Wine-3.txt",
+      "size": 1324,
+      "mode": 420,
+      "sha256": "2799d474935ef6c1787abc0895f3e386cd2843a5c7cd72a1c30d4f6762ac4b0a"
+    },
+    {
+      "path": "licenses/Wine-authors.txt",
+      "size": 29845,
+      "mode": 420,
+      "sha256": "4e2f062fd9c658b60ba7c0000f88f08d2b8f1333fa7b1c37ec27859ecb2de59d"
+    },
+    {
+      "path": "licenses/Wine.txt",
+      "size": 26434,
+      "mode": 420,
+      "sha256": "e237fa56668030e928551ddd60f05df5fe957f75eab874bbd017e085ed722e7c"
+    },
+    {
+      "path": "manifest.json",
+      "size": 5509,
+      "mode": 420,
+      "sha256": "c67365ac5f3869bb64e72932ba233a9f83e4a2c73d50bdca3f387818d4571cfe"
+    },
+    {
+      "path": "x86_64-unix/winevulkan.so",
+      "size": 683504,
+      "mode": 493,
+      "sha256": "b124221afd594c64141200c9033031cc191c4750d42b91e03a441b6a2d8f1d23",
+      "format": "mach-o",
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "x86_64-windows/winevulkan.dll",
+      "size": 385024,
+      "mode": 493,
+      "sha256": "782b997b3642b627f3966534b2ee0040a7d81c1d44ba0c91072d18823b13f236",
+      "format": "pe",
+      "architectures": [
+        "x86_64"
+      ]
+    }
+  ]
+}
