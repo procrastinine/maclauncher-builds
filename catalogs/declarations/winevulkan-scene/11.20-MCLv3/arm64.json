@@ -1,0 +1,124 @@
+{
+  "id": "winevulkan-scene",
+  "version": "11.20-MCLv3",
+  "arch": "arm64",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "minimumMacOS": "15.0",
+  "sourceRelative": null,
+  "sourceSha256": "d83cf1cffda34b1f71c9bedf16031281b49f027b5c5c34fff229059020bfa89b",
+  "directoryRelative": "winevulkan-scene/11.20-MCLv3/arm64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "162564429e685f953e6aa0e0e308cd66a1eb5b0d9ca4673814816b8dfb65a520",
+  "files": [
+    {
+      "path": "aarch64-unix/maclauncher-opengl32.so",
+      "size": 34848,
+      "mode": 493,
+      "sha256": "fe4f11d3fd38ff678a44b4e7ff1e5233887eb40846246d07781533c23fb7e7c4",
+      "format": "mach-o",
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "aarch64-unix/winevulkan.so",
+      "size": 834528,
+      "mode": 493,
+      "sha256": "081cbfda0df70a295a9e94a4bebe50d17ddbdfcffbe6120c20b74fe342d2a982",
+      "format": "mach-o",
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "aarch64-windows/maclauncher-opengl32.dll",
+      "size": 589824,
+      "mode": 493,
+      "sha256": "b4d9604df9788b857fd319ed9eb697e86f2c65c4880b89aaf8dceba33b83e966",
+      "format": "pe",
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "aarch64-windows/winevulkan.dll",
+      "size": 1245184,
+      "mode": 493,
+      "sha256": "f16efdf99c9fa994be3e2a205abde5f6a49f8d801cbde37990f16d74f8bacc6b",
+      "format": "pe",
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "i386-windows/maclauncher-opengl32.dll",
+      "size": 40960,
+      "mode": 493,
+      "sha256": "2ea570f99972a5f48d111ef2f24c3a66e5eba15040b12f0667fc726474b927d3",
+      "format": "pe",
+      "architectures": [
+        "x86"
+      ]
+    },
+    {
+      "path": "i386-windows/winevulkan.dll",
+      "size": 360448,
+      "mode": 493,
+      "sha256": "da643be9fcd5a85acd69b35e3d78a654ebf54c322316054acb45a14c4c4760ca",
+      "format": "pe",
+      "architectures": [
+        "x86"
+      ]
+    },
+    {
+      "path": "licenses/components.txt",
+      "size": 152,
+      "mode": 420,
+      "sha256": "e54cde9c329ef737992272aeec71f20dc2d83e4a3274724a52ff2fc35664d253"
+    },
+    {
+      "path": "licenses/Khronos-Vulkan-2.txt",
+      "size": 485,
+      "mode": 420,
+      "sha256": "7067771bb5f4df137e487409f1d9241619aa819ad47ad30f7ce75188d01ad9de"
+    },
+    {
+      "path": "licenses/Khronos-Vulkan.txt",
+      "size": 1084,
+      "mode": 420,
+      "sha256": "1ca3502222d967f3be5751c55f6b7ee735b5383909c3b501495f54b216dbf227"
+    },
+    {
+      "path": "licenses/Wine-2.txt",
+      "size": 824,
+      "mode": 420,
+      "sha256": "ae025f125a5d639f0f7abe5146efa1e3d7453cc10b744b2910806fa3f46626ef"
+    },
+    {
+      "path": "licenses/Wine-3.txt",
+      "size": 68547,
+      "mode": 420,
+      "sha256": "34daa7567c4b9baa61a01c9a2fd523c30568aeba7e3ad0db562634347d2254f7"
+    },
+    {
+      "path": "licenses/Wine-authors.txt",
+      "size": 31569,
+      "mode": 420,
+      "sha256": "5f134fcd3e9cd3b2148be79f783c6d617cc5727e8ec8de3e5ead8d7ce8bdd2cf"
+    },
+    {
+      "path": "licenses/Wine.txt",
+      "size": 26434,
+      "mode": 420,
+      "sha256": "e237fa56668030e928551ddd60f05df5fe957f75eab874bbd017e085ed722e7c"
+    },
+    {
+      "path": "manifest.json",
+      "size": 7335,
+      "mode": 420,
+      "sha256": "162564429e685f953e6aa0e0e308cd66a1eb5b0d9ca4673814816b8dfb65a520"
+    }
+  ]
+}
