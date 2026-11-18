@@ -3180,13 +3180,17 @@
         "label": "WineVulkan scene adapter 26.3.0-MCLv6"
       },
       {
-        "version": "11.20-MCLv1",
+        "version": "26.3.0-MCLv7",
+        "label": "WineVulkan scene adapter 26.3.0-MCLv7"
+      },
+      {
+        "version": "11.20-MCLv2",
         "label": "Wine 11.20 Vulkan scene adapter"
       }
     ],
     "build": [
       {
-        "version": "26.3.0-MCLv6",
+        "version": "26.3.0-MCLv7",
         "command": "tools/build-winevulkan-scene.mjs",
         "architectures": [
           "x64"
@@ -3217,7 +3221,7 @@
         ]
       },
       {
-        "version": "11.20-MCLv1",
+        "version": "11.20-MCLv2",
         "command": "tools/build-winevulkan-scene.mjs",
         "architectures": [
           "arm64"

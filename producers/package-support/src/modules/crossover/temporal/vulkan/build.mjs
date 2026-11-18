@@ -195,12 +195,13 @@ export function describeModule({directory,output,arch='x64',profile=source,modul
                 ...(native?{executionArchitecture:host.macho}:{})}:{})};
     });
     const provider={schema:1,provider:source.id,version:profile.version,profile:profile.profile,
-        sceneInteropAPI:1,sceneContextAPI:1,wineVulkanDriverVersion:profile.wineVulkanDriverVersion,originalUnixCallCount:profile.unixCallCount,runtimeProfile:profile.runtimeProfile,
+        sceneInteropAPI:1,sceneContextAPI:1,graphicsLibraryAPI:1,wineVulkanDriverVersion:profile.wineVulkanDriverVersion,originalUnixCallCount:profile.unixCallCount,runtimeProfile:profile.runtimeProfile,
         minimumMacOS:minimumMacOS,architectures:{unix:[...new Set(files.filter(file=>file.format==='mach-o').flatMap(file=>file.architectures))],pe:[...new Set(files.filter(file=>file.format==='pe').flatMap(file=>file.architectures))]},originalGpuWorkRetained:true,
         libraries:Object.fromEntries(MODULES.map(([file])=>[file.split('/')[0],file])),files};
     writeChanged(path.join(output,'provider.json'),JSON.stringify(provider,null,2)+'\n');
+    // Catalog capabilities: the Wine files the module pairs with, and its Unix side's graphics library loader.
     const manifest={schemaVersion:1,managerId:source.id,version:profile.version,platform:'darwin',arch:host.arch,minimumMacOS:minimumMacOS,
-        executableRelative:provider.libraries[host.unix],provider,files,dependencies:[]};
+        executableRelative:provider.libraries[host.unix],capabilities:{runtimeProfile:profile.runtimeProfile,graphicsLibraryAPI:1},provider,files,dependencies:[]};
     const payload=path.join(output,'payload');fs.mkdirSync(payload);
     for(const file of files){const target=path.join(payload,file.path);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(path.join(output,file.path),target);fs.chmodSync(target,file.mode);}
     const manifestFile=path.join(payload,'manifest.json');writeChanged(manifestFile,JSON.stringify(manifest,null,2)+'\n');

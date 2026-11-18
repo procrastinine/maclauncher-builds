@@ -1027,6 +1027,10 @@
       "path": "src/vulkan-features.c"
     },
     {
+      "source": "app:src/modules/shared/reshade/native/graphics-library-attach.h",
+      "path": "src/graphics-library-attach.h"
+    },
+    {
       "source": "app:src/modules/shared/reshade/native/winemetal-layer.c",
       "path": "src/winemetal-layer.c"
     },

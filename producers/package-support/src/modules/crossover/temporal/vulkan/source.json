@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "winevulkan-scene",
-  "version": "26.3.0-MCLv6",
+  "version": "26.3.0-MCLv7",
   "profile": "crossover-26.3.0-winevulkan-scene-v1",
   "sourcePage": "https://www.codeweavers.com/crossover/source",
   "wineVersion": "Wine version 11.0",
@@ -102,44 +102,7 @@
   "runtimeProfile": {
     "id": "crossover-26.3.0-winevulkan-scene-v1",
     "product": "CrossOver",
-    "version": "26.3",
-    "build": "26.3.0.39832",
-    "driverVersion": 47,
-    "unixCallCount": 674,
-    "files": [
-      {
-        "relative": "lib/wine/x86_64-unix/winevulkan.so",
-        "sha256": "5bdbc651ada2613f6df7a86a1632faef464e03f4a141a9cea18dd5d6871332b1"
-      },
-      {
-        "relative": "lib/wine/x86_64-windows/winevulkan.dll",
-        "sha256": "fa5e5ed267b803772b6c0b93bb9bbaa02978fdcab725c21ff6373455543c0a57"
-      },
-      {
-        "relative": "lib/wine/x86_64-unix/win32u.so",
-        "sha256": "2381102e5ee638ccd3f1d5ba3f22d5c7643a357127227027c876a246f541db08"
-      },
-      {
-        "relative": "lib/wine/x86_64-unix/winemac.so",
-        "sha256": "a46e1c63a5096210626d64ef6c62ddea7632f95dbcf437b1a3bf006d43dcf532"
-      },
-      {
-        "relative": "lib/wine/x86_64-unix/ntdll.so",
-        "sha256": "ab32585d767ae631154235861a2e0e8ea61bd09267a2dd341a439e3e8ed071fc"
-      },
-      {
-        "relative": "lib/wine/x86_64-windows/ntdll.dll",
-        "sha256": "6dff64c00793ce92124f1316985c63783f539f26b392975c70f57637458d2387"
-      },
-      {
-        "relative": "lib/wine/i386-windows/winevulkan.dll",
-        "sha256": "c85fd777581c2d0dde329ce54c3fab6675a08562c89c0ab0fbfb748529828438"
-      },
-      {
-        "relative": "lib/wine/i386-windows/ntdll.dll",
-        "sha256": "2c60ee6b00dd13b7f6cb11017778a041ba6a321eaea194f1fa0dca7eab8403e2"
-      }
-    ]
+    "wineVersion": "11.0"
   },
   "archiveDependency": "crossoverWine",
   "hostProfiles": {
