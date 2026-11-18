@@ -1,0 +1,174 @@
+From 0433ca10ac903963c34a2893241abc8ac0214f2a Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alexander=20Thei=C3=9Fen?= <alex@theissen.io>
+Date: Sun, 8 Nov 2026 16:25:40 +0800
+Subject: [PATCH 18/47] FEXCore, Windows: Keep the x87 control word out of
+ FPCR.FZ
+
+FLDCW and FLDENV read bit 12 of the x87 control word, the infinity
+control, into FPCR.FZ. Delphi programs load 0x1332, which turned on
+flush to zero for all SSE and x87 code. FPCR.FZ now follows MXCSR.FTZ
+alone, and the rest of the control word handling around FPCR is fixed
+with it:
+
+- FLDCW, FLDENV and FNINIT set only the rounding mode. Only an MXCSR
+  write changes FZ and FIZ.
+- FPCR has one rounding mode for x87 and SSE. With reduced precision
+  x87, FXRSTOR and XRSTOR take the x87 rounding control when MXCSR asks
+  for round to nearest. XRSTOR without the SSE component applies the
+  x87 one.
+- WoW64 contexts carry MXCSR in both directions instead of the default
+  0x1f80.
+- WoW64 saves the guest's FPCR rounding mode and FZ when a thread
+  leaves the JIT and restores them on entry. A context that changed
+  the control words in between gets them applied as FXRSTOR does.
+
+Limits:
+- MXCSR.FTZ also flushes subnormal results of reduced precision x87,
+  since both use FPCR.FZ (athei/wine-build#28).
+- ARM64EC contexts carry no x87 control word, and STMXCSR can return a
+  stale value after SetThreadContext there.
+
+License: MIT. Core adaptation retains the original author and source commit.
+
+diff --git a/FEXCore/Source/Interface/Core/JIT/MiscOps.cpp b/FEXCore/Source/Interface/Core/JIT/MiscOps.cpp
+index 4738b10..540d569 100644
+--- a/FEXCore/Source/Interface/Core/JIT/MiscOps.cpp
++++ b/FEXCore/Source/Interface/Core/JIT/MiscOps.cpp
+@@ -148,13 +148,17 @@ DEF_OP(SetRoundingMode) {
+     bfi(ARMEmitter::Size::i64Bit, TMP1, TMP2, 22, 2);
+   }
+ 
+-  // Insert the FTZ flag
+-  lsr(ARMEmitter::Size::i64Bit, TMP2, Src, 2);
+-  bfi(ARMEmitter::Size::i64Bit, TMP1, TMP2, 24, 1);
+-
+-  if (Op->SetDAZ && HostSupportsAFP) {
+-    // Extract DAZ from MXCSR and insert to in FPCR.FIZ
+-    bfxil(ARMEmitter::Size::i64Bit, TMP1, MXCSR, 6, 1);
++  if (Op->SetDAZ) {
++    // Only an MXCSR write sets SetDAZ, and FPCR.FZ follows MXCSR.FTZ alone. An x87 control word write leaves it, so
++    // the x87 infinity control bit cannot turn flush to zero on and FNINIT cannot turn it off.
++    // Insert the FTZ flag
++    lsr(ARMEmitter::Size::i64Bit, TMP2, Src, 2);
++    bfi(ARMEmitter::Size::i64Bit, TMP1, TMP2, 24, 1);
++
++    if (HostSupportsAFP) {
++      // Extract DAZ from MXCSR and insert to in FPCR.FIZ
++      bfxil(ARMEmitter::Size::i64Bit, TMP1, MXCSR, 6, 1);
++    }
+   }
+ 
+   // Now save the new FPCR
+diff --git a/FEXCore/Source/Interface/Core/OpcodeDispatcher/Vector.cpp b/FEXCore/Source/Interface/Core/OpcodeDispatcher/Vector.cpp
+index 1d27413..e0fb3e4 100644
+--- a/FEXCore/Source/Interface/Core/OpcodeDispatcher/Vector.cpp
++++ b/FEXCore/Source/Interface/Core/OpcodeDispatcher/Vector.cpp
+@@ -3243,7 +3243,21 @@ void OpDispatchBuilder::XRstorOpImpl(OpcodeArgs) {
+         Ref MXCSR = _LoadMemGPR(OpSize::i32Bit, Base, Constant(24), OpSize::i32Bit, MemOffsetType::SXTX, 1);
+         RestoreMXCSRState(MXCSR);
+       },
+-      [] { /* Intentionally do nothing*/ }, 2);
++      [this, &RestoreIfFlagSetOrDefault] {
++        // Without MXCSR, a restored x87 control word sets the rounding mode as FRSTOR does. The default x87 state
++        // already did in FNINIT.
++        if (ReducedPrecisionMode) {
++          RestoreIfFlagSetOrDefault(
++            0,
++            [this] {
++              Ref FCW = _LoadContextGPR(OpSize::i16Bit, offsetof(FEXCore::Core::CPUState, FCW));
++              Ref RoundingMode = _Bfe(OpSize::i32Bit, 2, 10, FCW);
++              _SetRoundingMode(RoundingMode, false, RoundingMode);
++            },
++            [] { });
++        }
++      },
++      2);
+   }
+ }
+ 
+@@ -3300,13 +3314,24 @@ void OpDispatchBuilder::RestoreSSEState(Ref MemBase) {
+   }
+ }
+ 
+-void OpDispatchBuilder::RestoreMXCSRState(Ref MXCSR) {
++void OpDispatchBuilder::RestoreMXCSRState(Ref MXCSR, bool ForStateRestore) {
+   // Mask out unsupported bits
+   MXCSR = _And(OpSize::i32Bit, MXCSR, Constant(0xFFC0));
+ 
+   _StoreContextGPR(OpSize::i32Bit, MXCSR, offsetof(FEXCore::Core::CPUState, mxcsr));
+   // We only support the rounding mode and FTZ bit being set
+   Ref RoundingMode = _Bfe(OpSize::i32Bit, 3, 13, MXCSR);
++  if (ForStateRestore && ReducedPrecisionMode) {
++    // x87 arithmetic rounds by FPCR as well, which has one rounding mode for both. FXRSTOR and XRSTOR restore the
++    // x87 control word too, and give no hint which of the two the code after them uses, unlike FLDCW and LDMXCSR. Take
++    // the x87 rounding control when MXCSR asks for round to nearest, so that a non-default rounding control in
++    // either one takes effect. Otherwise a restored x87 control word would never reach FPCR.
++    Ref FCW = _LoadContextGPR(OpSize::i16Bit, offsetof(FEXCore::Core::CPUState, FCW));
++    Ref X87RoundingMode = _Bfe(OpSize::i32Bit, 2, 10, FCW);
++    Ref SSERoundingMode = _Bfe(OpSize::i32Bit, 2, 13, MXCSR);
++    RoundingMode = _Select(OpSize::i32Bit, OpSize::i32Bit, CondClass::EQ, SSERoundingMode, Constant(0),
++                           _Or(OpSize::i32Bit, RoundingMode, X87RoundingMode), RoundingMode);
++  }
+   _SetRoundingMode(RoundingMode, true, MXCSR);
+ }
+ 
+@@ -3410,7 +3435,7 @@ void OpDispatchBuilder::UCOMISxOp(OpcodeArgs, IR::OpSize ElementSize) {
+ 
+ void OpDispatchBuilder::LDMXCSR(OpcodeArgs) {
+   Ref Dest = LoadSourceGPR_WithOpSize(Op, Op->Dest, OpSize::i32Bit, Op->Flags);
+-  RestoreMXCSRState(Dest);
++  RestoreMXCSRState(Dest, false);
+ }
+ 
+ void OpDispatchBuilder::STMXCSR(OpcodeArgs) {
+diff --git a/FEXCore/Source/Interface/Core/OpcodeDispatcher/X87F64.cpp b/FEXCore/Source/Interface/Core/OpcodeDispatcher/X87F64.cpp
+index b21d131..f821a0c 100644
+--- a/FEXCore/Source/Interface/Core/OpcodeDispatcher/X87F64.cpp
++++ b/FEXCore/Source/Interface/Core/OpcodeDispatcher/X87F64.cpp
+@@ -32,7 +32,7 @@ void OpDispatchBuilder::X87LDENVF64(OpcodeArgs) {
+   auto NewFCW = _LoadMemGPR(OpSize::i16Bit, Mem, OpSize::i16Bit);
+   // ignore the rounding precision, we're always 64-bit in F64.
+   // extract rounding mode
+-  Ref roundingMode = _Bfe(OpSize::i32Bit, 3, 10, NewFCW);
++  Ref roundingMode = _Bfe(OpSize::i32Bit, 2, 10, NewFCW);
+   _SetRoundingMode(roundingMode, false, roundingMode);
+   _StoreContextGPR(OpSize::i16Bit, NewFCW, offsetof(FEXCore::Core::CPUState, FCW));
+ 
+@@ -51,7 +51,7 @@ void OpDispatchBuilder::X87FLDCWF64(OpcodeArgs) {
+   Ref NewFCW = LoadSourceGPR(Op, Op->Src[0], Op->Flags);
+   // ignore the rounding precision, we're always 64-bit in F64.
+   // extract rounding mode
+-  Ref roundingMode = _Bfe(OpSize::i32Bit, 3, 10, NewFCW);
++  Ref roundingMode = _Bfe(OpSize::i32Bit, 2, 10, NewFCW);
+   _SetRoundingMode(roundingMode, false, roundingMode);
+   _StoreContextGPR(OpSize::i16Bit, NewFCW, offsetof(FEXCore::Core::CPUState, FCW));
+ }
+diff --git a/FEXCore/Source/Interface/Core/OpcodeDispatcher.h b/FEXCore/Source/Interface/Core/OpcodeDispatcher.h
+index 1a1b8af..8732dc7 100644
+--- a/FEXCore/Source/Interface/Core/OpcodeDispatcher.h
++++ b/FEXCore/Source/Interface/Core/OpcodeDispatcher.h
+@@ -1563,7 +1563,8 @@ private:
+   void XRstorOpImpl(OpcodeArgs);
+   void RestoreX87State(OpcodeArgs, Ref MemBase);
+   void RestoreSSEState(Ref MemBase);
+-  void RestoreMXCSRState(Ref MXCSR);
++  // ForStateRestore is false for LDMXCSR, which keeps the x87 control word out of FPCR.
++  void RestoreMXCSRState(Ref MXCSR, bool ForStateRestore = true);
+   void RestoreAVXState(Ref MemBase);
+   void DefaultX87State(OpcodeArgs);
+   void DefaultSSEState();
+diff --git a/FEXCore/Source/Interface/IR/IR.json b/FEXCore/Source/Interface/IR/IR.json
+index 16c29e7..fa2d449 100644
+--- a/FEXCore/Source/Interface/IR/IR.json
++++ b/FEXCore/Source/Interface/IR/IR.json
+@@ -221,7 +221,9 @@
+       },
+ 
+       "SetRoundingMode GPR:$RoundMode, i1:$SetDAZ, GPR:$MXCSR": {
+-        "Desc": ["Sets the current rounding mode options for the thread"
++        "Desc": ["Sets the current rounding mode options for the thread",
++                 "RoundMode holds the x86 rounding control in bits 0 and 1 and, with SetDAZ, FTZ in bit 2.",
++                 "SetDAZ marks an MXCSR write: only then are FTZ and DAZ (MXCSR bit 6) applied, an x87 write sets the rounding mode alone."
+                 ],
+         "HasSideEffects": true
+       },

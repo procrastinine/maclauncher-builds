@@ -28,8 +28,14 @@ foreach(Target anyps5-fex-proof anyps5-fex-start)
 endforeach()
 # The start host serves the main dispatch queue on the main thread with a CFRunLoop.
 target_link_libraries(anyps5-fex-start PRIVATE "-framework CoreFoundation")
+# It runs from its version's shared bundle and takes the game's name and Dock icon in-process, with the shared
+# native-host identity source build-proof.mjs copies beside these files.
+target_sources(anyps5-fex-start PRIVATE ${H}/maclauncher-application-identity.m)
+set_source_files_properties(${H}/maclauncher-application-identity.m PROPERTIES COMPILE_OPTIONS "-fobjc-arc;-fblocks")
+target_link_libraries(anyps5-fex-start PRIVATE "-framework AppKit")
 add_executable(anyps5-fex-syscall ${H}/AnyPS5FexSyscall.cpp)
-foreach(Target anyps5-fex-proof anyps5-fex-abi anyps5-fex-start anyps5-fex-syscall)
+add_executable(anyps5-fex-exception ${H}/AnyPS5FexException.cpp)
+foreach(Target anyps5-fex-proof anyps5-fex-abi anyps5-fex-start anyps5-fex-syscall anyps5-fex-exception)
   target_link_libraries(${Target} PRIVATE FEXCore FEXCore_Base JemallocDummy)
   target_include_directories(${Target} PRIVATE ${CMAKE_BINARY_DIR}/generated)
   set_target_properties(${Target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Bin)

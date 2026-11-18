@@ -1,0 +1,171 @@
+From 6668c5d85af88b79b7c6a4b8950525367e034609 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alexander=20Thei=C3=9Fen?= <alex@theissen.io>
+Date: Thu, 22 Oct 2026 17:32:26 +0800
+Subject: [PATCH 07/47] FEXCore: Write back MMX and upper YMM per instruction
+ in writable code
+
+MMX registers, and the upper halves of the YMM registers when the host
+has no 256-bit SVE, are cached like DF and stayed in the register cache
+until the end of the block. A store into a page of the running compiled
+unit is inline SMC: the fault handler rebuilds the guest state from the
+SRA host registers and the context and steps the faulting instruction
+again in a block of its own. A value that an instruction had loaded into
+one of them before the store was lost there, and the rest of the block
+ran with the older one.
+
+Inline SMC needs a store into a writable executable range that the
+running unit was decoded from, such as JIT output or a packed image
+section, and the decoder knows which ranges those are. A unit can reach
+past such a range into code that isn't writable, a stub in a writable
+page that jumps into the image's text for one, and the store then hits
+the stub's page while a block of the text is running. So when any code
+of a unit lies in a writable range, all of its blocks now write those
+cache entries back at every instruction boundary too, like DF: only
+after an instruction changed one, and it stays cached. Other units are
+compiled as before.
+
+In writable code each MMX write gets two stores, the value and its
+0xFFFF exponent, instead of two per register at the end of the block,
+which makes a loop of independent MMX instructions about two thirds
+slower there. A 256-bit AVX instruction gets one 128-bit store, and AVX
+loops get faster: the next iteration's load of an upper half no longer
+waits for a paired store from the end of the previous one.
+
+Not covered: a guest exception in code outside writable ranges that a
+handler continues also rebuilds the state mid-block, so MMX values and
+upper YMM halves written earlier in that block are still lost there. The
+x87 stack optimization pass keeps the x87 stack values, TOP and tags
+until the end of the block, so those are lost on inline SMC too. Only
+the ranges the decoder read code from count, so a writable page that a
+forward jump skips inside the span of the unit is not counted, which
+needs a writable page between read-only ones in one section or in
+anonymous memory. The disk cache keys a unit by the writability of its
+entry range only, so a cached unit can be used with the other setting
+when the ranges it reaches past that one differ in writability from the
+run that stored it.
+
+Code that was ever writable and executable keeps the write-back after
+it is made read-only, since the invalidation tracker keeps such ranges
+in its writable list when their protection changes to read and execute.
+
+CodeSizeValidation now reports its code as not writable, like the code
+of most programs, so the InstructionCountCI listings keep showing the
+usual code generation. The new InlineSMC_MMX_AVX and InlineSMC_MMX
+tests run from the writable test harness mapping and cover the other
+case: they load MMX and YMM values in a block that then stores into its
+own page.
+
+License: MIT. Core adaptation retains the original author and source commit.
+
+diff --git a/FEXCore/Source/Interface/Core/Core.cpp b/FEXCore/Source/Interface/Core/Core.cpp
+index 982e3a7..869b7a7 100644
+--- a/FEXCore/Source/Interface/Core/Core.cpp
++++ b/FEXCore/Source/Interface/Core/Core.cpp
+@@ -535,6 +535,9 @@ ContextImpl::GenerateIR(FEXCore::Core::InternalThreadState* Thread, uint64_t Gue
+ 
+   bool WantsDiskCachePatching = DiskCache.IsReadingDiskCache() || DiskCache.IsWritingDiskCache();
+ 
++  // Set again below for decoded code
++  Thread->OpDispatcher->SetWriteBackVectorCacheEachInst(false);
++
+   if (HasCustomIRHandlers.load(std::memory_order_relaxed)) {
+     std::shared_lock lk(CustomIRMutex);
+     auto Handler = CustomIRHandlers.find(GuestRIP);
+@@ -556,6 +559,7 @@ ContextImpl::GenerateIR(FEXCore::Core::InternalThreadState* Thread, uint64_t Gue
+ 
+     Thread->OpDispatcher->BeginFunction(GuestRIP, &CodeBlocks, BlockInfo->TotalInstructionCount, BlockInfo->Is64BitMode,
+                                         AreMonoHacksActive() && MonoBackpatcherBlock.load(std::memory_order_relaxed) == GuestRIP);
++    Thread->OpDispatcher->SetWriteBackVectorCacheEachInst(BlockInfo->InWritableRange);
+ 
+     const auto GPRSize = Thread->OpDispatcher->GetGPROpSize();
+ 
+diff --git a/FEXCore/Source/Interface/Core/Frontend.cpp b/FEXCore/Source/Interface/Core/Frontend.cpp
+index 8d1d8db..829f83f 100644
+--- a/FEXCore/Source/Interface/Core/Frontend.cpp
++++ b/FEXCore/Source/Interface/Core/Frontend.cpp
+@@ -120,6 +120,9 @@ int32_t Decoder::CheckRangeExecutable(uint64_t Address, uint64_t Size) {
+       return -(Size - RemainingSize);
+     }
+ 
++    // An instruction can start in one range and end in the next
++    BlockInfo.InWritableRange |= RangeInfo.Writable;
++
+     uint64_t RangeRemainingSize = ExecutableRangeEnd - Address;
+     if (RemainingSize > RangeRemainingSize) {
+       RemainingSize -= RangeRemainingSize;
+@@ -127,6 +130,7 @@ int32_t Decoder::CheckRangeExecutable(uint64_t Address, uint64_t Size) {
+     }
+   }
+ 
++  BlockInfo.InWritableRange |= ExecutableRangeWritable;
+   // Say all bytes are readable.
+   return Size;
+ }
+@@ -1817,6 +1821,7 @@ void Decoder::SetupDecodeInstructionsAtEntry(FEXCore::Core::InternalThreadState*
+   CurrentCodePage = PC & FEXCore::Utils::FEX_PAGE_MASK;
+ 
+   BlockInfo.CodePages = {CurrentCodePage};
++  BlockInfo.InWritableRange = false;
+ 
+   EntryBlock = true;
+   FinalInstruction = false;
+diff --git a/FEXCore/Source/Interface/Core/Frontend.h b/FEXCore/Source/Interface/Core/Frontend.h
+index ade14bc..92f6c88 100644
+--- a/FEXCore/Source/Interface/Core/Frontend.h
++++ b/FEXCore/Source/Interface/Core/Frontend.h
+@@ -59,6 +59,9 @@ public:
+   struct DecodedBlockInformation final {
+     uint64_t TotalInstructionCount;
+     bool Is64BitMode {};
++    // Some of the decoded code lies in a writable executable range. A store into such a range can hit the running
++    // code, and inline SMC handling then applies to the whole compiled unit, not only to the block that holds the page.
++    bool InWritableRange {};
+     fextl::vector<DecodedBlocks> Blocks;
+     fextl::set<uint64_t> EntryPoints;
+     fextl::set<uint64_t> CodePages; // Start addresses of all pages touching the block
+diff --git a/FEXCore/Source/Interface/Core/OpcodeDispatcher.h b/FEXCore/Source/Interface/Core/OpcodeDispatcher.h
+index ac44625..1a1b8af 100644
+--- a/FEXCore/Source/Interface/Core/OpcodeDispatcher.h
++++ b/FEXCore/Source/Interface/Core/OpcodeDispatcher.h
+@@ -345,6 +345,12 @@ public:
+     return ShouldDump;
+   }
+ 
++  // Write the MMX and AVX high cache entries back at every instruction boundary too, for code that a store can modify
++  // while it runs, see FlushRegisterCache.
++  void SetWriteBackVectorCacheEachInst(bool WriteBack) {
++    WriteBackVectorCacheEachInst = WriteBack;
++  }
++
+   void BeginFunction(uint64_t RIP, const fextl::vector<FEXCore::Frontend::Decoder::DecodedBlocks>* Blocks, uint32_t NumInstructions,
+                      bool Is64BitMode, bool MonoBackpatcherBlock);
+   void Finalize();
+@@ -1247,10 +1253,16 @@ public:
+ 
+       // A fault handler that resumes at the faulting instruction, as for
+       // inline SMC, rebuilds the state from the SRA registers and the
+-      // context, so DF has to be in the context at every instruction
+-      // boundary too. It is only written back after an instruction changed
+-      // it, and stays cached since reloading it is a memory load.
+-      KeepCachedMask = 1ull << DFIndex;
++      // context, so DF, the MMX registers and the upper halves of the YMM
++      // registers have to be in the context at every instruction boundary
++      // too. Each is only written back after an instruction changed it, and
++      // stays cached since reloading it is a memory load.
++      const uint64_t DFMask = 1ull << DFIndex;
++      const uint64_t MMXMask = ((1ull << (MM7Index - MM0Index + 1)) - 1) << MM0Index;
++      static_assert(AVXHigh15Index == 63, "AVX high halves are the top cache indices");
++      const uint64_t AVXHighMask = ~0ULL << AVXHigh0Index;
++
++      KeepCachedMask = DFMask | (WriteBackVectorCacheEachInst ? (MMXMask | AVXHighMask) : 0);
+       Bits &= (Mask | KeepCachedMask);
+     }
+ 
+@@ -1409,6 +1421,7 @@ private:
+   ForceTSOMode ForceTSO {ForceTSOMode::NoOverride};
+   // Used during new op bringup
+   bool ShouldDump {false};
++  bool WriteBackVectorCacheEachInst {false};
+ 
+   using SaveStoreAVXStatePtr = void (OpDispatchBuilder::*)(Ref MemBase);
+   using DefaultAVXStatePtr = void (OpDispatchBuilder::*)();

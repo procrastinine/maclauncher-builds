@@ -1,0 +1,75 @@
+From: procrastinine <24549552+procrastinine@users.noreply.github.com>
+License: MIT
+
+diff --git a/FEXCore/Source/Interface/Core/JIT/BranchOps.cpp b/FEXCore/Source/Interface/Core/JIT/BranchOps.cpp
+index c2b1d8e..78b5237 100644
+--- a/FEXCore/Source/Interface/Core/JIT/BranchOps.cpp
++++ b/FEXCore/Source/Interface/Core/JIT/BranchOps.cpp
+@@ -250,8 +250,18 @@ DEF_OP(CondJump) {
+ 
+   auto TrueTargetLabel = JumpTarget(Op->TrueBlock);
+ 
++  // A taken backward branch passes the interrupt check, as an unconditional backward branch does. The condition is
++  // inverted around the check and an unconditional branch, so the check runs only when the branch is taken: an
++  // interrupt there resumes at the branching instruction, which takes the branch again.
++  const bool CheckTaken = CTX->Config.NeedsPendingInterruptFaultCheck && TrueTargetLabel->Backward.Location;
++  ARMEmitter::ForwardLabel NotTaken {};
++
+   if (Op->FromNZCV) {
+-    b_OrRestart(MapCC(Op->Cond), TrueTargetLabel);
++    if (CheckTaken) {
++      (void)b(InvertCondition(MapCC(Op->Cond)), &NotTaken);
++    } else {
++      b_OrRestart(MapCC(Op->Cond), TrueTargetLabel);
++    }
+   } else {
+     uint64_t Const;
+     const bool isConst = IsInlineConstant(Op->Cmp2, &Const);
+@@ -264,21 +274,43 @@ DEF_OP(CondJump) {
+ 
+     if (Op->Cond == IR::CondClass::EQ) {
+       LOGMAN_THROW_A_FMT(Const == 0, "CondJump: Expected 0 source");
+-      cbz_OrRestart(Size, Reg, TrueTargetLabel);
++      if (CheckTaken) {
++        (void)cbnz(Size, Reg, &NotTaken);
++      } else {
++        cbz_OrRestart(Size, Reg, TrueTargetLabel);
++      }
+     } else if (Op->Cond == IR::CondClass::NEQ) {
+       LOGMAN_THROW_A_FMT(Const == 0, "CondJump: Expected 0 source");
+-      cbnz_OrRestart(Size, Reg, TrueTargetLabel);
++      if (CheckTaken) {
++        (void)cbz(Size, Reg, &NotTaken);
++      } else {
++        cbnz_OrRestart(Size, Reg, TrueTargetLabel);
++      }
+     } else if (Op->Cond == IR::CondClass::TSTZ) {
+       LOGMAN_THROW_A_FMT(Const < 64, "CondJump: Expected valid bit source");
+-      tbz_OrRestart(Reg, Const, TrueTargetLabel);
++      if (CheckTaken) {
++        (void)tbnz(Reg, Const, &NotTaken);
++      } else {
++        tbz_OrRestart(Reg, Const, TrueTargetLabel);
++      }
+     } else if (Op->Cond == IR::CondClass::TSTNZ) {
+       LOGMAN_THROW_A_FMT(Const < 64, "CondJump: Expected valid bit source");
+-      tbnz_OrRestart(Reg, Const, TrueTargetLabel);
++      if (CheckTaken) {
++        (void)tbz(Reg, Const, &NotTaken);
++      } else {
++        tbnz_OrRestart(Reg, Const, TrueTargetLabel);
++      }
+     } else {
+       LOGMAN_THROW_A_FMT(false, "CondJump expected simple condition");
+     }
+   }
+ 
++  if (CheckTaken) {
++    EmitSuspendInterruptCheck();
++    b_OrRestart(TrueTargetLabel);
++    (void)Bind(&NotTaken);
++  }
++
+   PendingTargetLabel = JumpTarget(Op->FalseBlock);
+ }
+ 

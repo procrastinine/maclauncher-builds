@@ -144,7 +144,11 @@
       ["arm64-standard-streams", "applyStandardStreamDeclarations"],
       ["guest-va-list", "applyGuestVaListOverlay"],
       ["arm64-driver-memory", "applyDriverMemoryWindow"],
-      ["arm64-sync-on-address", "applySyncOnAddressLoad"]
+      ["arm64-sync-on-address", "applySyncOnAddressLoad"],
+      ["arm64-writeback-keeps-newer-cpu-bytes", "applyWriteBackKeepsNewerCpuBytes"],
+      ["arm64-shadow-retire-own-registration", "applyShadowRetireOwnRegistration"],
+      ["arm64-event-ring", "applyEventRing"],
+      ["arm64-plane-store-keeps-newer-cpu-bytes", "applyPlaneStoreKeepsNewerCpuBytes"]
     ],
     "cmakeLibraries": ["libSceVideoOut", "libSceAgc", "libSceAgcDriver", "libSceAudioOut", "libSceLibcInternal", "libSceJson2", "libSceNet",
       "libSceHttp2", "libSceAvPlayer", "libSceAjm", "libSceAcm", "libSceSsl", "libSceNpWebApi2", "libSceAppContent", "libSceSaveData", "libSceImeDialog",
@@ -204,6 +208,78 @@
       "summary": "RSP committed after a memory POP store succeeds (Alexander Thei\u00dfen, Mach9 FEX fork)"
     },
     {
+      "file": "overlays/fex/0008-darwin-interrupt-page.patch",
+      "target": "fex",
+      "license": "MIT",
+      "summary": "the interrupt fault page sized and aligned to the 16 KiB Darwin host page, so it can be protected on its own; the host enables the interrupt check through the GdbServer option, whose only FEXCore use is this check"
+    },
+    {
+      "file": "overlays/fex/0009-taken-backward-branch-interrupt-check.patch",
+      "target": "fex",
+      "license": "MIT",
+      "summary": "the interrupt check on every taken backward conditional branch, as on an unconditional one"
+    },
+    {
+      "file": "overlays/fex/0010-x87-control-read.patch",
+      "target": "fex",
+      "license": "MIT",
+      "summary": "Reserved x87 control-word bits are masked on stores and Darwin state reads while preserving the loaded word"
+    },
+    {
+      "file": "overlays/fex/0011-x87-quiet-compare.patch",
+      "target": "fex",
+      "license": "MIT",
+      "summary": "Quiet x87 comparisons distinguish signaling inputs and unsupported encodings"
+    },
+    {
+      "file": "overlays/fex/0012-smc-direction.patch",
+      "target": "fex",
+      "license": "MIT",
+      "summary": "Changed direction flags are written back at guest instruction boundaries"
+    },
+    {
+      "file": "overlays/fex/0013-smc-vector-cache.patch",
+      "target": "fex",
+      "license": "MIT",
+      "summary": "Cached MMX and upper YMM state is retained at writable code instruction boundaries"
+    },
+    {
+      "file": "overlays/fex/0014-exact-x87-remainders.patch",
+      "target": "fex",
+      "license": "MIT",
+      "summary": "Full 80-bit FPREM and FPREM1 reductions preserve quotient bits and denormal operands"
+    },
+    {
+      "file": "overlays/fex/0015-x87-rounding-controls.patch",
+      "target": "fex",
+      "license": "MIT",
+      "summary": "MXCSR controls FTZ and DAZ independently of x87 control operations"
+    },
+    {
+      "file": "overlays/fex/0016-x86-undefined-flags.patch",
+      "target": "fex",
+      "license": "MIT",
+      "summary": "Arithmetic flags left undefined follow the selected x86 behavior"
+    },
+    {
+      "file": "overlays/fex/0017-signed-memory-loads.patch",
+      "target": "fex",
+      "license": "MIT",
+      "summary": "MOVSX and MOVSXD signed memory loads retain software TSO and destination width"
+    },
+    {
+      "file": "overlays/fex/0018-signed-load-offsets.patch",
+      "target": "fex",
+      "license": "MIT",
+      "summary": "Signed-load displacement inlining uses the memory access size with its paired load operation"
+    },
+    {
+      "file": "overlays/fex/0019-darwin-zero-anonymous-caches.patch",
+      "target": "fex",
+      "license": "MIT",
+      "summary": "Darwin anonymous cache invalidation clears resident entries with exact host-page edges"
+    },
+    {
       "file": "overlays/anyps5/guestcpu-arm64.patch",
       "target": "anyps5",
       "license": "GPL-2.0-only",
@@ -213,15 +289,18 @@
   "host": {
     "directory": "host",
     "license": "GPL-2.0-only",
+    "identity": "../package-support/src/modules/shared/runtime/application-identity.m",
     "targets": [
       "anyps5-fex-proof",
       "anyps5-fex-abi",
       "anyps5-fex-start",
-      "anyps5-fex-syscall"
+      "anyps5-fex-syscall",
+      "anyps5-fex-exception"
     ],
     "sources": [
       "CMakeLists.txt",
       "FexGuest.h",
+      "FaultMemoryReceipt.h",
       "SysVThunk.h",
       "Ps5Module.h",
       "AnyPS5FexProof.cpp",
@@ -229,6 +308,7 @@
       "AnyPS5FexStart.cpp",
       "GenericBridge.S",
       "AnyPS5FexSyscall.cpp",
+      "AnyPS5FexException.cpp",
       "fex-entry.cmake",
       "GuestCpuHost.h",
       "KernelThreadRecord.cpp",
@@ -242,7 +322,9 @@
       "source": "guest-abi.c",
       "symbols": [
         "guest_abi",
-        "guest_callback"
+        "guest_callback",
+        "guest_spin",
+        "guest_on_exception"
       ]
     },
     "generator": {

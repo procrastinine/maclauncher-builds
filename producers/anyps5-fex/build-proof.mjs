@@ -2,7 +2,7 @@
 // Builds the AnyPS5 under FEXCore proof host for arm64 macOS from pinned sources and owned overlays.
 //
 //   node producers/anyps5-fex/build-proof.mjs --out <directory> [--check <eboot.elf> <function> <slot> <bss> <main>]
-//     [--only proof,abi,start,syscall] [--anyps5-arm64 <directory>]
+//     [--only proof,abi,start,syscall,exception] [--anyps5-arm64 <directory>]
 //
 // --anyps5-arm64 names the arm64 AnyPS5 tree that producers/anyps5's buildRuntime({libraryArchitecture:'arm64',
 // configureOnly:true}) prepares at the same AnyPS5 revision: <directory>/source is its projection (every runtime
@@ -13,12 +13,16 @@
 // <directory>, the overlays are applied there, AnyPS5's arm64 library objects are compiled, and the
 // proof executable is linked against static FEXCore. Every host links every symbol it references (the proof takes the
 // AnyPS5 objects it reaches from their archive), so a missing definition fails the build.
-// The ABI proof's guest code (host/guest-abi.c) is compiled for x86-64 and its text extracted for the host to map.
+// The guest code of the ABI proof and the exception check (host/guest-abi.c) is compiled for x86-64 and its text
+// extracted for the hosts to map.
 // --check runs the module function twice, with the import slot unbound (must fail) and bound to the thunk (must
 // print PASS), and the ABI proof twice, through the generic register shim (must fail) and through per-signature
 // thunks (must print PASS), and the start host twice, without the game's sce_module PRX modules (must stop) and with
-// them (must reach main and print PASS), and the SYSCALL entry check once (must print PASS).
+// them (must reach main and print PASS), the SYSCALL entry check once (must print PASS), and the guest exception check
+// twice, taking each exception wherever the signal lands in translated code (must fail) and at FEXCore's interrupt
+// checks (must print PASS).
 import {gitlink} from '../../lib/pins.mjs';
+import {projectedInclude} from './projected-include.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync,spawnSync} from 'node:child_process';
@@ -33,6 +37,7 @@ function argumentsOf(argv){
  for(let at=0;at<argv.length;at++){
   if(argv[at]==='--out')options.out=path.resolve(argv[++at]);
   else if(argv[at]==='--check'){options.check=argv.slice(at+1,at+6);at+=5;}
+  else if(argv[at]==='--python')options.python=path.resolve(argv[++at]);
   else if(argv[at]==='--only')options.only=new Set(argv[++at].split(','));
   else if(argv[at]==='--anyps5-arm64')options.anyps5Arm64=path.resolve(argv[++at]);
   else throw Error('Unknown argument: '+argv[at]);
@@ -155,6 +160,12 @@ function cmakeLibraries(arm64,names,compiled,overlaid){
    if(word==='-MT'||word==='-MF'){at++;continue;}
    if(word==='-o'){args.push('-o',output);at++;continue;}
    if(word===source){args.push(edited);continue;}
+   if(word.startsWith('-I')||word==='-isystem'){
+    const directory=word==='-isystem'?words[++at]:word.slice(2);
+    const projected=projectedInclude(directory,build,path.join(arm64,'source'),overlaid,recipe.anyps5.paths);
+    args.push(...(word==='-isystem'?['-isystem',projected]:['-I'+projected]));
+    continue;
+   }
    args.push(word);
   }
   if(!args.includes(edited)||!args.includes(output))throw Error('The CMake command of '+object+' has no -o or source word.');
@@ -289,13 +300,15 @@ if(options.anyps5Arm64){
 const hostSource=path.join(stage,'host');
 fs.mkdirSync(hostSource,{recursive:true});
 for(const file of recipe.host.sources)fs.copyFileSync(path.join(import.meta.dirname,recipe.host.directory,file),path.join(hostSource,file));
+// The shared native-host identity source: the game's name and Dock icon from MACLAUNCHER_GAME_NAME and MACLAUNCHER_GAME_ICON.
+fs.copyFileSync(path.join(import.meta.dirname,recipe.host.identity),path.join(hostSource,'maclauncher-application-identity.m'));
 for(const tree of ['fex','anyps5','host'])syncTree(path.join(stage,tree),path.join(options.out,tree));
 fs.rmSync(stage,{recursive:true,force:true});
 
 const guestObject=path.join(options.out,'guest-abi.x86_64.o'),guestText=path.join(options.out,'guest-abi.bin');
 run('clang',['-arch','x86_64','-O2','-ffreestanding','-fno-builtin','-fno-stack-protector','-fno-asynchronous-unwind-tables','-c',
  path.join(import.meta.dirname,recipe.host.directory,recipe.host.guest.source),'-o',guestObject]);
-const guestOffsets=execFileSync('python3',['-I',path.join(import.meta.dirname,recipe.host.directory,'macho-text.py'),guestObject,guestText,...recipe.host.guest.symbols],{encoding:'utf8'}).trim().split(' ');
+const guestOffsets=execFileSync(options.python||'python3',['-I',path.join(import.meta.dirname,recipe.host.directory,'macho-text.py'),guestObject,guestText,...recipe.host.guest.symbols],{encoding:'utf8'}).trim().split(' ');
 const compile=(source,flags=[])=>{
  // Named after the whole source path: several libraries have an Export.cpp or a Process.cpp.
  const object=path.join(options.out,'objects',source.replace(/\.(cpp|c)$/,'.arm64.o'));
@@ -318,10 +331,7 @@ if(options.anyps5Arm64)cmake.archives.push(...recipe.anyps5.archives.map(name=>p
 cmake.includes.unshift(path.join(options.out,'anyps5/3rdparty/ZArchive/include'));
 if(options.anyps5Arm64){
  const projected=path.join(options.anyps5Arm64,'source');
- cmake.includes=[...new Set(cmake.includes.map(directory=>{
-  const relative=path.relative(projected,directory);
-  return !relative.startsWith('..')&&recipe.anyps5.paths.some(prefix=>relative===prefix||relative.startsWith(prefix+'/'))?path.join(options.out,'anyps5',relative):directory;
- }))].filter(directory=>directory!==path.join(options.out,'anyps5/core/libs'));
+ cmake.includes=[...new Set(cmake.includes.map(directory=>projectedInclude(directory,path.join(options.anyps5Arm64,'build'),projected,path.join(options.out,'anyps5'),recipe.anyps5.paths)))].filter(directory=>directory!==path.join(options.out,'anyps5/core/libs'));
  objects.push(...cmake.objects);
  process.stdout.write('arm64 CMake libraries: '+cmake.libraries.join(', ')+' ('+cmake.objects.length+' objects, '+cmake.archives.length+' static libraries)\n');
 }
@@ -343,7 +353,7 @@ if(options.anyps5Arm64){
 }
 // One thunk translation unit per source, plus the part and data tables (generate-thunks.py prints the files).
 const generatedThunks=path.join(options.out,'generated-thunks.cpp');
-const generatedFiles=execFileSync('python3',['-I',path.join(import.meta.dirname,recipe.host.directory,recipe.host.generator.script),generatedThunks,
+const generatedFiles=execFileSync(options.python||'python3',['-I',path.join(import.meta.dirname,recipe.host.directory,recipe.host.generator.script),generatedThunks,
  [path.join(options.out,'anyps5/core/libs'),...cmake.includes].join(':'),...[...recipe.anyps5.objects,...cmake.sources.filter(source=>fs.existsSync(path.join(options.out,'anyps5',source)))].map(source=>path.join(options.out,'anyps5',source)),'--',...objects],{encoding:'utf8',stdio:['ignore','pipe','inherit']}).trim().split('\n');
 const linkLog=path.join(options.out,'link.log');
 // Links and stub files of an earlier build never stand for this one.
@@ -353,10 +363,12 @@ if(!link(options.out,objects,linkLog)){
  const missing=[...fs.readFileSync(linkLog,'utf8').matchAll(/^  "(.*)", referenced from:/gm)].map(match=>match[1]);
  throw Error((missing.length?missing.length+' symbols no object defines ('+missing.slice(0,40).join(', ')+(missing.length>40?', ...':'')+')':'The host build failed')+'; see '+linkLog);
 }
-const [proof,abi,start,syscall]=recipe.host.targets.map(target=>path.join(options.out,'build/Bin',target));
+const [proof,abi,start,syscall,exception]=recipe.host.targets.map(target=>path.join(options.out,'build/Bin',target));
+const guestOffset=name=>guestOffsets[recipe.host.guest.symbols.indexOf(name)];
 // The dynamic libraries the AnyPS5 libraries link (SDL) load from next to the executables (@executable_path).
 for(const library of cmake.link.filter(item=>item.endsWith('.dylib')))fs.copyFileSync(library,path.join(options.out,'build/Bin',path.basename(library)));
-process.stdout.write(proof+'\n'+abi+' '+guestText+' '+guestOffsets.join(' ')+'\n'+start+'\n'+syscall+'\n');
+process.stdout.write(proof+'\n'+abi+' '+guestText+' '+guestOffset('guest_abi')+' '+guestOffset('guest_callback')+'\n'+start+'\n'+syscall+'\n'+
+ exception+' '+guestText+' '+guestOffset('guest_spin')+' '+guestOffset('guest_on_exception')+'\n');
 // The start host's static initializers include the AnyPS5 objects' registrations. Run without arguments, it stops at
 // its usage message (exit 2) when every initializer returns.
 {
@@ -368,7 +380,8 @@ if(options.check){
  // A check whose inputs did not change is not rerun: --only names the ones to run.
  const runs=name=>!options.only||options.only.has(name);
  if(runs('proof'))check(proof,[eboot,functionAddress,slot,bss],'unbound','bound');
- if(runs('abi'))check(abi,[guestText,...guestOffsets],'generic','thunks');
+ if(runs('abi'))check(abi,[guestText,guestOffset('guest_abi'),guestOffset('guest_callback')],'generic','thunks');
+ if(runs('exception'))check(exception,[guestText,guestOffset('guest_spin'),guestOffset('guest_on_exception')],'anywhere','checks');
  // The start check's game data folder is a build directory, not a launcher profile.
  const startData=path.join(options.out,'start-data');
  fs.mkdirSync(startData,{recursive:true});

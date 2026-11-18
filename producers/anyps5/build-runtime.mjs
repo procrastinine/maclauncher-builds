@@ -5,6 +5,8 @@ import {spawnSync} from 'node:child_process';
 import {recipe,inputs,verifySources,prepareSourceProjection,writeChanged} from './source-projection.mjs';
 import {pathToFileURL} from 'node:url';
 import {buildInput} from '../../tools/build-input.mjs';
+import {applyWriteBackKeepsNewerCpuBytes} from './overlays/writeback-keeps-newer-cpu-bytes/apply.mjs';
+import {applyPlaneStoreKeepsNewerCpuBytes} from './overlays/plane-store-keeps-newer-cpu-bytes/apply.mjs';
 import {applyArm64LibrariesOverlay} from './overlays/arm64-libs/apply.mjs';
 
 const root=path.resolve(import.meta.dirname,'../..');
@@ -44,8 +46,12 @@ export async function buildRuntime({buildDirectory=path.join(root,'out/anyps5-ru
  await prepareSourceProjection({source,repositories},projection);
  const arm64=libraryArchitecture==='arm64';
  if(arm64)applyArm64LibrariesOverlay(projection);
+ else {
+  applyWriteBackKeepsNewerCpuBytes(projection);
+  applyPlaneStoreKeepsNewerCpuBytes(projection);
+ }
  const ffmpeg=await prepareFfmpeg(buildDirectory,LIBRARY_ARCHITECTURES[libraryArchitecture].ffmpeg);
- run('cmake',['-S',projection,'-B',binary,'-DCMAKE_BUILD_TYPE=Release','-DCMAKE_OSX_ARCHITECTURES='+libraryArchitecture,...(arm64?['-DANYPS5_ARM64_LIBS=ON']:[]),'-DCMAKE_OSX_DEPLOYMENT_TARGET=26.0',
+ run('cmake',[...(arm64?['-G','Ninja']:[]),'-S',projection,'-B',binary,'-DCMAKE_BUILD_TYPE=Release','-DCMAKE_OSX_ARCHITECTURES='+libraryArchitecture,...(arm64?['-DANYPS5_ARM64_LIBS=ON']:[]),'-DCMAKE_OSX_DEPLOYMENT_TARGET=26.0',
   ...(python?['-DPython3_EXECUTABLE='+python]:[]),'-DBUILD_TESTING=OFF','-DANYPS5_RELINKER_ONLY=OFF','-DANYPS5_USE_SYSTEM_DEPS=OFF','-DFFMPEG_PREBUILT_DIR='+ffmpeg,
   '-DCMAKE_C_FLAGS=-ffile-prefix-map='+projection+'=/anyps5','-DCMAKE_CXX_FLAGS=-ffile-prefix-map='+projection+'=/anyps5']);
  if(!configureOnly)run('cmake',['--build',binary,'--target',...targets,'--parallel',String(jobs)]);

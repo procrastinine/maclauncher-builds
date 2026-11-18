@@ -2410,18 +2410,123 @@
       {
         "version": "MCLv12",
         "label": "AnyPS5 MCLv12"
+      },
+      {
+        "version": "MCLv13",
+        "label": "AnyPS5 MCLv13"
+      }
+    ],
+    "build": [
+      {
+        "version": "MCLv13",
+        "architectures": [
+          "x64"
+        ],
+        "command": "tools/build-anyps5.mjs",
+        "submodules": [
+          "sources/anyps5",
+          "sources/anyps5-nghttp2"
+        ],
+        "recursiveSubmodules": true,
+        "tools": [
+          "cmake",
+          "ninja",
+          "pkgconf"
+        ],
+        "archives": [
+          {
+            "file": "producers/anyps5/dependencies.json",
+            "pointer": "/artifacts/0"
+          },
+          {
+            "file": "producers/anyps5/dependencies.json",
+            "pointer": "/artifacts/2"
+          }
+        ]
+      },
+      {
+        "version": "MCLv12",
+        "architectures": [
+          "arm64",
+          "x64"
+        ],
+        "command": "tools/build-anyps5.mjs",
+        "submodules": [
+          "sources/anyps5",
+          "sources/anyps5-nghttp2"
+        ],
+        "recursiveSubmodules": true,
+        "tools": [
+          "cmake",
+          "ninja",
+          "pkgconf"
+        ],
+        "archives": [
+          {
+            "file": "producers/nxnative/dependencies.json",
+            "pointer": "/python"
+          },
+          {
+            "file": "producers/anyps5/dependencies.json",
+            "pointer": "/artifacts"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "anyps5-fex",
+    "name": "AnyPS5 FEX",
+    "purpose": "Arm64 AnyPS5 start host with the FEX execution layer.",
+    "producer": {
+      "kind": "maclauncher",
+      "repository": "https://github.com/procrastinine/maclauncher-builds",
+      "sourceDirectory": "producers/anyps5-fex",
+      "entries": [
+        "producers/anyps5-fex",
+        "producers/anyps5",
+        "producers/nxnative/dependencies.json",
+        "producers/package-support/src/modules/shared/runtime/application-identity.m"
+      ],
+      "buildEntry": "producers/anyps5-fex/package-runtime.mjs"
+    },
+    "upstreams": [
+      {
+        "id": "anyps5",
+        "provider": "github",
+        "url": "https://github.com/boykopovar/AnyPS5",
+        "repository": "boykopovar/AnyPS5",
+        "pin": {
+          "gitlink": "sources/anyps5"
+        }
+      },
+      {
+        "id": "fex",
+        "provider": "github",
+        "url": "https://github.com/FEX-Emu/FEX",
+        "repository": "FEX-Emu/FEX",
+        "pin": {
+          "gitlink": "sources/fex"
+        }
+      }
+    ],
+    "compatibility": "Apple Silicon with macOS 26 or later. Game code runs through FEX and the system libraries run on arm64.",
+    "packageProfiles": [
+      {
+        "version": "MCLv13",
+        "label": "AnyPS5 MCLv13"
       }
     ],
     "build": {
-      "version": "MCLv12",
+      "version": "MCLv13",
       "architectures": [
-        "arm64",
-        "x64"
+        "arm64"
       ],
-      "command": "tools/build-anyps5.mjs",
+      "command": "tools/build-anyps5-fex.mjs",
       "submodules": [
         "sources/anyps5",
-        "sources/anyps5-nghttp2"
+        "sources/anyps5-nghttp2",
+        "sources/fex"
       ],
       "recursiveSubmodules": true,
       "tools": [
@@ -2436,34 +2541,10 @@
         },
         {
           "file": "producers/anyps5/dependencies.json",
-          "pointer": "/artifacts"
+          "pointer": "/artifacts/1"
         }
       ]
     }
-  },
-  {
-    "id": "anyps5-fex",
-    "name": "AnyPS5 FEX",
-    "purpose": "Arm64 AnyPS5 start host with the FEX execution layer.",
-    "producer": {
-      "kind": "maclauncher",
-      "repository": "https://github.com/procrastinine/maclauncher-builds",
-      "sourceDirectory": "producers/anyps5-fex",
-      "entries": [
-        "producers/anyps5-fex"
-      ]
-    },
-    "upstreams": [
-      {
-        "id": "anyps5",
-        "provider": "github",
-        "url": "https://github.com/boykopovar/AnyPS5",
-        "repository": "boykopovar/AnyPS5",
-        "pin": {
-          "gitlink": "sources/anyps5"
-        }
-      }
-    ]
   },
   {
     "id": "nxnative-tools",

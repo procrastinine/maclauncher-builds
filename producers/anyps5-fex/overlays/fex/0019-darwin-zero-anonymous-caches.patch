@@ -1,0 +1,53 @@
+Subject: [PATCH] Clear Darwin anonymous caches with host-page boundaries
+
+Darwin MADV_DONTNEED is an access hint and retains resident contents.
+FEX cache and allocator invalidation requires zero-filled anonymous pages.
+Use MADV_ZERO for aligned whole host pages and exact stores for partial
+page edges, preserving neighboring entries on larger host pages.
+
+License: MIT.
+
+--- a/FEXCore/include/FEXCore/Utils/AllocatorHooks.h
++++ b/FEXCore/include/FEXCore/Utils/AllocatorHooks.h
+@@ -8,6 +8,7 @@
+ #include <stdlib.h>
+ #ifdef __APPLE__
+ #include <malloc/malloc.h>
++#include <unistd.h>
+ #else
+ #include <malloc.h>
+ #endif
+@@ -17,6 +18,8 @@
+ #include <memoryapi.h>
+ #endif
+ 
++#include <algorithm>
++#include <cstring>
+ #include <new>
+ #include <cstddef>
+ #include <cstdint>
+@@ -139,7 +142,24 @@
+   FEXCore::Allocator::munmap(Ptr, Size);
+ }
+ inline void VirtualDontNeed(void* Ptr, size_t Size, bool Recommit = true) {
++#ifdef __APPLE__
++  // Cache invalidation requires zero-filled anonymous memory. Darwin DONTNEED is only an access hint.
++  // Preserve neighbors when a FEX range occupies part of a larger host page.
++  auto* Bytes = static_cast<unsigned char*>(Ptr);
++  const size_t PageSize = static_cast<size_t>(getpagesize());
++  const size_t Misalignment = reinterpret_cast<uintptr_t>(Ptr) % PageSize;
++  const size_t Prefix = Misalignment ? std::min(Size, PageSize - Misalignment) : 0;
++  if (Prefix) { std::memset(Bytes, 0, Prefix); Bytes += Prefix; Size -= Prefix; }
++  const size_t Whole = Size - Size % PageSize;
++  if (Whole) {
++    const int Result = ::madvise(Bytes, Whole, MADV_ZERO);
++    LOGMAN_THROW_A_FMT(Result == 0, "Couldn't clear Darwin anonymous cache pages");
++    Bytes += Whole; Size -= Whole;
++  }
++  if (Size) std::memset(Bytes, 0, Size);
++#else
+   ::madvise(reinterpret_cast<void*>(Ptr), Size, MADV_DONTNEED);
++#endif
+ }
+ inline bool VirtualProtect(void* Ptr, size_t Size, ProtectOptions options) {
+   int prot {PROT_NONE};

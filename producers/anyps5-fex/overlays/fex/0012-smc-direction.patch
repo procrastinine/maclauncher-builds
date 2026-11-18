@@ -1,0 +1,118 @@
+From a6254f3e21648e433c34c9fef60c72afc20ac6e8 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alexander=20Thei=C3=9Fen?= <alex@theissen.io>
+Date: Thu, 22 Oct 2026 13:12:14 +0800
+Subject: [PATCH 06/47] FEXCore: Write DF back to the context at every
+ instruction boundary
+
+STD and CLD only update DF in the register cache, and the partial flush
+before every instruction writes back the SRA registers only, so DF
+reached the context at the end of the block. POPF also sets DF, but it
+ends its block. A store into the page of the block that is running is
+inline SMC: the fault handler rebuilds the guest state from the SRA host
+registers and the context (ReconstructThreadState in the WOW64 and
+ARM64EC frontends, SpillSRA in the Linux SMC tracking) and steps the
+faulting instruction again in a block of its own. A DF that the block
+had changed before the store was lost there.
+
+The PEtite packer runs into this when it unpacks a DLL. It looks up each
+import by name and then erases the name with STD and REP STOSB, and the
+names are in the same page as the loop. With DF lost the erase ran
+forwards from the terminator, wiped the start of the next name, and the
+next GetProcAddress got an empty name, so LoadLibrary of the DLL failed
+with "Unable to load function:  (KERNEL32.dll)".
+
+The partial flush now writes DF back too when an instruction changed it.
+It stays cached, as reloading it is a memory load, so blocks that only
+read DF are unchanged, and a block that writes DF gets one byte store
+after that instruction instead of at the end of the block. MMX
+registers and the upper halves of the YMM registers are cached the same
+way and have the same problem; this change does not touch them. The
+comments on the partial flush now say that it is needed for DF.
+
+In the InstructionCountCI listings of the CLD and STD string operation
+cases in FEXOpt/MultiInst.json, the DF store moves up to the constant.
+Where the string operation does not use the constant, its register is
+free after the store and the allocator hands it to the next value, so
+some registers in those listings change. The instruction counts stay
+the same.
+
+The new InlineSMC_DF tests erase a string like PEtite does and check DF
+after a store into the running block's page, in 64-bit and 32-bit mode.
+
+License: MIT. Core adaptation retains the original author and source commit.
+
+diff --git a/FEXCore/Source/Interface/Core/Core.cpp b/FEXCore/Source/Interface/Core/Core.cpp
+index 81d841b..982e3a7 100644
+--- a/FEXCore/Source/Interface/Core/Core.cpp
++++ b/FEXCore/Source/Interface/Core/Core.cpp
+@@ -629,16 +629,16 @@ ContextImpl::GenerateIR(FEXCore::Core::InternalThreadState* Thread, uint64_t Gue
+ 
+         // Do a partial register cache flush before every instruction. This
+         // prevents cross-instruction static register caching, while allowing
+-        // context load/stores to be optimized within a block. Theoretically,
+-        // this flush is not required for correctness, all mandatory flushes are
+-        // included in instruction-specific handlers. Instead, this is a blunt
+-        // heuristic to make the register cache less aggressive, as the current
+-        // RA generates bad code in common cases with tied registers otherwise.
++        // context load/stores to be optimized within a block. For the SRA
++        // registers this is a blunt heuristic to make the register cache less
++        // aggressive, as the current RA generates bad code in common cases with
++        // tied registers otherwise.
+         //
+-        // However, it makes our exception handling behaviour more predictable.
+-        // It is potentially correctness bearing in that sense, but that is a
+-        // side effect here and (if that behaviour is required) we should handle
+-        // that more explicitly later.
++        // It is required for correctness for DF, though. A fault in the middle
++        // of a block that resumes at the faulting instruction, such as inline
++        // SMC, rebuilds the state with ReconstructThreadState (or SpillSRA on
++        // Linux) from the SRA registers and the context, and DF is only in the
++        // context once this flush has written it back.
+         Thread->OpDispatcher->FlushRegisterCache(true);
+ 
+         if (ExtendedDebugInfo || Thread->OpDispatcher->CanHaveSideEffects(TableInfo, DecodedInfo)) {
+diff --git a/FEXCore/Source/Interface/Core/OpcodeDispatcher.h b/FEXCore/Source/Interface/Core/OpcodeDispatcher.h
+index 5de192d..ac44625 100644
+--- a/FEXCore/Source/Interface/Core/OpcodeDispatcher.h
++++ b/FEXCore/Source/Interface/Core/OpcodeDispatcher.h
+@@ -1230,16 +1230,28 @@ public:
+     // instructions like "add rax, 1". This hack will go away with clauses.
+     uint64_t Bits = RegCache.Written;
+ 
+-    // We have an SRA only mode that exists as a hack to make register caching
+-    // less aggressive. We should get rid of this once RA can take it.
++    // We have an SRA only mode, run before every instruction, that exists as a
++    // hack to make register caching less aggressive. We should get rid of
++    // that part once RA can take it. The DF write back it also does is needed
++    // for correctness and has to stay at every instruction boundary.
+     uint64_t Mask = ~0ULL;
+ 
++    // Written back, but still valid in the cache afterwards.
++    uint64_t KeepCachedMask = 0;
++
+     if (SRAOnly) {
+       const uint64_t GPRMask = ((1ull << (AFIndex - GPR0Index + 1)) - 1) << GPR0Index;
+       const uint64_t FPRMask = ((1ull << (FPR15Index - FPR0Index + 1)) - 1) << FPR0Index;
+ 
+       Mask &= (GPRMask | FPRMask);
+-      Bits &= Mask;
++
++      // A fault handler that resumes at the faulting instruction, as for
++      // inline SMC, rebuilds the state from the SRA registers and the
++      // context, so DF has to be in the context at every instruction
++      // boundary too. It is only written back after an instruction changed
++      // it, and stays cached since reloading it is a memory load.
++      KeepCachedMask = 1ull << DFIndex;
++      Bits &= (Mask | KeepCachedMask);
+     }
+ 
+     if (MMXOnly) {
+@@ -1295,7 +1307,7 @@ public:
+       Bits &= ~(1ull << Index);
+     }
+ 
+-    RegCache.Written &= ~Mask;
++    RegCache.Written &= ~(Mask | KeepCachedMask);
+     RegCache.Cached &= ~Mask;
+     RegCache.Partial &= ~Mask;
+   }

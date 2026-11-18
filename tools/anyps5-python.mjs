@@ -1,0 +1,19 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import {execFileSync} from 'node:child_process';
+import {buildInput} from './build-input.mjs';
+
+const root=path.resolve(import.meta.dirname,'..');
+
+/** Materialize the declared Python build interpreter for an AnyPS5 producer. */
+export async function preparePython(arch,work){
+ fs.mkdirSync(work,{recursive:true});
+ const pythonPin=arch==='arm64'?JSON.parse(fs.readFileSync(path.join(root,'producers/nxnative/dependencies.json'))).python:JSON.parse(fs.readFileSync(path.join(root,'producers/anyps5/dependencies.json'))).artifacts.find(input=>input.id==='build-python-'+arch);
+ if(!pythonPin)throw Error('The requested CPU has no declared Python build interpreter.');
+ const archive=await buildInput(pythonPin),pythonBase=path.join(work,'python-source'),pythonEnvironment=path.join(work,'python');
+ fs.mkdirSync(pythonBase);execFileSync('/usr/bin/tar',['-xzf',archive,'-C',pythonBase],{maxBuffer:Infinity});
+ execFileSync(path.join(pythonBase,'python/bin/python3'),['-m','venv','--without-pip',pythonEnvironment],{maxBuffer:Infinity,stdio:'inherit'});
+ const python=path.join(pythonEnvironment,'bin/python3');
+ if(execFileSync(python,['--version'],{maxBuffer:Infinity,encoding:'utf8'}).trim()!=='Python '+pythonPin.version)throw Error('The declared Python build interpreter has a different version.');
+ return python;
+}

@@ -1,0 +1,166 @@
+From fa4f65e2546931869554029cdf1472b49afb6863 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alexander=20Thei=C3=9Fen?= <alex@theissen.io>
+Date: Sat, 31 Oct 2026 19:48:31 +0800
+Subject: [PATCH 22/47] FEXCore, Windows: Read the x87 control word as hardware
+ does
+
+Hardware reads bit 6 of the control word as one and bits 7, 13, 14 and
+15 as zero, whatever was loaded. FEX gave back the word as loaded. In
+World of Warcraft 3.3.5a a DLL's CRT loads 0x23f, the CRT in the
+executable then fails its FNSTCW & 0x7f == 0x7f test and takes the x87
+path of floor, with two FPCR changes per call.
+
+- CPUState keeps the word as loaded, so FLDCW, FLDENV, FRSTOR, FXRSTOR
+  and XRSTOR are unchanged.
+- FNSTCW, FNSTENV, FNSAVE, FXSAVE and XSAVE apply the mask, as do the
+  WOW64 and ARM64EC contexts and Linux signal frames.
+- The JIT, softfloat and FPCR code read only the rounding and precision
+  fields, which the mask keeps.
+
+The InstructionCountCI listings are not regenerated: CodeSizeValidation
+needs a Linux host.
+
+License: MIT. Core adaptation retains the original author and source commit.
+
+diff --git a/FEXCore/Source/Interface/Core/OpcodeDispatcher/Vector.cpp b/FEXCore/Source/Interface/Core/OpcodeDispatcher/Vector.cpp
+index 08b53ef..1d27413 100644
+--- a/FEXCore/Source/Interface/Core/OpcodeDispatcher/Vector.cpp
++++ b/FEXCore/Source/Interface/Core/OpcodeDispatcher/Vector.cpp
+@@ -3065,10 +3065,7 @@ void OpDispatchBuilder::SaveX87State(OpcodeArgs, Ref MemBase) {
+     //   16 | FDP[31:0] | FDS         | <R> | MXCSR     | MXCSR_MASK|
+   }
+ 
+-  {
+-    auto FCW = _LoadContextGPR(OpSize::i16Bit, offsetof(FEXCore::Core::CPUState, FCW));
+-    _StoreMemGPR(OpSize::i16Bit, MemBase, FCW, OpSize::i16Bit);
+-  }
++  { _StoreMemGPR(OpSize::i16Bit, MemBase, ReconstructFCW_Helper(), OpSize::i16Bit); }
+ 
+   { _StoreMemGPR(OpSize::i16Bit, ReconstructFSW_Helper(), MemBase, Constant(2), OpSize::i16Bit, MemOffsetType::SXTX, 1); }
+ 
+diff --git a/FEXCore/Source/Interface/Core/OpcodeDispatcher/X87.cpp b/FEXCore/Source/Interface/Core/OpcodeDispatcher/X87.cpp
+index f3e9903..cec315e 100644
+--- a/FEXCore/Source/Interface/Core/OpcodeDispatcher/X87.cpp
++++ b/FEXCore/Source/Interface/Core/OpcodeDispatcher/X87.cpp
+@@ -399,10 +399,7 @@ void OpDispatchBuilder::X87FNSTENV(OpcodeArgs) {
+   Ref Mem = LoadSourceGPR(Op, Op->Dest, Op->Flags, {.LoadData = false});
+   Mem = AppendSegmentOffset(Mem, Op->Flags);
+ 
+-  {
+-    auto FCW = _LoadContextGPR(OpSize::i16Bit, offsetof(FEXCore::Core::CPUState, FCW));
+-    _StoreMemGPR(Size, Mem, FCW, Size);
+-  }
++  { _StoreMemGPR(Size, Mem, ReconstructFCW_Helper(), Size); }
+ 
+   { _StoreMemGPR(Size, ReconstructFSW_Helper(), Mem, Constant(IR::OpSizeToSize(Size) * 1), Size, MemOffsetType::SXTX, 1); }
+ 
+@@ -506,10 +503,7 @@ void OpDispatchBuilder::X87FNSAVE(OpcodeArgs) {
+   const auto Size = OpSizeFromDst(Op);
+   Ref Mem = MakeSegmentAddress(Op, Op->Dest);
+   Ref Top = GetX87Top();
+-  {
+-    auto FCW = _LoadContextGPR(OpSize::i16Bit, offsetof(FEXCore::Core::CPUState, FCW));
+-    _StoreMemGPR(Size, Mem, FCW, Size);
+-  }
++  { _StoreMemGPR(Size, Mem, ReconstructFCW_Helper(), Size); }
+ 
+   { _StoreMemGPR(Size, ReconstructFSW_Helper(), Mem, Constant(IR::OpSizeToSize(Size) * 1), Size, MemOffsetType::SXTX, 1); }
+ 
+@@ -630,10 +624,15 @@ void OpDispatchBuilder::X87FRSTOR(OpcodeArgs) {
+   _StoreContextFPRIndexed(Reg, Top, StoreSize, MMBaseOffset(), IR::OpSizeToSize(OpSize::i128Bit));
+ }
+ 
++// The control word as the guest reads it, see FPState::ReconstructFCW.
++Ref OpDispatchBuilder::ReconstructFCW_Helper() {
++  Ref FCW = _LoadContextGPR(OpSize::i16Bit, offsetof(FEXCore::Core::CPUState, FCW));
++  return _Or(OpSize::i32Bit, _And(OpSize::i32Bit, FCW, Constant(FPState::FCWReadMask)), Constant(FPState::FCWReadSet));
++}
++
+ // Load / Store Control Word
+ void OpDispatchBuilder::X87FSTCW(OpcodeArgs) {
+-  auto FCW = _LoadContextGPR(OpSize::i16Bit, offsetof(FEXCore::Core::CPUState, FCW));
+-  StoreResultGPR(Op, FCW);
++  StoreResultGPR(Op, ReconstructFCW_Helper());
+ }
+ 
+ void OpDispatchBuilder::X87FLDCW(OpcodeArgs) {
+diff --git a/FEXCore/Source/Interface/Core/OpcodeDispatcher.h b/FEXCore/Source/Interface/Core/OpcodeDispatcher.h
+index 4477c72..89d04c6 100644
+--- a/FEXCore/Source/Interface/Core/OpcodeDispatcher.h
++++ b/FEXCore/Source/Interface/Core/OpcodeDispatcher.h
+@@ -713,6 +713,7 @@ public:
+   void VZEROOp(OpcodeArgs);
+ 
+   // X87 Ops
++  Ref ReconstructFCW_Helper();
+   Ref ReconstructFSW_Helper(Ref T = nullptr);
+   // Returns new x87 stack top from FSW.
+   Ref ReconstructX87StateFromFSW_Helper(Ref FSW);
+diff --git a/FEXCore/include/FEXCore/Core/CoreState.h b/FEXCore/include/FEXCore/Core/CoreState.h
+index c1cb5f0..b2dffbe 100644
+--- a/FEXCore/include/FEXCore/Core/CoreState.h
++++ b/FEXCore/include/FEXCore/Core/CoreState.h
+@@ -209,6 +209,7 @@ struct alignas(64) CPUState {
+     }
+   }
+ 
++  // As loaded. Anything the guest can see goes through FPState::ReconstructFCW.
+   uint16_t FCW {0x37F};
+   uint8_t AbridgedFTW {};
+ 
+diff --git a/FEXCore/include/FEXCore/Darwin/ContextState.h b/FEXCore/include/FEXCore/Darwin/ContextState.h
+index a614d95..b44c13c 100644
+--- a/FEXCore/include/FEXCore/Darwin/ContextState.h
++++ b/FEXCore/include/FEXCore/Darwin/ContextState.h
+@@ -42,7 +42,7 @@ inline void CaptureFXState(uint8_t* Bytes) {
+   auto& T = Thread();
+   auto& CPU = State();
+   std::memset(Bytes, 0, 512);
+-  WriteFXField<uint16_t>(Bytes, 0, CPU.FCW);
++  WriteFXField<uint16_t>(Bytes, 0, FPState::ReconstructFCW(CPU.FCW));
+   WriteFXField<uint16_t>(Bytes, 2, X87Status());
+   Bytes[4] = CPU.AbridgedFTW;
+   WriteFXField<uint64_t>(Bytes, 8, CPU.FIP);
+diff --git a/FEXCore/include/FEXCore/Darwin/GuestState.h b/FEXCore/include/FEXCore/Darwin/GuestState.h
+index dd0bf88..3227311 100644
+--- a/FEXCore/include/FEXCore/Darwin/GuestState.h
++++ b/FEXCore/include/FEXCore/Darwin/GuestState.h
+@@ -67,7 +67,7 @@ inline void SetMxcsr(uint32_t Value) {
+ }
+ // This is the mask emitted by the selected FEXCore FXSAVE/XSAVE implementation.
+ inline uint32_t MxcsrMask() { return 0xffc0; }
+-inline uint16_t X87Control() { return State().FCW; }
++inline uint16_t X87Control() { return FPState::ReconstructFCW(State().FCW); }
+ inline void SetX87Control(uint16_t Value) { State().FCW = Value; }
+ inline uint16_t X87Status() {
+   const auto& Flags = State().flags;
+@@ -120,7 +120,7 @@ inline uint16_t X87Tag() {
+ inline std::array<uint32_t, 7> X87Environment() {
+   // 32-bit FNSTENV layout: reserved upper words are all ones. FEX tracks FIP; selectors and FOP are zero.
+   const auto& CPU = State();
+-  return {0xffff0000U | CPU.FCW, 0xffff0000U | X87Status(), 0xffff0000U | X87Tag(),
++  return {0xffff0000U | FPState::ReconstructFCW(CPU.FCW), 0xffff0000U | X87Status(), 0xffff0000U | X87Tag(),
+           static_cast<uint32_t>(CPU.FIP), 0, 0, 0xffff0000U};
+ }
+ inline void SetX87Environment(const std::array<uint32_t, 7>& Environment) {
+diff --git a/FEXCore/include/FEXCore/Utils/FPState.h b/FEXCore/include/FEXCore/Utils/FPState.h
+index 824f3c5..afda0ef 100644
+--- a/FEXCore/include/FEXCore/Utils/FPState.h
++++ b/FEXCore/include/FEXCore/Utils/FPState.h
+@@ -6,6 +6,16 @@
+ namespace FEXCore::FPState {
+ enum class X87Tag : uint8_t { Valid = 0b00, Zero = 0b01, Special = 0b10, Empty = 0b11 };
+ 
++// x87 hardware reads bit 6 of the control word as one and bits 7, 13, 14 and 15 as zero, whatever was loaded.
++// CPUState::FCW keeps the word as loaded, so that loading it costs nothing, and only its readers apply these.
++static constexpr uint16_t FCWReadMask = 0x1f3f;
++static constexpr uint16_t FCWReadSet = 0x0040;
++
++// The control word as the guest reads it.
++static inline uint16_t ReconstructFCW(uint16_t FCW) {
++  return (FCW & FCWReadMask) | FCWReadSet;
++}
++
+ static inline X87Tag GetX87Tag(uint64_t (&Reg)[2], bool Valid) {
+   if (!Valid) {
+     return X87Tag::Empty;

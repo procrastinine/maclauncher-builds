@@ -62,7 +62,7 @@ const plist=version=>`<?xml version="1.0" encoding="UTF-8"?>
 </plist>
 `;
 
-export async function packageRuntime({startBuild,output,version,anyps5Source}){
+export async function packageRuntime({startBuild,output,version,anyps5Source,buildOutput=false}){
  if(!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(version||'')||!output||fs.existsSync(output))throw Error('Choose a new output directory and explicit package version.');
  for(const name of ['anyps5-fex-start','libSDL2-2.0.0.dylib'])
   if(!Native.readMachOArchitectures(path.join(startBuild,name),{allowLibrary:true}).includes('arm64'))throw Error(`${name} in the start build is not arm64.`);
@@ -87,8 +87,12 @@ export async function packageRuntime({startBuild,output,version,anyps5Source}){
  for(const submodule of recipe.source.submodules)addLicenses(payload,'fex/'+submodule,path.join(fex,submodule));
  const digest=relative=>({path:relative,sha256:sha(fs.readFileSync(path.join(import.meta.dirname,relative)))});
  const overlays=filesIn(path.join(import.meta.dirname,'overlays')).map(relative=>digest('overlays/'+relative));
- const producerInputs=[...['build-proof.mjs','package-runtime.mjs','source.json'].map(digest),
-  ...filesIn(path.join(import.meta.dirname,'host')).map(relative=>digest('host/'+relative)),...overlays].sort((a,b)=>a.path.localeCompare(b.path));
+ const sharedOverlays=['writeback-keeps-newer-cpu-bytes','plane-store-keeps-newer-cpu-bytes'].map(name=>{
+  const relative='anyps5/overlays/'+name+'/apply.mjs';
+  return {path:relative,sha256:sha(fs.readFileSync(path.join(root,'producers',relative)))};
+ });
+ const producerInputs=[...sharedOverlays,...['build-proof.mjs','package-runtime.mjs','projected-include.mjs','source.json'].map(digest),
+  ...filesIn(path.join(import.meta.dirname,'host')).map(relative=>digest('host/'+relative)),digest(recipe.host.identity),...overlays].sort((a,b)=>a.path.localeCompare(b.path));
  const sources={fex:sourceProvenance(recipe.source),anyps5:sourceProvenance(anyps5Recipe.source)};
  // Each dependency's exact commit, read from the AnyPS5 checkout the licences came from (or the owned gitlink).
  const dependencies=anyps5Dependencies.dependencies.map(entry=>{
@@ -100,7 +104,8 @@ export async function packageRuntime({startBuild,output,version,anyps5Source}){
  fs.writeFileSync(path.join(payload,'source.json'),json({schemaVersion:1,source:sources.fex,anyps5:sources.anyps5,overlays:recipe.overlays,
   dependencies,producerInputs}));
  const files=filesIn(payload).map(relative=>record(payload,relative));
- const manifest={schemaVersion:1,managerId:'anyps5-fex',version,platform:'darwin',arch:'arm64',minimumMacOS:'26.0',
+ // The package is the AnyPS5 runtime's arm64 build, so it names the AnyPS5 manager.
+ const manifest={schemaVersion:1,managerId:'anyps5',version,platform:'darwin',arch:'arm64',minimumMacOS:'26.0',
   upstreamRevision:sourceRevision(anyps5Recipe.source),fexRevision:sourceRevision(recipe.source),gameArchitecture:'x86_64',
   capabilities:{mouseRouting:true,touchPadBinding:true},
   provenance:{sourceUrl:anyps5Recipe.source.repository,sourceRevision:sourceRevision(anyps5Recipe.source),
@@ -111,6 +116,7 @@ export async function packageRuntime({startBuild,output,version,anyps5Source}){
  const declaration={id:'anyps5-fex',version,arch:'arm64',launcherArchitectures:['arm64'],minimumMacOS:manifest.minimumMacOS,directoryRelative:'anyps5-fex/'+version+'/arm64',
   sourceRelative:'source.json',sourceSha256:sourceFile.sha256,manifestRelative:'runtime.json',manifestSha256:manifestFile.sha256,files:[...files,manifestFile],redistribution:'bundle'};
  fs.writeFileSync(path.join(output,'declaration.json'),json(declaration));
+ if(buildOutput)return {output,declaration};
  const archive=path.join(output,assetName(declaration));
  const result=await pack({project:'anyps5-fex',input:payload,declaration,output:archive});
  return {archive,record:result};
