@@ -1,5 +1,11 @@
 # MacLauncher KosmicKrisp
 
+## 27.0.0-devel-MCLv15
+
+On macOS, an opaque Vulkan swapchain publishes its composition mode to the presentation layer while keeping the native Metal layer non-opaque. Its final blit writes alpha one.
+
+The temporal carrier forwards late scene attachments in command order to graphics libraries that implement the late-scene callback. It associates them with the original scene owner and frame.
+
 ## 27.0.0-devel-MCLv14
 
 The shader key of a graphics pipeline includes its depth and stencil attachment formats, its color attachment count and color attachment mapping, and whether its rasterization state allows depth clipping and depth clamping to be both off or both on, so pipelines that differ only in these no longer share shaders built for another state. Selections nested deeper than the Metal compiler accepts, as in long selection ladders, keep their conditions in named booleans and emit their branches as guarded sibling blocks; conditions are evaluated before either branch runs, and loops keep their structure. Copies into a compressed image stop at the destination mip level's edge, so a copy that covers fewer texels than one block in a small mip level is accepted. Shader serialization stores source object indices of 2^20 - 1 and above in a separate word, so shaders with more objects serialize.
