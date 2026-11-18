@@ -114,22 +114,6 @@
     "compatibility": "Android 16 / API 36 framework and image contract; source updates are explicit adaptations.",
     "packageProfiles": [
       {
-        "version": "0.2.0",
-        "label": "MacLauncher Android 0.2.0"
-      },
-      {
-        "version": "0.1.0",
-        "label": "MacLauncher Android 0.1.0"
-      },
-      {
-        "version": "0.2.0-MCLv1",
-        "label": "MacLauncher Android 0.2.0-MCLv1"
-      },
-      {
-        "version": "0.2.1",
-        "label": "MacLauncher Android 0.2.1"
-      },
-      {
         "version": "0.2.6",
         "label": "MacLauncher Android 0.2.6"
       },
@@ -253,68 +237,6 @@
     }
   },
   {
-    "id": "android-art",
-    "name": "MacLauncher Android ART adapter",
-    "purpose": "ART execution adapters, compiled framework data and native services for MacLauncher Android; the original Android system image is acquired separately.",
-    "producer": {
-      "kind": "maclauncher",
-      "repository": "https://github.com/procrastinine/maclauncher-builds",
-      "entries": [
-        "sources/maclauncher-android/tools/build-art.mjs",
-        "sources/maclauncher-android/src/modules/android/art/source.mjs",
-        "sources/maclauncher-android/src/modules/android/art/build-runner.mjs",
-        "sources/maclauncher-android/src/modules/android/art/build.mjs",
-        "sources/maclauncher-android/src/modules/android/art/build-image-extractor.mjs",
-        "sources/maclauncher-android/src/modules/android/art/package.mjs"
-      ],
-      "buildEntry": "tools/build-android-art.mjs",
-      "sourceProject": "android",
-      "sourceDirectory": "sources/maclauncher-android"
-    },
-    "upstreams": [
-      {
-        "id": "aim",
-        "provider": "github",
-        "url": "https://github.com/hahnlee/aim",
-        "repository": "hahnlee/aim",
-        "pin": {
-          "file": "sources/maclauncher-android/upstreams.json",
-          "pointer": "/projects/0/revision",
-          "repositoryPointer": "/projects/0/repository"
-        }
-      },
-      {
-        "id": "aosp-art",
-        "provider": "gitiles",
-        "url": "https://android.googlesource.com/platform/art",
-        "pin": {
-          "file": "sources/maclauncher-android/src/modules/android/native/source-pins.json",
-          "pointer": "/aospArt"
-        }
-      },
-      {
-        "id": "aosp-bionic",
-        "provider": "gitiles",
-        "url": "https://android.googlesource.com/platform/bionic",
-        "pin": {
-          "file": "sources/maclauncher-android/src/modules/android/native/source-pins.json",
-          "pointer": "/aospBionic"
-        }
-      }
-    ],
-    "compatibility": "Android 16 / API 36; uses the matching Android common framework and a separately acquired original system image.",
-    "packageProfiles": [
-      {
-        "version": "0.2.0",
-        "label": "MacLauncher Android ART adapter 0.2.0"
-      },
-      {
-        "version": "0.1.0",
-        "label": "MacLauncher Android ART adapter 0.1.0"
-      }
-    ]
-  },
-  {
     "id": "android-aim",
     "name": "AIM with MacLauncher integration",
     "purpose": "Private runtime/data paths, display routing and process integration.",
@@ -346,26 +268,6 @@
       }
     ],
     "packageProfiles": [
-      {
-        "version": "MCLv1-1022",
-        "label": "AIM with MacLauncher integration MCLv1-1022"
-      },
-      {
-        "version": "MCLv1-1028-6",
-        "label": "AIM with MacLauncher integration MCLv1-1028-6"
-      },
-      {
-        "version": "MCLv2-1028-6",
-        "label": "AIM with MacLauncher integration MCLv2-1028-6"
-      },
-      {
-        "version": "0.1.0-MCLv3",
-        "label": "AIM with MacLauncher integration 0.1.0-MCLv3"
-      },
-      {
-        "version": "0.1.0-MCLv4",
-        "label": "AIM with MacLauncher integration 0.1.0-MCLv4"
-      },
       {
         "version": "0.1.0-MCLv8",
         "label": "AIM with MacLauncher integration 0.1.0-MCLv8"
@@ -468,18 +370,6 @@
       }
     ],
     "packageProfiles": [
-      {
-        "version": "1.5.0-MCLv1",
-        "label": "AI5 SDL2 1.5.0-MCLv1"
-      },
-      {
-        "version": "1.5.0-MCLv2",
-        "label": "AI5 SDL2 1.5.0-MCLv2"
-      },
-      {
-        "version": "1.5.0-MCLv3",
-        "label": "AI5 SDL2 1.5.0-MCLv3"
-      },
       {
         "version": "1.5.0-MCLv8",
         "label": "AI5 SDL2 1.5.0-MCLv8"
@@ -602,18 +492,6 @@
     ],
     "packageProfiles": [
       {
-        "version": "26.10-MCLv1",
-        "label": ".NET 8 host"
-      },
-      {
-        "version": "26.10-MCLv2",
-        "label": ".NET 8 host"
-      },
-      {
-        "version": "26.10-MCLv3",
-        "label": ".NET 8 host 26.10-MCLv3"
-      },
-      {
         "version": "26.10-MCLv7",
         "label": ".NET 8 host 26.10-MCLv7"
       },
@@ -701,18 +579,6 @@
       }
     ],
     "packageProfiles": [
-      {
-        "version": "MCLv1-1020",
-        "label": "GemRB MCLv1-1020"
-      },
-      {
-        "version": "MCLv2-1020",
-        "label": "GemRB MCLv2-1020"
-      },
-      {
-        "version": "0.9.5-git-MCLv3",
-        "label": "GemRB 0.9.5-git-MCLv3"
-      },
       {
         "version": "0.9.5-git-MCLv8",
         "label": "GemRB 0.9.5-git-MCLv8"
@@ -832,18 +698,6 @@
     ],
     "packageProfiles": [
       {
-        "version": "2.2.0-MCLv1",
-        "label": "GameMaker 8 decompiler 2.2.0-MCLv1"
-      },
-      {
-        "version": "2.2.0-MCLv2",
-        "label": "GameMaker 8 decompiler 2.2.0-MCLv2"
-      },
-      {
-        "version": "2.2.0-MCLv3",
-        "label": "GameMaker 8 decompiler 2.2.0-MCLv3"
-      },
-      {
         "version": "2.2.0-MCLv7",
         "label": "GameMaker 8 decompiler 2.2.0-MCLv7"
       }
@@ -908,46 +762,6 @@
       }
     ],
     "packageProfiles": [
-      {
-        "version": "1.9-MCLv1",
-        "label": "HashLink 1.9 ABI",
-        "anchor": "hashlink-1-9"
-      },
-      {
-        "version": "1.12-MCLv1",
-        "label": "HashLink 1.12 ABI",
-        "anchor": "hashlink-1-12"
-      },
-      {
-        "version": "1.9-MCLv2",
-        "label": "HashLink 1.9 ABI",
-        "anchor": "hashlink-1-9"
-      },
-      {
-        "version": "1.12-MCLv2",
-        "label": "HashLink 1.12 ABI",
-        "anchor": "hashlink-1-12"
-      },
-      {
-        "version": "1.12-MCLv3",
-        "label": "HashLink 1.12 ABI 1.12-MCLv3",
-        "anchor": "hashlink-1-12"
-      },
-      {
-        "version": "1.9-MCLv3",
-        "label": "HashLink 1.9 ABI 1.9-MCLv3",
-        "anchor": "hashlink-1-9"
-      },
-      {
-        "version": "1.12-MCLv4",
-        "label": "HashLink 1.12 ABI 1.12-MCLv4",
-        "anchor": "hashlink-1-12"
-      },
-      {
-        "version": "1.9-MCLv4",
-        "label": "HashLink 1.9 ABI 1.9-MCLv4",
-        "anchor": "hashlink-1-9"
-      },
       {
         "version": "1.12-MCLv8",
         "label": "HashLink 1.12 ABI 1.12-MCLv8",
@@ -1053,18 +867,6 @@
       }
     ],
     "packageProfiles": [
-      {
-        "version": "0.10.8.903-MCLv1",
-        "label": "impacto Windows-game profile 0.10.8.903-MCLv1"
-      },
-      {
-        "version": "0.10.8.903-MCLv2",
-        "label": "impacto Windows-game profile 0.10.8.903-MCLv2"
-      },
-      {
-        "version": "0.10.8.903-MCLv3",
-        "label": "impacto Windows-game profile 0.10.8.903-MCLv3"
-      },
       {
         "version": "0.10.8.903-MCLv8",
         "label": "impacto Windows-game profile 0.10.8.903-MCLv8"
@@ -1228,18 +1030,6 @@
     ],
     "packageProfiles": [
       {
-        "version": "MCLv1-0206",
-        "label": "Inno Setup extraction tools MCLv1-0206"
-      },
-      {
-        "version": "MCLv2-0206",
-        "label": "Inno Setup extraction tools MCLv2-0206"
-      },
-      {
-        "version": "1.10-dev-MCLv3",
-        "label": "Inno Setup extraction tools 1.10-dev-MCLv3"
-      },
-      {
         "version": "1.10-dev-MCLv7",
         "label": "Inno Setup extraction tools 1.10-dev-MCLv7"
       }
@@ -1318,28 +1108,8 @@
     },
     "packageProfiles": [
       {
-        "version": "MCLv2-1030-kag3",
-        "label": "KiriKiri SDL2 macOS"
-      },
-      {
-        "version": "MCLv1-1028-kag3-1",
-        "label": "Kirikiri SDL2 MCLv1-1028-kag3-1"
-      },
-      {
-        "version": "MCLv1-1001",
-        "label": "Kirikiri SDL2 MCLv1-1001"
-      },
-      {
-        "version": "MCLv3",
-        "label": "KiriKiri SDL2 macOS MCLv3"
-      },
-      {
         "version": "MCLv7",
         "label": "KiriKiri SDL2 macOS MCLv7"
-      },
-      {
-        "version": "MCLv8",
-        "label": "KiriKiri SDL2 macOS MCLv8"
       },
       {
         "version": "MCLv9",
@@ -1400,18 +1170,6 @@
       }
     ],
     "packageProfiles": [
-      {
-        "version": "0.5.3-MCLv1",
-        "label": "libnpengine Mac runner 0.5.3-MCLv1"
-      },
-      {
-        "version": "0.5.3-MCLv2",
-        "label": "libnpengine Mac runner 0.5.3-MCLv2"
-      },
-      {
-        "version": "0.5.3-MCLv3",
-        "label": "libnpengine Mac runner 0.5.3-MCLv3"
-      },
       {
         "version": "0.5.3-MCLv8",
         "label": "libnpengine Mac runner 0.5.3-MCLv8"
@@ -1504,18 +1262,6 @@
     ],
     "packageProfiles": [
       {
-        "version": "MCLv1-0126",
-        "label": "ONScripter-EN MCLv1-0126"
-      },
-      {
-        "version": "MCLv2-0126",
-        "label": "ONScripter-EN MCLv2-0126"
-      },
-      {
-        "version": "20250608-en-MCLv3",
-        "label": "ONScripter-EN 20250608-en-MCLv3"
-      },
-      {
         "version": "20250608-en-MCLv7",
         "label": "ONScripter-EN 20250608-en-MCLv7"
       },
@@ -1592,18 +1338,6 @@
       }
     ],
     "packageProfiles": [
-      {
-        "version": "0.7.7beta-MCLv1",
-        "label": "ONScripterYuri 0.7.7beta-MCLv1"
-      },
-      {
-        "version": "0.7.7beta-MCLv2",
-        "label": "ONScripter-Yuri 0.7.7beta-MCLv2"
-      },
-      {
-        "version": "0.7.7beta-MCLv3",
-        "label": "ONScripter-Yuri 0.7.7beta-MCLv3"
-      },
       {
         "version": "0.7.7beta-MCLv8",
         "label": "ONScripter-Yuri 0.7.7beta-MCLv8"
@@ -1738,18 +1472,6 @@
     ],
     "packageProfiles": [
       {
-        "version": "0.2.0-MCLv1",
-        "label": "OpenGMK 0.2.0-MCLv1"
-      },
-      {
-        "version": "0.2.0-MCLv2",
-        "label": "OpenGMK 0.2.0-MCLv2"
-      },
-      {
-        "version": "0.2.0-MCLv3",
-        "label": "OpenGMK 0.2.0-MCLv3"
-      },
-      {
         "version": "0.2.0-MCLv7",
         "label": "OpenGMK 0.2.0-MCLv7"
       }
@@ -1804,18 +1526,6 @@
       }
     ],
     "packageProfiles": [
-      {
-        "version": "0.1.0-MCLv1",
-        "label": "ReMinori 0.1.0-MCLv1"
-      },
-      {
-        "version": "0.1.0-MCLv2",
-        "label": "ReMinori 0.1.0-MCLv2"
-      },
-      {
-        "version": "0.1.0-MCLv3",
-        "label": "ReMinori 0.1.0-MCLv3"
-      },
       {
         "version": "0.1.0-MCLv7",
         "label": "ReMinori 0.1.0-MCLv7"
@@ -1880,18 +1590,6 @@
       }
     ],
     "packageProfiles": [
-      {
-        "version": "0.5.0-MCLv1",
-        "label": "System3 decompiler 0.5.0-MCLv1"
-      },
-      {
-        "version": "0.5.0-MCLv2",
-        "label": "System3 decompiler 0.5.0-MCLv2"
-      },
-      {
-        "version": "0.5.0-MCLv3",
-        "label": "System3 decompiler 0.5.0-MCLv3"
-      },
       {
         "version": "0.5.0-MCLv7",
         "label": "System3 decompiler 0.5.0-MCLv7"
@@ -2018,18 +1716,6 @@
     ],
     "packageProfiles": [
       {
-        "version": "1.8.0-MCLv1",
-        "label": "System3 SDL2 1.8.0-MCLv1"
-      },
-      {
-        "version": "1.8.0-MCLv2",
-        "label": "System3 SDL2 1.8.0-MCLv2"
-      },
-      {
-        "version": "1.8.0-MCLv3",
-        "label": "System3 SDL2 1.8.0-MCLv3"
-      },
-      {
         "version": "1.8.0-MCLv8",
         "label": "System3 SDL2 1.8.0-MCLv8"
       },
@@ -2083,18 +1769,6 @@
       }
     ],
     "packageProfiles": [
-      {
-        "version": "1.13.0-MCLv1",
-        "label": "System3.5 decompiler 1.13.0-MCLv1"
-      },
-      {
-        "version": "1.13.0-MCLv2",
-        "label": "System3.5 decompiler 1.13.0-MCLv2"
-      },
-      {
-        "version": "1.13.0-MCLv3",
-        "label": "System3.5 decompiler 1.13.0-MCLv3"
-      },
       {
         "version": "1.13.0-MCLv7",
         "label": "System3.5 decompiler 1.13.0-MCLv7"
@@ -2170,18 +1844,6 @@
       }
     },
     "packageProfiles": [
-      {
-        "version": "MCLv1-1019",
-        "label": "xsystem35 SDL2 MCLv1-1019"
-      },
-      {
-        "version": "MCLv2-1019",
-        "label": "xsystem35 SDL2 MCLv2-1019"
-      },
-      {
-        "version": "2.20.0-MCLv3",
-        "label": "xsystem35 SDL2 2.20.0-MCLv3"
-      },
       {
         "version": "2.20.0-MCLv8",
         "label": "xsystem35 SDL2 2.20.0-MCLv8"
@@ -2325,18 +1987,6 @@
       }
     ],
     "packageProfiles": [
-      {
-        "version": "MCLv1-1021",
-        "label": "xsystem4 MCLv1-1021"
-      },
-      {
-        "version": "MCLv2-1021",
-        "label": "xsystem4 MCLv2-1021"
-      },
-      {
-        "version": "MCLv3",
-        "label": "xsystem4 MCLv3"
-      },
       {
         "version": "MCLv8",
         "label": "xsystem4 MCLv8"
@@ -2490,22 +2140,6 @@
     ],
     "packageProfiles": [
       {
-        "version": "MCLv1-1024",
-        "label": "KosmicKrisp geometry/transform-feedback adaptation MCLv1-1024"
-      },
-      {
-        "version": "MCLv2-1030",
-        "label": "KosmicKrisp geometry and transform feedback"
-      },
-      {
-        "version": "MCLv3-1030",
-        "label": "KosmicKrisp geometry and transform feedback"
-      },
-      {
-        "version": "27.0.0-devel-MCLv4",
-        "label": "KosmicKrisp geometry and transform feedback 27.0.0-devel-MCLv4"
-      },
-      {
         "version": "27.0.0-devel-MCLv8",
         "label": "KosmicKrisp geometry and transform feedback 27.0.0-devel-MCLv8"
       },
@@ -2569,10 +2203,6 @@
     "upstreams": [],
     "packageProfiles": [
       {
-        "version": "35.0.0.60",
-        "label": "Universal Flash Player projector 35.0.0.60"
-      },
-      {
         "version": "35.0.0.60-MCLv1",
         "label": "Universal Flash Player projector 35.0.0.60-MCLv1"
       }
@@ -2615,18 +2245,6 @@
       }
     ],
     "packageProfiles": [
-      {
-        "version": "MCLv1-1003",
-        "label": "Unicode filename normalization"
-      },
-      {
-        "version": "MCLv2-1003",
-        "label": "Unicode filename normalization"
-      },
-      {
-        "version": "2.4.2-MCLv3",
-        "label": "Unicode filename normalization 2.4.2-MCLv3"
-      },
       {
         "version": "2.4.2-MCLv7",
         "label": "Unicode filename normalization 2.4.2-MCLv7"
@@ -2713,18 +2331,6 @@
     },
     "packageProfiles": [
       {
-        "version": "MCLv1-1007",
-        "label": "Butterscotch MCLv1-1007"
-      },
-      {
-        "version": "MCLv2-1007",
-        "label": "Butterscotch MCLv2-1007"
-      },
-      {
-        "version": "MCLv3",
-        "label": "Butterscotch MCLv3"
-      },
-      {
         "version": "MCLv7",
         "label": "Butterscotch MCLv7"
       },
@@ -2794,28 +2400,8 @@
     "compatibility": "The converter matches the package CPU. Game code and PRX libraries are x86-64, native on Intel and run through Rosetta on Apple Silicon.",
     "packageProfiles": [
       {
-        "version": "MCLv1-1027-2",
-        "label": "AnyPS5 MCLv1-1027-2"
-      },
-      {
-        "version": "MCLv2-1027-2",
-        "label": "AnyPS5 MCLv2-1027-2"
-      },
-      {
-        "version": "MCLv3-1027-2",
-        "label": "AnyPS5 MCLv3-1027-2"
-      },
-      {
-        "version": "MCLv4",
-        "label": "AnyPS5 MCLv4"
-      },
-      {
         "version": "MCLv8",
         "label": "AnyPS5 MCLv8"
-      },
-      {
-        "version": "MCLv9",
-        "label": "AnyPS5 MCLv9"
       },
       {
         "version": "MCLv10",
@@ -2881,18 +2467,6 @@
     ],
     "compatibility": "Apple Silicon with macOS 26 or later and the launcher-provided CPython 3.12 ABI. Upstream source and profiles are selected separately; native tools require a compatible shader format and source adapter.",
     "packageProfiles": [
-      {
-        "version": "MCLv1-1027-3",
-        "label": "nxnative native tools MCLv1-1027-3"
-      },
-      {
-        "version": "MCLv2-1027-3",
-        "label": "nxnative native tools MCLv2-1027-3"
-      },
-      {
-        "version": "MCLv3",
-        "label": "nxnative native tools MCLv3"
-      },
       {
         "version": "MCLv7",
         "label": "nxnative native tools MCLv7"
@@ -2985,18 +2559,6 @@
     ],
     "packageProfiles": [
       {
-        "version": "0.41.0-MCLv7",
-        "label": "Decoded video with separate controls and subtitles, Apple Silicon, macOS 27"
-      },
-      {
-        "version": "0.41.0-MCLv8",
-        "label": "Decoded video with separate controls and subtitles"
-      },
-      {
-        "version": "0.41.0-MCLv8-1",
-        "label": "Decoded video with separate controls and subtitles 0.41.0-MCLv8-1"
-      },
-      {
         "version": "0.41.0-MCLv11",
         "label": "Decoded video with separate controls and subtitles 0.41.0-MCLv11"
       },
@@ -3075,14 +2637,6 @@
     ],
     "compatibility": "Intel x86-64 guest execution; Rosetta on Apple Silicon, macOS26 and a managed Vulkan1.4 provider.",
     "packageProfiles": [
-      {
-        "version": "MCLv1-1027-1",
-        "label": "Prosper x86-64"
-      },
-      {
-        "version": "MCLv2",
-        "label": "Prosper x86-64 MCLv2"
-      },
       {
         "version": "MCLv6",
         "label": "Prosper x86-64 MCLv6"
@@ -3163,18 +2717,6 @@
     },
     "upstreams": [],
     "packageProfiles": [
-      {
-        "version": "26.3.0-MCLv1",
-        "label": "CrossOver26.3 WineVulkan ABI47"
-      },
-      {
-        "version": "26.3.1",
-        "label": "WineVulkan scene adapter 26.3.1"
-      },
-      {
-        "version": "26.3.0-MCLv2",
-        "label": "WineVulkan scene adapter 26.3.0-MCLv2"
-      },
       {
         "version": "26.3.0-MCLv6",
         "label": "WineVulkan scene adapter 26.3.0-MCLv6"
@@ -3299,20 +2841,8 @@
     ],
     "packageProfiles": [
       {
-        "version": "1.0.1-MCLv1",
-        "label": "FidelityFX API 1.0.1 Vulkan"
-      },
-      {
-        "version": "1.0.1-MCLv2",
-        "label": "FidelityFX API 1.0.1 Vulkan 1.0.1-MCLv2"
-      },
-      {
         "version": "1.0.1-MCLv6",
         "label": "FidelityFX API 1.0.1 Vulkan 1.0.1-MCLv6"
-      },
-      {
-        "version": "1.0.1-MCLv8",
-        "label": "FidelityFX API 1.0.1 Vulkan and Direct3D 12 1.0.1-MCLv8"
       },
       {
         "version": "1.0.1-MCLv9",
@@ -3404,14 +2934,6 @@
     ],
     "packageProfiles": [
       {
-        "version": "1.4.2-MCLv2",
-        "label": "MoltenVK 1.4.2 scene recording"
-      },
-      {
-        "version": "1.4.2-MCLv3",
-        "label": "MoltenVK 1.4.2 scene recording 1.4.2-MCLv3"
-      },
-      {
         "version": "1.4.2-MCLv7",
         "label": "MoltenVK 1.4.2 scene recording 1.4.2-MCLv7"
       },
@@ -3483,18 +3005,6 @@
     ],
     "packageProfiles": [
       {
-        "version": "3.0.0-465c88c3-MCLv2",
-        "label": "RPGMakerDecrypter 3.0.0-465c88c3-MCLv2"
-      },
-      {
-        "version": "3.0.0-465c88c3-MCLv3",
-        "label": "RPGMakerDecrypter 3.0.0-465c88c3-MCLv3"
-      },
-      {
-        "version": "3.0.0-MCLv4",
-        "label": "RPGMakerDecrypter 3.0.0-MCLv4"
-      },
-      {
         "version": "3.0.0-MCLv8",
         "label": "RPGMakerDecrypter 3.0.0-MCLv8"
       }
@@ -3550,18 +3060,6 @@
     "upstreams": [],
     "packageProfiles": [
       {
-        "version": "software-gl-v3-MCLv2",
-        "label": "GameMaker OpenGL helper software-gl-v3-MCLv2"
-      },
-      {
-        "version": "software-gl-v3-MCLv3",
-        "label": "GameMaker software OpenGL software-gl-v3-MCLv3"
-      },
-      {
-        "version": "3.0.1",
-        "label": "GameMaker OpenGL helper 3.0.1"
-      },
-      {
         "version": "3.0.5",
         "label": "GameMaker OpenGL helper 3.0.5"
       }
@@ -3599,18 +3097,6 @@
     ],
     "packageProfiles": [
       {
-        "version": "0.0.13-838e47b-MCLv1",
-        "label": "VNDS-LOVE 0.0.13-838e47b-MCLv1"
-      },
-      {
-        "version": "0.0.13-838e47b-MCLv2",
-        "label": "VNDS-LOVE 0.0.13-838e47b-MCLv2"
-      },
-      {
-        "version": "0.0.13-MCLv3",
-        "label": "VNDS-LOVE 0.0.13-MCLv3"
-      },
-      {
         "version": "0.0.13-MCLv7",
         "label": "VNDS-LOVE 0.0.13-MCLv7"
       }
@@ -3642,18 +3128,6 @@
     },
     "upstreams": [],
     "packageProfiles": [
-      {
-        "version": "1.0.0-MCLv1",
-        "label": "MacLauncher RLVM adapter 1.0.0-MCLv1"
-      },
-      {
-        "version": "1.0.0-MCLv2",
-        "label": "MacLauncher RLVM adapter 1.0.0-MCLv2"
-      },
-      {
-        "version": "1.0.1",
-        "label": "MacLauncher RLVM adapter 1.0.1"
-      },
       {
         "version": "1.0.5",
         "label": "MacLauncher RLVM adapter 1.0.5"
@@ -3697,18 +3171,6 @@
       }
     },
     "packageProfiles": [
-      {
-        "version": "1.0.0-preview.5f358ef1360b-MCLv1-1028-1",
-        "label": "siglus_rs 1.0.0-preview.5f358ef1360b-MCLv1-1028-1"
-      },
-      {
-        "version": "1.0.0-preview.5f358ef1360b-MCLv2-1028-1",
-        "label": "siglus_rs 1.0.0-preview.5f358ef1360b-MCLv2-1028-1"
-      },
-      {
-        "version": "0.1.0-MCLv3",
-        "label": "siglus_rs 0.1.0-MCLv3"
-      },
       {
         "version": "0.1.0-MCLv7",
         "label": "siglus_rs 0.1.0-MCLv7"
@@ -3771,14 +3233,6 @@
       }
     ],
     "packageProfiles": [
-      {
-        "version": "5.13.0-MCLv1",
-        "label": "uosc helper 5.13.0-MCLv1"
-      },
-      {
-        "version": "5.13.0-MCLv2",
-        "label": "uosc helper 5.13.0-MCLv2"
-      },
       {
         "version": "5.13.0-MCLv6",
         "label": "uosc helper 5.13.0-MCLv6"
@@ -3881,14 +3335,6 @@
       }
     ],
     "packageProfiles": [
-      {
-        "version": "2.9.0-MCLv1",
-        "label": "ScummVM Tools 2.9.0-MCLv1"
-      },
-      {
-        "version": "2.9.0-MCLv2",
-        "label": "ScummVM Tools 2.9.0-MCLv2"
-      },
       {
         "version": "2.9.0-MCLv7",
         "label": "ScummVM Tools 2.9.0-MCLv7"

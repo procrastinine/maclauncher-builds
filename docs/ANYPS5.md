@@ -128,9 +128,9 @@ The upstream source and this repository's adapters are licensed GPL-2.0-only, wi
 The shared [Runtime build workflow](../.github/workflows/runtime-build.yml) runs [build-anyps5.mjs](../tools/build-anyps5.mjs). Its registry entry declares CMake, Ninja, pkg-config and the recursive AnyPS5 source checkout. Each job builds the relinker for the requested CPU and the same x86-64 runtime libraries, then produces the package declaration and payload used by the shared release command. ARM64 runs on the Apple Silicon runner; x64 runs on the Intel runner. The recipe downloads the FFmpeg dependency and a build-only CPython interpreter for the selected CPU recorded in `dependencies.json`, checking their sizes and SHA-256 values before extraction. Python runs from an isolated environment and generates glslang headers; the interpreter is excluded from the runtime payload.
 
 ```sh
-node tools/init-runtime-sources.mjs --project anyps5 --version MCLv2-1027-2
+node tools/init-runtime-sources.mjs --project anyps5 --version MCLv12
 node tools/build-runtime.mjs --project anyps5 --arch arm64 \
-  --version MCLv2-1027-2 --work /absolute/path/to/new-work \
+  --version MCLv12 --work /absolute/path/to/new-work \
   --output /absolute/path/to/new-output
 ```
 

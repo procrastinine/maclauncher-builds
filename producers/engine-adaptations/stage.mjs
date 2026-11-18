@@ -8,7 +8,7 @@ const require=createRequire(import.meta.url),B=require('../../lib/package-format
 const {validateDeclaration}=require('../../lib/package-contract.cjs');
 const root=import.meta.dirname;
 const profiles={
- 'vnds-love':{source:'vnds-love',version:'0.0.13-838e47b-MCLv1',entry:'engine/main.lua',minimumMacOS:'11.0'}
+ 'vnds-love':{source:'vnds-love',entry:'engine/main.lua',minimumMacOS:'11.0'}
 };
 const metadata=file=>{const {bytes,...record}=B.readRegular(fs.realpathSync(file),B.LIMITS.fileBytes);return record;};
 function inventory(directory,prefix=''){
@@ -52,8 +52,8 @@ function describe(profile,project,version,directory,{sourceUrl,sourceRevision}){
  declaration.sourceRelative='manifest.json';validateDeclaration(declaration);return declaration;
 }
 const selected=project=>{const profile=profiles[project];if(!profile)throw Error('Select an engine-data project.');return profile;};
-export function stageData({project,output,version=profiles[project]?.version}){
- const profile=profiles[project];if(!profile||!path.isAbsolute(output||'')||fs.existsSync(output)||!version||/[\\/]/.test(version))throw Error('Select an engine-data project and a new absolute output directory.');
+export function stageData({project,output,version}){
+ const profile=profiles[project];version??=profile&&buildRecord(resolveProject(project,path.resolve(root,'../..'),{resolvePins:false})).version;if(!profile||!path.isAbsolute(output||'')||fs.existsSync(output)||!version||/[\\/]/.test(version))throw Error('Select an engine-data project and a new absolute output directory.');
  fs.mkdirSync(output,{recursive:true});
  try{return describe(profile,project,version,output,gather(profile,project,output));}
  catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}

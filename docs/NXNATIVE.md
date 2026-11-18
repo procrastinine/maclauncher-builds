@@ -60,9 +60,9 @@ A refresh requires a new version and leaves earlier packages unchanged. It reuse
 The shared [Runtime build workflow](../.github/workflows/runtime-build.yml) uses [build-nxnative.mjs](../tools/build-nxnative.mjs) for the ARM64 tools package. Its registry entry selects the upstream source and the exact SPIRV-Cross, glslang and Zstandard sources. CMake and Ninja are declared Homebrew build tools. The recipe downloads .NET SDK 10.0.401 into its own work directory, checks its SHA-256 and requires macOS SDK 27.0. The [SDK declaration](../producers/nxnative/dotnet-sdk.json) also records Microsoft's SHA-512.
 
 ```sh
-node tools/init-runtime-sources.mjs --project nxnative-tools --version MCLv2-1027-3
+node tools/init-runtime-sources.mjs --project nxnative-tools --version MCLv9
 node tools/build-runtime.mjs --project nxnative-tools --arch arm64 \
-  --version MCLv2-1027-3 --work /absolute/path/to/new-work \
+  --version MCLv9 --work /absolute/path/to/new-work \
   --output /absolute/path/to/new-output
 ```
 

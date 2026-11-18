@@ -7,32 +7,18 @@ import {execFileSync} from 'node:child_process';
 import {readProjects,resolveProject} from '../lib/projects.mjs';
 import {assetName,releaseTag,assetUrl,validateCatalog} from '../lib/project-identity.mjs';
 import {catalog} from '../tools/runtime-package.mjs';
-import {main as buildRuntime} from '../tools/build-runtime.mjs';
+import {buildAndroidArt} from '../tools/build-android-art.mjs';
 import {createRequire} from 'node:module';
 const requirements=createRequire(import.meta.url)('./support/requirements.cjs');
 
-test('Android ART has its own producer, release identity and catalog without routing to the common JVM build',requirements({sourceTree:'sources/maclauncher-android'}),()=>{
- const common=resolveProject('android'),art=resolveProject('android-art');
- assert.equal(common.producer.kind,'pinned-source');
- assert.equal(common.producer.recipe,'runtimes/android/source.json');
- assert.deepEqual(art.producer,{kind:'maclauncher',repository:'https://github.com/procrastinine/maclauncher-builds',sourceDirectory:'sources/maclauncher-android',buildEntry:'tools/build-android-art.mjs',sourceProject:'android',entries:[
-  'sources/maclauncher-android/tools/build-art.mjs','sources/maclauncher-android/src/modules/android/art/source.mjs','sources/maclauncher-android/src/modules/android/art/build-runner.mjs','sources/maclauncher-android/src/modules/android/art/build.mjs','sources/maclauncher-android/src/modules/android/art/build-image-extractor.mjs','sources/maclauncher-android/src/modules/android/art/package.mjs'
- ]});
- const identity={id:art.id,version:'1.2.3-ml1',arch:'arm64'};
- assert.equal(assetName(identity),'android-art-1.2.3-ml1-arm64.tar.gz');
- assert.equal(releaseTag(identity),'android-art/v1.2.3-ml1/arm64');
- assert.notEqual(releaseTag(identity),releaseTag({...identity,id:common.id}));
- assert.equal(assetUrl(identity,art.releaseRepository),'https://github.com/procrastinine/maclauncher-builds/releases/download/android-art%2Fv1.2.3-ml1%2Farm64/android-art-1.2.3-ml1-arm64.tar.gz');
- const record={schemaVersion:2,...identity,minimumMacOS:'13.0',launcherArchitectures:['arm64'],manifestRelative:'runtime.json',
-  manifestSha256:'1'.repeat(64),sourceSha256:'2'.repeat(64),updatePolicy:'manual',asset:{filename:assetName(identity),sha256:'3'.repeat(64),bytes:1}};
- const selected=catalog([record],{project:art.id,repository:art.releaseRepository});
- assert.equal(selected.projectId,'android-art');
- assert.equal(selected.packages[0].id,'android-art');
- assert.throws(()=>catalog([record],{project:common.id,repository:common.releaseRepository}),/expected project android/);
- assert.throws(()=>validateCatalog(selected,{project:common.id,repository:common.releaseRepository}),/different project/);
+test('ART inputs belong to the shared Android runtime rather than a separate release project',()=>{
+ const registry=readProjects(undefined,{resolvePins:false});
+ assert.equal(registry.projects.some(row=>row.id==='android-art'),false);
+ const common=registry.projects.find(row=>row.id==='android');
+ for(const id of ['android-art-elf','android-art-ffi','android-art-java','android-art-image-extractor'])assert.ok(common.build.inputs.includes(id));
 });
 
-test('registered ART builds delegate unchanged inputs to the canonical ART entry',requirements({sourceTree:'sources/maclauncher-android'}),t=>{
+test('registered ART builds delegate unchanged inputs to the canonical ART entry',requirements({sourceTree:'sources/maclauncher-android'}),async t=>{
  const directory=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'android-art-project-')));
  t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
  const producer=path.join(directory,'sources/maclauncher-android');
@@ -47,8 +33,8 @@ test('registered ART builds delegate unchanged inputs to the canonical ART entry
  const hub=path.resolve(import.meta.dirname,'..');fs.writeFileSync(path.join(directory,'projects.json'),JSON.stringify(readProjects(hub)));
  write(path.join(directory,'runtimes/android/source.json'),JSON.stringify({schemaVersion:1,id:'android',gitlink:'sources/maclauncher-android',buildEntry:'tools/build.mjs',checkEntry:'tools/check-sources.mjs'}));
  fs.cpSync(path.join(hub,'tools'),path.join(directory,'tools'),{recursive:true});
- assert.deepEqual(buildRuntime(['--project','android-art','--check'],directory),{id:'android-art',revision,action:'check'});
+ assert.deepEqual(await buildAndroidArt({source:producer,check:true}),{id:'android-art',action:'check'});
  const output=path.join(directory,'output'),inputs=path.join(directory,'inputs.json'),options={output,sources:{source:producer,klepton:producer,glesHeaders:producer,aosp:producer},runner:{precise:{archives:['retained-cpu.a']}},sourceArchive:path.join(directory,'complete-source.tar.gz')};
- write(inputs,JSON.stringify(options));assert.deepEqual(buildRuntime(['--project','android-art','--inputs',inputs],directory),{id:'android-art',revision,action:'build'});
+ write(inputs,JSON.stringify(options));const built=await buildAndroidArt({source:producer,inputs});assert.equal(built.root,options.output);
  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(output,'observed.json'))),options);
 });
