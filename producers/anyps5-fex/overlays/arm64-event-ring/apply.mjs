@@ -34,7 +34,7 @@ export function applyEventRing(root) {
   const mapHooks = scope => '#define MCL_RING_FILE "' + scope + '"\n' + hooks;
   edit(ringFiles[0], replace => {
     const scope = '\nnamespace GuestArena {\nnamespace {';
-    replace(scope, '\n' + apple('#include <cstring>\n#include <fcntl.h>\n#include <new>\n#include <unistd.h>\n') + mapHooks('GuestArena') + scope);
+    replace(scope, '\n' + apple('#include <cstring>\n#include <dlfcn.h>\n#include <fcntl.h>\n#include <new>\n#include <pthread.h>\n#include <time.h>\n#include <unistd.h>\n') + mapHooks('GuestArena') + scope);
     const importWrite = 'bool GuestArenaBeginImportWrite_nid_postfix(void* pointer, std::size_t bytes) {\n';
     replace(importWrite, importWrite + '    ' + note('observe', 'pointer', 'bytes', 'import-write-scope', '0'));
     const hostWrite = 'bool GuestArenaBeginHostWrite_nid_postfix(void* pointer, std::size_t bytes) {\n';
