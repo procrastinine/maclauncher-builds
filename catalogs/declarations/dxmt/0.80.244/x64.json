@@ -1,0 +1,87 @@
+{
+  "id": "dxmt",
+  "version": "0.80.244",
+  "arch": "x64",
+  "minimumMacOS": "14.0",
+  "launcherArchitectures": [
+    "arm64",
+    "x64"
+  ],
+  "sourceRelative": null,
+  "sourceSha256": "c9e0582a6659812a61194e0906ccf56801367dcd93c1e5ef00de22f2ea5817b1",
+  "directoryRelative": "dxmt/0.80.244/x64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "b2d814251bd95645aad2e4f826a76121caf6b2e7f25e6cf6487aaf1d30d09518",
+  "files": [
+    {
+      "path": "licenses/components.txt",
+      "size": 76,
+      "sha256": "6d0def0ead5693c86564179d7a4ad85b6fd595aabb8e56071a14384b2c9fcedc",
+      "mode": 420
+    },
+    {
+      "path": "licenses/DXMT-2.txt",
+      "size": 782,
+      "sha256": "b87c35aef7b2cf14de854118ca55ce5c4b284c85b5f002421fb8d46d868c2d17",
+      "mode": 420
+    },
+    {
+      "path": "licenses/DXMT-3.txt",
+      "size": 1272,
+      "sha256": "3422f02eb18f1e598731b586832afab8b322badd61d45a4b95674ceec4b6108d",
+      "mode": 420
+    },
+    {
+      "path": "licenses/DXMT.txt",
+      "size": 26434,
+      "sha256": "e237fa56668030e928551ddd60f05df5fe957f75eab874bbd017e085ed722e7c",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 2407,
+      "sha256": "b2d814251bd95645aad2e4f826a76121caf6b2e7f25e6cf6487aaf1d30d09518",
+      "mode": 420
+    },
+    {
+      "path": "wine/VERSION",
+      "size": 24,
+      "sha256": "e7024b24581a50f4dd5f424d83df83e1d49977d9385b74be14269302f3049458",
+      "mode": 420
+    },
+    {
+      "path": "wine/x86_64-unix/winemetal.so",
+      "size": 31533992,
+      "sha256": "62dbce6c66f23308fcdf58fba7371271b0412a71074ad7add87a801516ce473a",
+      "mode": 493,
+      "architectures": [
+        "x86_64"
+      ],
+      "executionArchitecture": "x86_64"
+    },
+    {
+      "path": "wine/x86_64-windows/d3d10core.dll",
+      "size": 1028096,
+      "sha256": "83f567b966cf9d03085a8ddb3fef3c75b20bc11ffee943ca10486558226b8ea8",
+      "mode": 420
+    },
+    {
+      "path": "wine/x86_64-windows/d3d11.dll",
+      "size": 4386816,
+      "sha256": "d8d43250e37ecc8065724eb51153bb3b7f9a1256a102296142396e5483b3c62e",
+      "mode": 420
+    },
+    {
+      "path": "wine/x86_64-windows/dxgi.dll",
+      "size": 1277952,
+      "sha256": "1e76bf979ba54e9e16429e0cce25e0029d2f7b23a34027f4ac72d04c5c46c61c",
+      "mode": 420
+    },
+    {
+      "path": "wine/x86_64-windows/winemetal.dll",
+      "size": 61440,
+      "sha256": "e176504a3ee9d79d0f1b455141d79ed5f0355ce8ecf99317001ffd5d8e620367",
+      "mode": 420
+    }
+  ]
+}
