@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
+import vm from 'node:vm';
 import {crossFile,nativeFile,configureVersion,sourceVersion} from '../producers/dxmt/build.mjs';
 import {buildRecord} from '../lib/projects.mjs';
 import {applyWindowOverlay} from '../producers/dxmt/window-overlay.mjs';
@@ -26,6 +27,31 @@ test('DXMT machine files hold only single-quoted Meson strings',t=>{
  assert.ok(native.includes("c = '/X/it\\'s/clang'"));
  assert.ok(native.includes("c_args = ['-arch', 'arm64', '-ffile-prefix-map=/w=source/dxmt']"));
  assert.ok(native.includes("cpp_link_args = ['-arch', 'arm64']"));
+});
+
+
+test('DXMT Meson uses the same pinned Ninja as LLVM with no host Ninja on PATH',async t=>{
+ const work=temporary(t),compiler=path.join(work,'llvm-mingw'),bin=path.join(work,'build-tools','tools','bin');
+ const source=fs.readFileSync(new URL('../producers/dxmt/build.mjs',import.meta.url),'utf8');
+ const start=source.indexOf('export async function compile('),end=source.indexOf('export async function inspectBuiltPayload(',start);
+ assert.ok(start>=0&&end>start);
+ const calls=[],hostPath='/usr/bin:/bin';
+ const compile=vm.runInNewContext(source.slice(start,end).replace(/^export /,'')+'\ncompile',{
+  path,fs:{realpathSync:fs.realpathSync,statSync:()=>({isFile:()=>true}),writeFileSync:()=>{}},
+  inputs:{minimumMacOS:'15.0'},process:{env:{PATH:hostPath,NINJA:'/host/unpinned/ninja'}},
+  findBuildTool:name=>'/usr/bin/'+name,read:(_command,args)=>'/sdk/'+args.at(-1),
+  reproducibleEnvironment:env=>env,crossFile:()=>'',nativeFile:()=>'',write:()=>{},
+  run:(command,args,{env})=>calls.push({command,action:args[0],args:Array.from(args),env})
+ });
+ await compile({work,prepared:{compiler,tools:{bin},source:path.join(work,'source'),sdk:path.join(work,'wine-sdk'),llvmSource:path.join(work,'llvm-source')}});
+ const ninja=path.join(bin,'ninja');
+ assert.ok(calls[0].args.includes('-DCMAKE_MAKE_PROGRAM='+ninja));
+ const meson=calls.filter(call=>call.command===path.join(bin,'meson'));
+ assert.deepEqual(meson.map(call=>call.action),['setup','compile','install']);
+ for(const call of meson){
+  assert.equal(call.env.NINJA,ninja);
+  assert.equal(call.env.PATH,path.join(compiler,'bin')+path.delimiter+hostPath);
+ }
 });
 
 test('DXMT version metadata comes from the declared source revision',t=>{

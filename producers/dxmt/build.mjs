@@ -92,7 +92,7 @@ export async function compile({work,prepared}){
  for(const tool of ['metal','metallib'])if(!fs.statSync(read('/usr/bin/xcrun',['--sdk','macosx','--find',tool])).isFile())throw Error('The selected Xcode lacks '+tool+'.');
  const maps=[...new Set([work,fs.realpathSync(work)])].flatMap(from=>['file','debug','macro'].map(kind=>'-f'+kind+'-prefix-map='+from+'=source/dxmt'));
  const flags=['-O2','-g0',...maps].join(' ');
- const env=reproducibleEnvironment({...process.env,SDKROOT:sdk,MACOSX_DEPLOYMENT_TARGET:inputs.minimumMacOS,PATH:path.join(prepared.compiler,'bin')+path.delimiter+process.env.PATH});
+ const env=reproducibleEnvironment({...process.env,SDKROOT:sdk,MACOSX_DEPLOYMENT_TARGET:inputs.minimumMacOS,NINJA:ninja,PATH:path.join(prepared.compiler,'bin')+path.delimiter+process.env.PATH});
  const llvmBuild=path.join(work,'llvm-build'),llvm=path.join(work,'llvm');
  run(cmake,['-S',prepared.llvmSource,'-B',llvmBuild,'-G','Ninja','-DCMAKE_MAKE_PROGRAM='+ninja,'-DCMAKE_BUILD_TYPE=Release','-DCMAKE_INSTALL_PREFIX='+llvm,
   '-DCMAKE_OSX_ARCHITECTURES=arm64','-DCMAKE_OSX_DEPLOYMENT_TARGET='+inputs.minimumMacOS,'-DCMAKE_C_COMPILER='+clang,'-DCMAKE_CXX_COMPILER='+clangxx,
