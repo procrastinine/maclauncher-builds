@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import {crossFile,nativeFile,configureVersion,sourceVersion} from '../producers/dxmt/build.mjs';
+import {buildRecord} from '../lib/projects.mjs';
 import {applyWindowOverlay} from '../producers/dxmt/window-overlay.mjs';
 const temporary=t=>{const root=fs.mkdtempSync(path.join(os.tmpdir(),'dxmt-producer-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));return root;};
 
@@ -40,8 +41,8 @@ test('DXMT version metadata comes from the declared source revision',t=>{
 
 test('the declared DXMT builds keep separate arm64 SDK and x64 publisher inputs',()=>{
  const registry=JSON.parse(fs.readFileSync(new URL('../projects/downloadable.json',import.meta.url))),row=registry.find(row=>row.id==='dxmt');
- const arm=row.build.find(build=>build.version==='0.80-244-g7c8dee1-MCLv1');
- const intel=row.build.find(build=>build.version==='0.80.244');
+ const arm=buildRecord(row,'0.80-244-g7c8dee1-MCLv1');
+ const intel=buildRecord(row,'0.80.244');
  assert.deepEqual(arm?.architectures,['arm64']);
  assert.deepEqual(intel?.architectures,['x64']);
  assert.equal(arm.command,intel.command);
