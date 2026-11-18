@@ -1,6 +1,46 @@
 {
   "schemaVersion": 2,
   "projectId": "dxmt",
-  "packages": [],
-  "updatePolicy": "manual"
+  "updatePolicy": "manual",
+  "packages": [
+    {
+      "schemaVersion": 2,
+      "id": "dxmt",
+      "version": "0.80-244-g7c8dee1-MCLv1",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "14.0",
+      "manifestRelative": "manifest.json",
+      "manifestSha256": "92389796f7a1c1369f8f492b07327b42c7cf265105d44fbcd27a5f85df7125d5",
+      "sourceSha256": "d683d6bfcce642532104565b2684d23298d9522de05695f214e2647ac2c3e40b",
+      "updatePolicy": "manual",
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "4f613fad2ecf987456e3ba0fc36ca60b2c3b4a10"
+      },
+      "asset": {
+        "filename": "dxmt-0.80-244-g7c8dee1-MCLv1-arm64.tar.gz",
+        "sha256": "d979eba2d05884cd55eb23b1134b251dc770e000da98c433212d1d80d7fbe636",
+        "bytes": 16096477,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/dxmt%2Fv0.80-244-g7c8dee1-MCLv1%2Farm64/dxmt-0.80-244-g7c8dee1-MCLv1-arm64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "4f613fad2ecf987456e3ba0fc36ca60b2c3b4a10",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.2",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "44221762874",
+        "runAttempt": "1",
+        "definitionDigest": "a6aee16f524e04f8ba5c6f866ed37abb68e09c0a1fd8777a899840685e51ada9"
+      },
+      "tag": "dxmt/v0.80-244-g7c8dee1-MCLv1/arm64"
+    }
+  ]
 }

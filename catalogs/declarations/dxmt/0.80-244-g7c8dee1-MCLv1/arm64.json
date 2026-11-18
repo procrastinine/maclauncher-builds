@@ -1,0 +1,109 @@
+{
+  "id": "dxmt",
+  "version": "0.80-244-g7c8dee1-MCLv1",
+  "arch": "arm64",
+  "minimumMacOS": "14.0",
+  "launcherArchitectures": [
+    "arm64"
+  ],
+  "sourceRelative": null,
+  "sourceSha256": "d683d6bfcce642532104565b2684d23298d9522de05695f214e2647ac2c3e40b",
+  "directoryRelative": "dxmt/0.80-244-g7c8dee1-MCLv1/arm64",
+  "manifestRelative": "manifest.json",
+  "manifestSha256": "92389796f7a1c1369f8f492b07327b42c7cf265105d44fbcd27a5f85df7125d5",
+  "files": [
+    {
+      "path": "licenses/components.txt",
+      "size": 139,
+      "sha256": "01d2b397d56d9461535ebd2abafbe932ef4a9408117e44eba8302c705d7a8935",
+      "mode": 420
+    },
+    {
+      "path": "licenses/DirectX-headers.txt",
+      "size": 5905,
+      "sha256": "f38e6194bd3bfa1b654f118e5acefe0aead437bbe669eee43957ccc65a7127f1",
+      "mode": 420
+    },
+    {
+      "path": "licenses/DXMT-2.txt",
+      "size": 782,
+      "sha256": "b87c35aef7b2cf14de854118ca55ce5c4b284c85b5f002421fb8d46d868c2d17",
+      "mode": 420
+    },
+    {
+      "path": "licenses/DXMT-3.txt",
+      "size": 1272,
+      "sha256": "3422f02eb18f1e598731b586832afab8b322badd61d45a4b95674ceec4b6108d",
+      "mode": 420
+    },
+    {
+      "path": "licenses/DXMT.txt",
+      "size": 26434,
+      "sha256": "e237fa56668030e928551ddd60f05df5fe957f75eab874bbd017e085ed722e7c",
+      "mode": 420
+    },
+    {
+      "path": "licenses/LLVM.txt",
+      "size": 15141,
+      "sha256": "8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee",
+      "mode": 420
+    },
+    {
+      "path": "manifest.json",
+      "size": 3176,
+      "sha256": "92389796f7a1c1369f8f492b07327b42c7cf265105d44fbcd27a5f85df7125d5",
+      "mode": 420
+    },
+    {
+      "path": "wine/aarch64-unix/winemetal.so",
+      "size": 26678624,
+      "sha256": "dbf2bf106ba109dca057124076e905e40a54929bc9857a52ffd9f58284d0b4e0",
+      "mode": 493,
+      "architectures": [
+        "arm64"
+      ]
+    },
+    {
+      "path": "wine/aarch64-windows/d3d10core.dll",
+      "size": 2367488,
+      "sha256": "e1abe6a2284773479e07bf0819ecdcc9072d62263edc51ad5781a6ae514b4f84",
+      "mode": 493
+    },
+    {
+      "path": "wine/aarch64-windows/d3d11.dll",
+      "size": 9109504,
+      "sha256": "d08cd0d8d097563476810e11a62f44092a5442ac701edec922e91bc14e1c6b2e",
+      "mode": 493
+    },
+    {
+      "path": "wine/aarch64-windows/d3d12.dll",
+      "size": 4509696,
+      "sha256": "8f80c33b3986099c0ca9c99a3e963a71fe90424426d7b358c92f827377708271",
+      "mode": 493
+    },
+    {
+      "path": "wine/aarch64-windows/dxgi.dll",
+      "size": 2871296,
+      "sha256": "3a499be67cf0dd231c1b1fff72ea7cb61b807b601ae197a459f42ca9ee39c589",
+      "mode": 493
+    },
+    {
+      "path": "wine/aarch64-windows/nvngx.dll",
+      "size": 2498560,
+      "sha256": "d6b1be22a78c57740c133b9438207deb19074cdeedf5ae744e8761f9f5b13d4d",
+      "mode": 493
+    },
+    {
+      "path": "wine/aarch64-windows/winemetal.dll",
+      "size": 208896,
+      "sha256": "3c9bd479ea5a8b589fdfa3ba08f647a634573c81c75f1825c97af85eb591028b",
+      "mode": 493
+    },
+    {
+      "path": "wine/VERSION",
+      "size": 24,
+      "sha256": "e7024b24581a50f4dd5f424d83df83e1d49977d9385b74be14269302f3049458",
+      "mode": 420
+    }
+  ]
+}
