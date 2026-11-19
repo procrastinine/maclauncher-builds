@@ -69,8 +69,9 @@ export async function packageRuntime({startBuild,output,version,anyps5Source,bui
   const file=path.join(startBuild,name);
   if(!Native.readMachOArchitectures(file,{allowLibrary:true}).includes('arm64'))throw Error(`${name} in the start build is not arm64.`);
   for(const slice of readMachOLoadCommands(file).slices){
-   if(!slice.minimumMacOS||!Native.versionAtLeast(recipe.host.minimumMacOS,slice.minimumMacOS))
-    throw Error(`${name} requires macOS ${slice.minimumMacOS??'with an explicit deployment target'}, which does not satisfy the package minimum ${recipe.host.minimumMacOS}.`);
+   if(!slice.minimumMacOS)throw Error(`${name} does not declare a macOS deployment target.`);
+   if(!Native.versionAtLeast(recipe.host.minimumMacOS,slice.minimumMacOS))
+    throw Error(`${name} requires macOS ${slice.minimumMacOS}, which does not satisfy the package minimum ${recipe.host.minimumMacOS}.`);
   }
  }
  fs.mkdirSync(output,{recursive:true});const payload=path.join(output,'payload');fs.mkdirSync(payload);

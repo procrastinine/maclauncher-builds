@@ -2515,36 +2515,70 @@
       {
         "version": "MCLv13",
         "label": "AnyPS5 MCLv13"
+      },
+      {
+        "version": "MCLv14",
+        "label": "AnyPS5 MCLv14"
       }
     ],
-    "build": {
-      "version": "MCLv13",
-      "architectures": [
-        "arm64"
-      ],
-      "command": "tools/build-anyps5-fex.mjs",
-      "submodules": [
-        "sources/anyps5",
-        "sources/anyps5-nghttp2",
-        "sources/fex"
-      ],
-      "recursiveSubmodules": true,
-      "tools": [
-        "cmake",
-        "ninja",
-        "pkgconf"
-      ],
-      "archives": [
-        {
-          "file": "producers/nxnative/dependencies.json",
-          "pointer": "/python"
-        },
-        {
-          "file": "producers/anyps5/dependencies.json",
-          "pointer": "/artifacts/1"
-        }
-      ]
-    }
+    "build": [
+      {
+        "version": "MCLv14",
+        "architectures": [
+          "arm64"
+        ],
+        "command": "tools/build-anyps5-fex.mjs",
+        "submodules": [
+          "sources/anyps5",
+          "sources/anyps5-nghttp2",
+          "sources/fex"
+        ],
+        "recursiveSubmodules": true,
+        "tools": [
+          "cmake",
+          "ninja",
+          "pkgconf"
+        ],
+        "archives": [
+          {
+            "file": "producers/nxnative/dependencies.json",
+            "pointer": "/python"
+          },
+          {
+            "file": "producers/anyps5/dependencies.json",
+            "pointer": "/artifacts/1"
+          }
+        ]
+      },
+      {
+        "version": "MCLv13",
+        "architectures": [
+          "arm64"
+        ],
+        "command": "tools/build-anyps5-fex.mjs",
+        "submodules": [
+          "sources/anyps5",
+          "sources/anyps5-nghttp2",
+          "sources/fex"
+        ],
+        "recursiveSubmodules": true,
+        "tools": [
+          "cmake",
+          "ninja",
+          "pkgconf"
+        ],
+        "archives": [
+          {
+            "file": "producers/nxnative/dependencies.json",
+            "pointer": "/python"
+          },
+          {
+            "file": "producers/anyps5/dependencies.json",
+            "pointer": "/artifacts/1"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "nxnative-tools",
