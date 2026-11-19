@@ -288,6 +288,7 @@
   ],
   "host": {
     "directory": "host",
+    "minimumMacOS": "26.0",
     "license": "GPL-2.0-only",
     "identity": "../package-support/src/modules/shared/runtime/application-identity.m",
     "targets": [

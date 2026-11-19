@@ -211,7 +211,7 @@ function prefixMaps(out){
 
 function link(out,objects,log){
  const build=path.join(out,'build');
- run('cmake',['-S',path.join(out,'fex'),'-B',build,'-G','Ninja','-DCMAKE_BUILD_TYPE=Release','-DBUILD_TESTING=OFF','-DBUILD_FEXCONFIG=OFF',
+ run('cmake',['-S',path.join(out,'fex'),'-B',build,'-G','Ninja','-DCMAKE_BUILD_TYPE=Release','-DCMAKE_OSX_DEPLOYMENT_TARGET='+recipe.host.minimumMacOS,'-DBUILD_TESTING=OFF','-DBUILD_FEXCONFIG=OFF',
   // The host's closure uses the pinned static fmt source, regardless of installed host packages.
   '-DCMAKE_DISABLE_FIND_PACKAGE_fmt=ON',
   '-DENABLE_JEMALLOC_GLIBC_ALLOC=OFF','-DENABLE_OFFLINE_TELEMETRY=OFF','-DENABLE_CCACHE=OFF','-DENABLE_LTO=OFF','-DTUNE_CPU=none','-DTUNE_ARCH=generic',

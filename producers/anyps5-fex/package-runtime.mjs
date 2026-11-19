@@ -22,6 +22,7 @@ import {pack} from '../../tools/runtime-package.mjs';
 import {assetName} from '../../lib/project-identity.mjs';
 
 const require=createRequire(import.meta.url),Native=require('../../lib/package-format.cjs');
+const {readMachOLoadCommands}=require('../../lib/macho-load-commands.cjs');
 const root=path.resolve(import.meta.dirname,'../..');
 const recipe=JSON.parse(fs.readFileSync(path.join(import.meta.dirname,'source.json')));
 const anyps5Recipe=JSON.parse(fs.readFileSync(path.join(root,'producers/anyps5/source.json')));
@@ -56,7 +57,7 @@ const plist=version=>`<?xml version="1.0" encoding="UTF-8"?>
  <key>CFBundleShortVersionString</key><string>${version}</string>
  <key>CFBundleVersion</key><string>${version}</string>
  <key>LSApplicationCategoryType</key><string>public.app-category.games</string>
- <key>LSMinimumSystemVersion</key><string>26.0</string>
+ <key>LSMinimumSystemVersion</key><string>${recipe.host.minimumMacOS}</string>
  <key>NSHighResolutionCapable</key><true/>
 </dict>
 </plist>
@@ -64,8 +65,14 @@ const plist=version=>`<?xml version="1.0" encoding="UTF-8"?>
 
 export async function packageRuntime({startBuild,output,version,anyps5Source,buildOutput=false}){
  if(!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(version||'')||!output||fs.existsSync(output))throw Error('Choose a new output directory and explicit package version.');
- for(const name of ['anyps5-fex-start','libSDL2-2.0.0.dylib'])
-  if(!Native.readMachOArchitectures(path.join(startBuild,name),{allowLibrary:true}).includes('arm64'))throw Error(`${name} in the start build is not arm64.`);
+ for(const name of ['anyps5-fex-start','libSDL2-2.0.0.dylib']){
+  const file=path.join(startBuild,name);
+  if(!Native.readMachOArchitectures(file,{allowLibrary:true}).includes('arm64'))throw Error(`${name} in the start build is not arm64.`);
+  for(const slice of readMachOLoadCommands(file).slices){
+   if(!slice.minimumMacOS||!Native.versionAtLeast(recipe.host.minimumMacOS,slice.minimumMacOS))
+    throw Error(`${name} requires macOS ${slice.minimumMacOS??'with an explicit deployment target'}, which does not satisfy the package minimum ${recipe.host.minimumMacOS}.`);
+  }
+ }
  fs.mkdirSync(output,{recursive:true});const payload=path.join(output,'payload');fs.mkdirSync(payload);
  const app=path.join(payload,'AnyPS5.app');
  copy(path.join(startBuild,'libSDL2-2.0.0.dylib'),path.join(payload,SDL),0o755);
@@ -105,7 +112,7 @@ export async function packageRuntime({startBuild,output,version,anyps5Source,bui
   dependencies,producerInputs}));
  const files=filesIn(payload).map(relative=>record(payload,relative));
  // The package is the AnyPS5 runtime's arm64 build, so it names the AnyPS5 manager.
- const manifest={schemaVersion:1,managerId:'anyps5',version,platform:'darwin',arch:'arm64',minimumMacOS:'26.0',
+ const manifest={schemaVersion:1,managerId:'anyps5',version,platform:'darwin',arch:'arm64',minimumMacOS:recipe.host.minimumMacOS,
   upstreamRevision:sourceRevision(anyps5Recipe.source),fexRevision:sourceRevision(recipe.source),gameArchitecture:'x86_64',
   capabilities:{mouseRouting:true,touchPadBinding:true},
   provenance:{sourceUrl:anyps5Recipe.source.repository,sourceRevision:sourceRevision(anyps5Recipe.source),
