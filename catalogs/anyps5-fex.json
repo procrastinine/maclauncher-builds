@@ -6,6 +6,49 @@
     {
       "schemaVersion": 2,
       "id": "anyps5-fex",
+      "version": "MCLv14",
+      "arch": "arm64",
+      "launcherArchitectures": [
+        "arm64"
+      ],
+      "minimumMacOS": "26.0",
+      "manifestRelative": "runtime.json",
+      "manifestSha256": "c5a23a17b2293ad9c1f2abd7cd966c3da62c69978258c03cb94575761567d336",
+      "sourceSha256": "d01d113997de946e6451b4a10beff45b5a3d79feb3e99be04836153a9fe6647a",
+      "updatePolicy": "manual",
+      "capabilities": {
+        "mouseRouting": true,
+        "touchPadBinding": true
+      },
+      "source": {
+        "repository": "procrastinine/maclauncher-builds",
+        "revision": "0b8281d48923e6e0df6fc44ccaf8fe427ab99c05"
+      },
+      "asset": {
+        "filename": "anyps5-fex-MCLv14-arm64.tar.gz",
+        "sha256": "7ebcf6a6e80e262f9758da4e8e2bdb4e6991b87011eac5ebdeff28935dfc25ad",
+        "bytes": 12950245,
+        "url": "https://github.com/procrastinine/maclauncher-builds/releases/download/anyps5-fex%2FvMCLv14%2Farm64/anyps5-fex-MCLv14-arm64.tar.gz"
+      },
+      "build": {
+        "sourceRevision": "0b8281d48923e6e0df6fc44ccaf8fe427ab99c05",
+        "workflow": "procrastinine/maclauncher-builds/.github/workflows/runtime-build.yml",
+        "toolchain": {
+          "node": "24.22.2",
+          "zlib": "1.3.2.1-motley-285e94b",
+          "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "xcode": "Xcode 27.0\nBuild version 27A266a",
+          "macosSDK": "27.0"
+        },
+        "runId": "44624126420",
+        "runAttempt": "1",
+        "definitionDigest": "ebe3994b11c69fd35bcae29424464ef859fe3f0ee97a61dd3c1b50913574b2f2"
+      },
+      "tag": "anyps5-fex/vMCLv14/arm64"
+    },
+    {
+      "schemaVersion": 2,
+      "id": "anyps5-fex",
       "version": "MCLv13",
       "arch": "arm64",
       "launcherArchitectures": [
