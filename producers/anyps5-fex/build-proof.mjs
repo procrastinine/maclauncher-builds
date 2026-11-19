@@ -212,6 +212,8 @@ function prefixMaps(out){
 function link(out,objects,log){
  const build=path.join(out,'build');
  run('cmake',['-S',path.join(out,'fex'),'-B',build,'-G','Ninja','-DCMAKE_BUILD_TYPE=Release','-DBUILD_TESTING=OFF','-DBUILD_FEXCONFIG=OFF',
+  // The host's closure uses the pinned static fmt source, regardless of installed host packages.
+  '-DCMAKE_DISABLE_FIND_PACKAGE_fmt=ON',
   '-DENABLE_JEMALLOC_GLIBC_ALLOC=OFF','-DENABLE_OFFLINE_TELEMETRY=OFF','-DENABLE_CCACHE=OFF','-DENABLE_LTO=OFF','-DTUNE_CPU=none','-DTUNE_ARCH=generic',
   '-DCMAKE_PROJECT_FEX_INCLUDE='+path.join(out,'host',recipe.host.entry),'-DANYPS5_ARM64_OBJECTS='+objects.join(';'),'-DANYPS5_SOURCE_DIR='+path.join(out,'anyps5'),'-DANYPS5_GENERATED_THUNKS='+generatedFiles.join(';'),
   '-DANYPS5_ARM64_LINK='+[...cmake.archives,...cmake.link].join(';'),'-DANYPS5_ARM64_INCLUDES='+cmake.includes.join(';'),

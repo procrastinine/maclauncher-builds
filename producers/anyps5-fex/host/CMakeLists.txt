@@ -33,6 +33,8 @@ target_link_libraries(anyps5-fex-start PRIVATE "-framework CoreFoundation")
 target_sources(anyps5-fex-start PRIVATE ${H}/maclauncher-application-identity.m)
 set_source_files_properties(${H}/maclauncher-application-identity.m PROPERTIES COMPILE_OPTIONS "-fobjc-arc;-fblocks")
 target_link_libraries(anyps5-fex-start PRIVATE "-framework AppKit")
+# The shipped host retains symbols without the linked debug map of local archive member paths.
+target_link_options(anyps5-fex-start PRIVATE "-Wl,-S")
 add_executable(anyps5-fex-syscall ${H}/AnyPS5FexSyscall.cpp)
 add_executable(anyps5-fex-exception ${H}/AnyPS5FexException.cpp)
 foreach(Target anyps5-fex-proof anyps5-fex-abi anyps5-fex-start anyps5-fex-syscall anyps5-fex-exception)
